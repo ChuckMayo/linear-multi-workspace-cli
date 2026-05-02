@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 
@@ -25,11 +25,9 @@ describe('npm pack contract', () => {
   }, 60_000)
 
   it('npm run verify-pack is wired up in package.json', () => {
-    const pkg = JSON.parse(
-      execFileSync('node', ['-e', "process.stdout.write(require('fs').readFileSync('package.json','utf8'))"], {
-        encoding: 'utf8',
-      }),
-    ) as { scripts?: Record<string, string> }
+    const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>
+    }
     expect(pkg.scripts?.['verify-pack']).toBeTruthy()
     expect(pkg.scripts?.['verify-pack']).toContain('scripts/verify-pack.mjs')
   })

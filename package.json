@@ -29,7 +29,8 @@
     "prepack": "npm run build && oclif manifest",
     "postpack": "rm -f oclif.manifest.json",
     "codegen": "graphql-codegen",
-    "fetch-schema": "tsx codegen/fetch-schema.ts"
+    "fetch-schema": "tsx codegen/fetch-schema.ts",
+    "verify-pack": "node scripts/verify-pack.mjs"
   },
   "oclif": {
     "bin": "linear-agent",
