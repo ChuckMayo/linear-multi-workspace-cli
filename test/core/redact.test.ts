@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { redact, REDACTED } from '@/core/redact/index.js'
+import { REDACTED, redact } from '@/core/redact/index.js'
 
 describe('redact (string scalar)', () => {
   it('replaces a bare PAT with [REDACTED]', () => {
@@ -144,7 +144,10 @@ describe('redact (property-based)', () => {
         { maxDepth: 4 },
         { weight: 5, arbitrary: leaf },
         { weight: 1, arbitrary: fc.array(rec('tree'), { maxLength: 5 }) },
-        { weight: 1, arbitrary: fc.dictionary(fc.string({ minLength: 1 }), rec('tree'), { maxKeys: 5 }) },
+        {
+          weight: 1,
+          arbitrary: fc.dictionary(fc.string({ minLength: 1 }), rec('tree'), { maxKeys: 5 }),
+        },
       ),
     })).tree
 
