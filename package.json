@@ -1,0 +1,58 @@
+{
+  "name": "linear-agent",
+  "version": "0.0.0",
+  "description": "Agent-runtime-agnostic Linear CLI",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "linear-agent": "./bin/run.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "schema.graphql",
+    "src/generated",
+    "oclif.manifest.json",
+    "README.md"
+  ],
+  "main": "./dist/index.js",
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsdown",
+    "prepack": "npm run build && oclif manifest",
+    "postpack": "rm -f oclif.manifest.json",
+    "codegen": "graphql-codegen",
+    "fetch-schema": "tsx codegen/fetch-schema.ts"
+  },
+  "oclif": {
+    "bin": "linear-agent",
+    "commands": "./dist/commands",
+    "topicSeparator": " "
+  },
+  "dependencies": {
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "@linear/sdk": "^83.0.0",
+    "@oclif/core": "^4.11.0",
+    "conf": "^14.0.0",
+    "picocolors": "^1.1.0",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.0",
+    "@graphql-codegen/cli": "^7.0.0",
+    "@graphql-codegen/client-preset": "*",
+    "@types/node": "^22.0.0",
+    "oclif": "^4.23.0",
+    "tsdown": "*",
+    "tsx": "*",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}
