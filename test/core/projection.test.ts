@@ -15,9 +15,9 @@ import { LinearAgentError } from '@/core/errors/index.js'
 import {
   FULL_PRESET,
   ISSUE_PRESETS,
+  type ProjectionSpec,
   parseFields,
   project,
-  type ProjectionSpec,
 } from '@/core/projection/index.js'
 
 describe('ISSUE_PRESETS', () => {
