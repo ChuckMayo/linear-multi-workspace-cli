@@ -148,3 +148,30 @@ describe('.github/dependabot.yml is configured for npm + github-actions', () => 
     expect(gha?.schedule?.interval).toBe('monthly')
   })
 })
+
+describe('ci.yml runs the pack contract verifier after Build', () => {
+  it('contains a step that invokes scripts/verify-pack.mjs', () => {
+    const wf = yaml.load(readFileSync(CI, 'utf8')) as CiWorkflow
+    const job = Object.values(wf.jobs ?? {})[0]
+    const verifyStep = (job?.steps ?? []).find(
+      (s) => typeof s.run === 'string' && s.run.includes('scripts/verify-pack.mjs'),
+    )
+    expect(verifyStep, 'no step runs scripts/verify-pack.mjs').toBeDefined()
+    expect(verifyStep?.name?.toLowerCase()).toContain('verify pack')
+  })
+
+  it('runs Verify pack AFTER Build (so dist/ exists when verify-pack runs)', () => {
+    const wf = yaml.load(readFileSync(CI, 'utf8')) as CiWorkflow
+    const job = Object.values(wf.jobs ?? {})[0]
+    const steps = job?.steps ?? []
+    const buildIdx = steps.findIndex(
+      (s) => typeof s.run === 'string' && s.run.includes('npm run build'),
+    )
+    const verifyIdx = steps.findIndex(
+      (s) => typeof s.run === 'string' && s.run.includes('scripts/verify-pack.mjs'),
+    )
+    expect(buildIdx, 'no Build step found').toBeGreaterThanOrEqual(0)
+    expect(verifyIdx, 'no Verify pack step found').toBeGreaterThanOrEqual(0)
+    expect(verifyIdx).toBeGreaterThan(buildIdx)
+  })
+})
