@@ -22,9 +22,7 @@ describe('schema.graphql is vendored, valid, and deterministic', () => {
     const sdl = readFileSync(SCHEMA, 'utf8')
     const ast = parse(sdl)
     expect(ast.definitions.length).toBeGreaterThan(0)
-    const hasQuery = ast.definitions.some(
-      (d) => 'name' in d && d.name?.value === 'Query',
-    )
+    const hasQuery = ast.definitions.some((d) => 'name' in d && d.name?.value === 'Query')
     expect(hasQuery).toBe(true)
   })
 
