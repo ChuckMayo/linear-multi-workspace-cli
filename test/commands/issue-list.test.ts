@@ -49,23 +49,27 @@ function clearMockIssues(): void {
 }
 
 import IssueList from '@/commands/issue/list.js'
-import { issueListRuntime } from '@/lib/issue-list-runtime.js'
+// Stub config — pure object so tests don't touch the filesystem. Shape
+// matches the `Config` type from `@/core/config/index.js` so the runtime
+// signature accepts the override without casting.
+import type { Config } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import { failure } from '@/core/output/index.js'
+import { issueListRuntime } from '@/lib/issue-list-runtime.js'
 
-// Stub config — pure object so tests don't touch the filesystem.
-const STUB_CONFIG = {
+const STUB_CONFIG: Config = {
   active: 'acme',
   workspaces: {
     acme: {
       name: 'acme',
       token: 'lin_api_acme_token_xxxxxxxx',
       organizationId: 'org-acme',
+      createdAt: '2026-01-01T00:00:00Z',
     },
   },
 }
 
-const EMPTY_CONFIG = { active: null, workspaces: {} }
+const EMPTY_CONFIG: Config = { active: null, workspaces: {} }
 
 beforeAll(() => {
   process.env.NO_COLOR = '1'
@@ -237,9 +241,7 @@ describe('issueListRuntime — happy paths', () => {
   })
 
   it('Test 3: --fields=ids returns only id and identifier', async () => {
-    setMockIssues(async () =>
-      sdkConnection([sdkIssue({ id: 'iss_1', identifier: 'ENG-1' })]),
-    )
+    setMockIssues(async () => sdkConnection([sdkIssue({ id: 'iss_1', identifier: 'ENG-1' })]))
 
     const out = await issueListRuntime({
       flags: { fields: 'ids' },

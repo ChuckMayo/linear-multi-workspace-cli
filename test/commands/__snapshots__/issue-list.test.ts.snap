@@ -1,0 +1,247 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issueListRuntime — failure envelopes (KRN-09) > Test 9: WORKSPACE_NOT_RESOLVED (exit 10) — empty config, no env keys > failure-WORKSPACE_NOT_RESOLVED 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_NOT_RESOLVED",
+    "details": {
+      "configuredWorkspaces": [],
+      "remediation": "run \`linear-agent workspace add <name> --token <api-key>\` to register a workspace",
+    },
+    "message": "no workspace selected: pass --workspace <name>, set LINEAR_WORKSPACE, or run \`linear-agent workspace use <name>\`",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueListRuntime — failure envelopes (KRN-09) > Test 10: AUTH_INVALID (exit 11) — SDK throws 401-shaped error > failure-AUTH_INVALID 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "AUTH_INVALID",
+    "message": "token rejected by Linear",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueListRuntime — failure envelopes (KRN-09) > Test 11a: VALIDATION_FAILED via SDK input validation > failure-VALIDATION_FAILED-sdk 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "details": {
+      "cause": "Argument value is not valid: filter.state.name",
+    },
+    "message": "Linear rejected the request payload",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueListRuntime — failure envelopes (KRN-09) > Test 12: LINEAR_API_ERROR (exit 13) — generic SDK failure > failure-LINEAR_API_ERROR 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "LINEAR_API_ERROR",
+    "details": {
+      "cause": "GraphQL Error: Unexpected internal server error",
+    },
+    "message": "Linear API call failed",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueListRuntime — failure envelopes (KRN-09) > Test 13: RATELIMITED (exit 14, transient: true) > failure-RATELIMITED 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "RATELIMITED",
+    "message": "Linear rate limit exceeded",
+    "retryAfterMs": 30000,
+    "transient": true,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueListRuntime — failure envelopes (KRN-09) > Test 14: NETWORK_ERROR (exit 15, transient: true) > failure-NETWORK_ERROR 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "NETWORK_ERROR",
+    "message": "network error during Linear API call",
+    "transient": true,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueListRuntime — happy paths > Test 1: defaults preset projects 8 fields with pageInfo mirrored > defaults-2-issues-paginated 1`] = `
+{
+  "data": [
+    {
+      "assignee": {
+        "email": "alice@example.com",
+      },
+      "id": "iss_1",
+      "identifier": "ENG-1",
+      "priority": 2,
+      "state": {
+        "name": "In Progress",
+      },
+      "team": {
+        "key": "ENG",
+      },
+      "title": "first",
+      "updatedAt": "2026-01-01T00:00:00Z",
+    },
+    {
+      "assignee": {
+        "email": "bob@example.com",
+      },
+      "id": "iss_2",
+      "identifier": "ENG-2",
+      "priority": 3,
+      "state": {
+        "name": "Backlog",
+      },
+      "team": {
+        "key": "ENG",
+      },
+      "title": "second",
+      "updatedAt": "2026-01-02T00:00:00Z",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": "next-page-token",
+      "hasNextPage": true,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`issueListRuntime — happy paths > Test 2: --fields=id,title,state.name returns exactly those keys > custom-fields-csv 1`] = `
+{
+  "data": [
+    {
+      "id": "iss_1",
+      "state": {
+        "name": "Done",
+      },
+      "title": "one",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`issueListRuntime — happy paths > Test 3: --fields=ids returns only id and identifier > preset-ids 1`] = `
+{
+  "data": [
+    {
+      "id": "iss_1",
+      "identifier": "ENG-1",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`issueListRuntime — happy paths > Test 4: --fields=full returns the projection passthrough > preset-full 1`] = `
+{
+  "data": [
+    {
+      "description": null,
+      "id": "iss_1",
+      "identifier": "ENG-1",
+      "priority": 2,
+      "title": "full",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "url": "https://linear.app/acme/issue/ENG-1",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`issueListRuntime — happy paths > Test 5: empty result returns data: [] and mirrored pageInfo > empty-list 1`] = `
+{
+  "data": [],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`issueListRuntime — happy paths > Test 6: --limit + --cursor passes { first, after } to the SDK verbatim > paginated-meta 1`] = `
+{
+  "endCursor": "final",
+  "hasNextPage": false,
+  "hasPreviousPage": false,
+  "startCursor": null,
+}
+`;
