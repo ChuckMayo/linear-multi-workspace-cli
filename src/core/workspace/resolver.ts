@@ -1,5 +1,5 @@
 import { LinearAgentError } from '../errors/index.js'
-import type { ResolveInput, ResolvedWorkspace, WorkspaceSource } from './types.js'
+import type { ResolvedWorkspace, ResolveInput, WorkspaceSource } from './types.js'
 
 /**
  * Pure resolver that translates `(flags, env, config)` into a single

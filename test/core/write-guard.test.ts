@@ -24,7 +24,9 @@ const NAMED_ENTRY = {
   organizationId: 'org-acme',
 }
 
-function withSource(source: Exclude<ResolvedWorkspace['source'], 'api-key-env'>): ResolvedWorkspace {
+function withSource(
+  source: Exclude<ResolvedWorkspace['source'], 'api-key-env'>,
+): ResolvedWorkspace {
   return { ...NAMED_ENTRY, source }
 }
 

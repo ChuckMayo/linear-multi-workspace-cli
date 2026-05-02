@@ -31,7 +31,10 @@ const EMPTY_INPUT: ResolveInput = {
   config: { active: null, workspaces: {} },
 }
 
-function withConfig(workspaces: Record<string, typeof ACME_ENTRY>, active: string | null = null): ResolveInput['config'] {
+function withConfig(
+  workspaces: Record<string, typeof ACME_ENTRY>,
+  active: string | null = null,
+): ResolveInput['config'] {
   return { active, workspaces }
 }
 
