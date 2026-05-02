@@ -1,10 +1,10 @@
 import { describe, expect, expectTypeOf, it } from 'vitest'
 import {
   ERROR_CODES,
+  type ErrorCode,
   EXIT_CODES,
   exitCodeFor,
   LinearAgentError,
-  type ErrorCode,
 } from '@/core/errors/index.js'
 
 describe('LinearAgentError', () => {
@@ -40,9 +40,9 @@ describe('LinearAgentError', () => {
   })
 
   it('defaults transient=false for non-transient families', () => {
-    expect(
-      new LinearAgentError({ code: 'WORKSPACE_NOT_RESOLVED', message: 'x' }).transient,
-    ).toBe(false)
+    expect(new LinearAgentError({ code: 'WORKSPACE_NOT_RESOLVED', message: 'x' }).transient).toBe(
+      false,
+    )
     expect(new LinearAgentError({ code: 'AUTH_INVALID', message: 'x' }).transient).toBe(false)
     expect(new LinearAgentError({ code: 'VALIDATION_FAILED', message: 'x' }).transient).toBe(false)
     expect(new LinearAgentError({ code: 'LINEAR_API_ERROR', message: 'x' }).transient).toBe(false)
