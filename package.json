@@ -51,6 +51,7 @@
     "@graphql-codegen/client-preset": "*",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.0.0",
+    "fast-check": "^4.7.0",
     "oclif": "^4.23.0",
     "tsdown": "*",
     "tsx": "*",
