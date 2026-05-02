@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`runCommand (_shared) > Test 1: success handler produces success envelope on stdout, no stderr, exit 0 > shared-success-envelope 1`] = `
+"{"$apiVersion":"1","ok":true,"data":{"foo":"bar"},"meta":{"command":"workspace add"}}
+"
+`;
+
+exports[`workspace add > Test 9: org-id collision attaches data.warning but still succeeds > add-org-collision-warning 1`] = `"organization already registered as acme"`;
+
+exports[`workspace list > Test 11: empty config returns empty workspaces array > list-empty-config 1`] = `
+"{"$apiVersion":"1","ok":true,"data":{"workspaces":[]},"meta":{"command":"workspace list"}}
+"
+`;
+
+exports[`workspace remove > Test 16: removing active picks alphabetical-first remaining as new active > remove-active-with-remaining 1`] = `
+"{"$apiVersion":"1","ok":true,"data":{"removed":"acme","active":"beta"},"meta":{"command":"workspace remove"}}
+"
+`;
+
+exports[`workspace replace-token > Test 25: success envelope NEVER includes the new token > replace-token-success 1`] = `
+"{"$apiVersion":"1","ok":true,"data":{"name":"acme","organizationId":"org-uuid-acme"},"meta":{"command":"workspace replace-token","workspace":"acme"}}
+"
+`;

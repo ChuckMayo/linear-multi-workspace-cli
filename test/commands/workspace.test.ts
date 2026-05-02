@@ -54,15 +54,14 @@ function clearMockViewer(): void {
   mockViewerError = null
 }
 
-// Imports must come after `vi.mock` setup.
-import { LinearAgentError } from '@/core/errors/index.js'
 import { runCommand } from '@/commands/workspace/_shared.js'
 import { runWorkspaceAdd } from '@/commands/workspace/add.js'
 import { runWorkspaceList } from '@/commands/workspace/list.js'
-import { runWorkspaceUse } from '@/commands/workspace/use.js'
 import { runWorkspaceRemove } from '@/commands/workspace/remove.js'
 import { runWorkspaceReplaceToken } from '@/commands/workspace/replace-token.js'
+import { runWorkspaceUse } from '@/commands/workspace/use.js'
 import { configPath } from '@/core/config/index.js'
+import { LinearAgentError } from '@/core/errors/index.js'
 
 let tmpHome: string
 let configFile: string
