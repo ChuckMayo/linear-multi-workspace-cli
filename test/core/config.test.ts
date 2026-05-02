@@ -1,12 +1,12 @@
-import { chmodSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { LinearAgentError } from '@/core/errors/index.js'
-import { ConfigSchema, WorkspaceEntrySchema, type Config } from '@/core/config/schema.js'
 import { configDir, configPath } from '@/core/config/paths.js'
+import { type Config, ConfigSchema, WorkspaceEntrySchema } from '@/core/config/schema.js'
 import { loadConfig, saveConfig, updateConfig } from '@/core/config/store.js'
+import { LinearAgentError } from '@/core/errors/index.js'
 
 describe('ConfigSchema (Zod schema)', () => {
   it('parses an empty config (active: null, no workspaces)', () => {
@@ -225,13 +225,17 @@ describe('ConfigStore (loadConfig / saveConfig)', () => {
   it('updateConfig loads, mutates, saves', () => {
     saveConfig(SAMPLE_CONFIG, { path })
     const next = updateConfig(
-      (c) => ({
-        ...c,
-        workspaces: {
-          ...c.workspaces,
-          acme: { ...c.workspaces.acme!, lastUsedAt: '2026-05-02T01:00:00Z' },
-        },
-      }),
+      (c) => {
+        const acme = c.workspaces.acme
+        if (!acme) throw new Error('precondition: acme must exist after saveConfig')
+        return {
+          ...c,
+          workspaces: {
+            ...c.workspaces,
+            acme: { ...acme, lastUsedAt: '2026-05-02T01:00:00Z' },
+          },
+        }
+      },
       { path },
     )
     expect(next.workspaces.acme?.lastUsedAt).toBe('2026-05-02T01:00:00Z')
@@ -254,4 +258,3 @@ describe('ConfigStore (loadConfig / saveConfig)', () => {
     expect(matchesA || matchesB).toBe(true)
   })
 })
-
