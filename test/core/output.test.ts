@@ -38,7 +38,11 @@ describe('success() envelope', () => {
   })
 
   it('handles data: null (used by mutation commands later)', () => {
-    const env = success(null, { command: 'workspace use', workspace: 'acme', workspaceSource: 'flag' })
+    const env = success(null, {
+      command: 'workspace use',
+      workspace: 'acme',
+      workspaceSource: 'flag',
+    })
     expect(env).toMatchSnapshot()
   })
 
@@ -145,10 +149,11 @@ describe('format() — JSON path (default)', () => {
   })
 
   it('snapshot: failure JSON output', () => {
-    const env = failure(
-      LinearAgentError.linear.apiError({ message: 'server error' }),
-      { command: 'issue list', workspace: 'acme', workspaceSource: 'flag' },
-    )
+    const env = failure(LinearAgentError.linear.apiError({ message: 'server error' }), {
+      command: 'issue list',
+      workspace: 'acme',
+      workspaceSource: 'flag',
+    })
     expect(format(env, { pretty: false }).stdout).toMatchSnapshot()
   })
 })
@@ -167,10 +172,11 @@ describe('format() — pretty path', () => {
   })
 
   it('snapshot: failure-pretty includes code, message, and one-liner stderr summary', () => {
-    const env = failure(
-      LinearAgentError.linear.apiError({ message: 'request failed' }),
-      { command: 'issue list', workspace: 'acme', workspaceSource: 'flag' },
-    )
+    const env = failure(LinearAgentError.linear.apiError({ message: 'request failed' }), {
+      command: 'issue list',
+      workspace: 'acme',
+      workspaceSource: 'flag',
+    })
     const out = format(env, { pretty: true })
     expect(out.stdout).toMatchSnapshot('failure-pretty stdout')
     expect(out.stderr).toBeDefined()

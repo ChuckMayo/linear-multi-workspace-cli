@@ -1,0 +1,184 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`failure() envelope — one fixture per error code in the taxonomy > snapshot: AUTH_INVALID (exit 11) 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "AUTH_INVALID",
+    "message": "token rejected by Linear",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": false,
+}
+`;
+
+exports[`failure() envelope — one fixture per error code in the taxonomy > snapshot: LINEAR_API_ERROR (exit 13) 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "LINEAR_API_ERROR",
+    "details": {
+      "graphqlErrorCode": "INTERNAL_SERVER_ERROR",
+    },
+    "message": "Linear returned an error",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+    "workspace": "acme",
+    "workspaceSource": "env",
+  },
+  "ok": false,
+}
+`;
+
+exports[`failure() envelope — one fixture per error code in the taxonomy > snapshot: NETWORK_ERROR (exit 15, transient: true) 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "NETWORK_ERROR",
+    "message": "DNS resolution failed for api.linear.app",
+    "transient": true,
+  },
+  "meta": {
+    "command": "issue list",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": false,
+}
+`;
+
+exports[`failure() envelope — one fixture per error code in the taxonomy > snapshot: RATELIMITED (exit 14, transient: true, retryAfterMs) 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "RATELIMITED",
+    "details": {
+      "complexityRemaining": 0,
+    },
+    "message": "Linear rate limit exceeded",
+    "retryAfterMs": 30000,
+    "transient": true,
+  },
+  "meta": {
+    "command": "issue list",
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+  "ok": false,
+}
+`;
+
+exports[`failure() envelope — one fixture per error code in the taxonomy > snapshot: VALIDATION_FAILED (exit 12) 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "details": {
+      "field": "title",
+    },
+    "message": "field "title" is required",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue create",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": false,
+}
+`;
+
+exports[`failure() envelope — one fixture per error code in the taxonomy > snapshot: WORKSPACE_NOT_RESOLVED (exit 10) 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_NOT_RESOLVED",
+    "message": "no workspace selected",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`format() — JSON path (default) > snapshot: failure JSON output 1`] = `
+"{"$apiVersion":"1","ok":false,"error":{"code":"LINEAR_API_ERROR","message":"server error","transient":false},"meta":{"command":"issue list","workspace":"acme","workspaceSource":"flag"}}
+"
+`;
+
+exports[`format() — JSON path (default) > snapshot: success JSON output 1`] = `
+"{"$apiVersion":"1","ok":true,"data":{"issues":[{"id":"iss_1","identifier":"ENG-1","title":"first"}]},"meta":{"command":"issue list","workspace":"acme","workspaceSource":"flag"}}
+"
+`;
+
+exports[`format() — pretty path > snapshot: failure-pretty includes code, message, and one-liner stderr summary > failure-pretty stderr 1`] = `
+"error: LINEAR_API_ERROR — request failed
+"
+`;
+
+exports[`format() — pretty path > snapshot: failure-pretty includes code, message, and one-liner stderr summary > failure-pretty stdout 1`] = `
+"error: LINEAR_API_ERROR — request failed
+# see stderr for one-liner; full envelope on stdout above
+"
+`;
+
+exports[`format() — pretty path > snapshot: success-pretty includes workspace and command path 1`] = `
+"# issue list · acme
+{
+  "issues": []
+}
+"
+`;
+
+exports[`format() — token redaction wiring > snapshot: failure with token in details renders [REDACTED] 1`] = `
+"{"$apiVersion":"1","ok":false,"error":{"code":"LINEAR_API_ERROR","message":"request failed","transient":false,"details":{"rawHeader":"Authorization: [REDACTED]"}},"meta":{"command":"issue list","workspace":"acme","workspaceSource":"flag"}}
+"
+`;
+
+exports[`success() envelope > handles data: null (used by mutation commands later) 1`] = `
+{
+  "$apiVersion": "1",
+  "data": null,
+  "meta": {
+    "command": "workspace use",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
+
+exports[`success() envelope > includes pageInfo in meta when provided 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "issues": [
+      {
+        "id": "iss_1",
+        "identifier": "ENG-1",
+      },
+    ],
+  },
+  "meta": {
+    "command": "issue list",
+    "pageInfo": {
+      "endCursor": "abc",
+      "hasNextPage": true,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+  "ok": true,
+}
+`;
