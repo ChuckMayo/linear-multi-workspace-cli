@@ -48,6 +48,7 @@
     "@biomejs/biome": "^2.4.0",
     "@graphql-codegen/cli": "^7.0.0",
     "@graphql-codegen/client-preset": "*",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.0.0",
     "oclif": "^4.23.0",
     "tsdown": "*",
