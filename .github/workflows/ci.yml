@@ -43,3 +43,6 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Verify pack
+        run: node scripts/verify-pack.mjs
