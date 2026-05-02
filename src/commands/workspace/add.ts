@@ -2,7 +2,12 @@ import { Args, Command, Flags } from '@oclif/core'
 import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig, saveConfig, type WorkspaceEntry } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
-import { BASE_FLAGS, type CommandOutput, classifySdkError, runCommand } from './_shared.js'
+import {
+  BASE_FLAGS,
+  type CommandOutput,
+  classifySdkError,
+  runCommand,
+} from '@/lib/workspace-runtime.js'
 
 /**
  * `linear-agent workspace add <name> --token <api-key>`

@@ -1,6 +1,6 @@
 import { Command } from '@oclif/core'
 import { loadConfig } from '@/core/config/index.js'
-import { BASE_FLAGS, type CommandOutput, runCommand } from './_shared.js'
+import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
  * `linear-agent workspace list`

@@ -1,7 +1,7 @@
 import { Args, Command } from '@oclif/core'
 import { type Config, updateConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
-import { BASE_FLAGS, type CommandOutput, runCommand } from './_shared.js'
+import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
  * `linear-agent workspace remove <name>`

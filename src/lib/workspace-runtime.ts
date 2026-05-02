@@ -1,6 +1,12 @@
 /**
  * Shared runtime for workspace commands.
  *
+ * Lives in `src/lib/` (not `src/commands/workspace/`) because oclif's manifest
+ * generator scans every file under `src/commands/` as a command — a helper
+ * file there would surface as `linear-agent workspace _shared`. The lib path
+ * also matches `tsdown.config.ts`'s entry globs (commands + lib double-star
+ * patterns) so the bundle layout stays predictable.
+ *
  * Each oclif command file under `src/commands/workspace/` stays under ~50 LOC
  * by delegating envelope formatting, error wrapping, exit-code mapping, and
  * stdout/stderr writing to `runCommand` here. Tests call this helper (and the

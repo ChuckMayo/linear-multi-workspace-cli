@@ -54,7 +54,6 @@ function clearMockViewer(): void {
   mockViewerError = null
 }
 
-import { runCommand } from '@/commands/workspace/_shared.js'
 import { runWorkspaceAdd } from '@/commands/workspace/add.js'
 import { runWorkspaceList } from '@/commands/workspace/list.js'
 import { runWorkspaceRemove } from '@/commands/workspace/remove.js'
@@ -62,6 +61,7 @@ import { runWorkspaceReplaceToken } from '@/commands/workspace/replace-token.js'
 import { runWorkspaceUse } from '@/commands/workspace/use.js'
 import { configPath } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
+import { runCommand } from '@/lib/workspace-runtime.js'
 
 let tmpHome: string
 let configFile: string
