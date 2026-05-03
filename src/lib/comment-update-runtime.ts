@@ -175,18 +175,28 @@ async function hydrateForProjection(
   spec: ProjectionSpec,
 ): Promise<Record<string, unknown>> {
   const needs = neededRelations(spec)
-  const hydrated: Record<string, unknown> = { ...comment }
-
-  if (needs.has('user') && hydrated.user !== undefined) {
-    hydrated.user = await resolveLazy(hydrated.user)
+  if (needs.size === 0) {
+    // No relations needed -- copy non-relation keys only so we don't
+    // accidentally trigger a relation getter via spread enumeration on
+    // `--fields=ids`. Mirrors issue-get-runtime.ts:167-193.
+    const out: Record<string, unknown> = {}
+    for (const k of Object.keys(comment)) {
+      if (!RELATION_KEYS.has(k)) out[k] = comment[k]
+    }
+    return out
   }
-  if (needs.has('issue') && hydrated.issue !== undefined) {
-    hydrated.issue = await resolveLazy(hydrated.issue)
+  const hydrated: Record<string, unknown> = {}
+  for (const k of Object.keys(comment)) {
+    if (RELATION_KEYS.has(k)) {
+      if (needs.has(k)) {
+        const value = comment[k]
+        hydrated[k] = await resolveLazy(value)
+      }
+      // else: skip -- don't read the lazy getter at all
+    } else {
+      hydrated[k] = comment[k]
+    }
   }
-  if (needs.has('parent') && hydrated.parent !== undefined) {
-    hydrated.parent = await resolveLazy(hydrated.parent)
-  }
-
   return hydrated
 }
 
