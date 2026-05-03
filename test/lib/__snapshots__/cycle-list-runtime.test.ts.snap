@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cycleListRuntime -- workspace-wide (no --team) > Test 1: client.cycles({ first: 25 }) with no filter; team is hydrated for default preset > list-success-workspace-wide 1`] = `
+{
+  "$apiVersion": "1",
+  "data": [
+    {
+      "endsAt": "2026-01-14T00:00:00Z",
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "isActive": false,
+      "name": "Cycle 1",
+      "number": 1,
+      "progress": 0.5,
+      "startsAt": "2026-01-01T00:00:00Z",
+      "team": {
+        "key": "ENG",
+      },
+    },
+  ],
+  "meta": {
+    "command": "cycle list",
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
