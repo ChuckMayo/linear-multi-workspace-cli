@@ -10,15 +10,81 @@
  * body rather than via `vi.mock` reject — keeps the per-test contract local.
  *
  * KRN-09 coverage: Tests 9-14 fault-inject one error per code in the
- * taxonomy (10/11/12/13/14/15) and snapshot the failure envelope. The
- * runtime classifier in `classifyIssueListError` is what each test exercises.
+ * taxonomy (10/11/12/13/14/15) and snapshot the failure envelope. After
+ * Phase 2 PLAN 02-01, the canonical classifier is `classifySdkError` in
+ * `src/core/transport/rate-limit.ts` and discriminates on `instanceof` of
+ * the `@linear/sdk` typed error classes — so these tests now throw real
+ * SDK error class instances (`RatelimitedLinearError`,
+ * `AuthenticationLinearError`, `NetworkLinearError`,
+ * `InvalidInputLinearError`, plain `LinearError`) instead of plain
+ * `Error("AuthenticationError: ...")` regex bait.
  */
 import { execFileSync } from 'node:child_process'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Stub @linear/sdk BEFORE importing modules that consume it.
+// Stub @linear/sdk BEFORE importing modules that consume it. The transport
+// module imports the typed error classes from this same path, so the mock
+// must EXPORT them — otherwise `instanceof RatelimitedLinearError` in the
+// transport always returns false (the import resolves to `undefined`).
 vi.mock('@linear/sdk', () => {
+  class LinearError extends Error {
+    constructor(message?: string) {
+      super(message ?? 'mock LinearError')
+      this.name = 'LinearError'
+    }
+  }
+  class RatelimitedLinearError extends LinearError {
+    retryAfter?: number
+    complexityRemaining?: number
+    complexityLimit?: number
+    complexityResetAt?: number | Date
+    constructor(opts?: {
+      message?: string
+      retryAfter?: number
+      complexityRemaining?: number
+      complexityLimit?: number
+      complexityResetAt?: number | Date
+    }) {
+      super(opts?.message ?? 'rate limited')
+      this.name = 'RatelimitedLinearError'
+      if (opts?.retryAfter !== undefined) this.retryAfter = opts.retryAfter
+      if (opts?.complexityRemaining !== undefined)
+        this.complexityRemaining = opts.complexityRemaining
+      if (opts?.complexityLimit !== undefined) this.complexityLimit = opts.complexityLimit
+      if (opts?.complexityResetAt !== undefined) this.complexityResetAt = opts.complexityResetAt
+    }
+  }
+  class NetworkLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'network error')
+      this.name = 'NetworkLinearError'
+    }
+  }
+  class AuthenticationLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'auth error')
+      this.name = 'AuthenticationLinearError'
+    }
+  }
+  class InvalidInputLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'invalid input')
+      this.name = 'InvalidInputLinearError'
+    }
+  }
+  class InternalLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'internal')
+      this.name = 'InternalLinearError'
+    }
+  }
   return {
+    LinearError,
+    RatelimitedLinearError,
+    NetworkLinearError,
+    AuthenticationLinearError,
+    InvalidInputLinearError,
+    InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
       constructor(opts: { apiKey: string }) {
@@ -48,6 +114,13 @@ function clearMockIssues(): void {
   lastIssuesArgs = null
 }
 
+import {
+  AuthenticationLinearError as RealAuthenticationLinearError,
+  InternalLinearError as RealInternalLinearError,
+  InvalidInputLinearError as RealInvalidInputLinearError,
+  NetworkLinearError as RealNetworkLinearError,
+  RatelimitedLinearError as RealRatelimitedLinearError,
+} from '@linear/sdk'
 import IssueList from '@/commands/issue/list.js'
 // Stub config — pure object so tests don't touch the filesystem. Shape
 // matches the `Config` type from `@/core/config/index.js` so the runtime
@@ -56,6 +129,28 @@ import type { Config } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import { failure } from '@/core/output/index.js'
 import { issueListRuntime } from '@/lib/issue-list-runtime.js'
+
+// vi.mock above replaces @linear/sdk at module-load with our own classes
+// whose constructors accept a test-friendly options bag. Cast away the
+// real SDK constructor signature for the mock-construction call sites.
+type RatelimitedLinearErrorOpts = {
+  message?: string
+  retryAfter?: number
+  complexityRemaining?: number
+  complexityLimit?: number
+  complexityResetAt?: number | Date
+}
+const RatelimitedLinearError = RealRatelimitedLinearError as unknown as new (
+  opts?: RatelimitedLinearErrorOpts,
+) => Error
+const NetworkLinearError = RealNetworkLinearError as unknown as new (msg?: string) => Error
+const AuthenticationLinearError = RealAuthenticationLinearError as unknown as new (
+  msg?: string,
+) => Error
+const InvalidInputLinearError = RealInvalidInputLinearError as unknown as new (
+  msg?: string,
+) => Error
+const InternalLinearError = RealInternalLinearError as unknown as new (msg?: string) => Error
 
 const STUB_CONFIG: Config = {
   active: 'acme',
@@ -386,9 +481,11 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
     }
   })
 
-  it('Test 10: AUTH_INVALID (exit 11) — SDK throws 401-shaped error', async () => {
+  it('Test 10: AUTH_INVALID (exit 11) — SDK throws AuthenticationLinearError', async () => {
+    // Phase 2 PLAN 02-01: classifySdkError discriminates on the typed SDK
+    // error class via instanceof, NOT message regex.
     setMockIssues(async () => {
-      throw new Error('AuthenticationError: Token is invalid (401)')
+      throw new AuthenticationLinearError('Token is invalid (401)')
     })
 
     expect.assertions(3)
@@ -397,6 +494,7 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
         flags: {},
         env: {},
         loadConfigOverride: () => STUB_CONFIG,
+        retryOptsOverride: { maxAttempts: 1 },
       })
     } catch (e) {
       expect(e).toBeInstanceOf(LinearAgentError)
@@ -406,9 +504,9 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
     }
   })
 
-  it('Test 11a: VALIDATION_FAILED via SDK input validation', async () => {
+  it('Test 11a: VALIDATION_FAILED via SDK input validation (InvalidInputLinearError)', async () => {
     setMockIssues(async () => {
-      throw new Error('Argument value is not valid: filter.state.name')
+      throw new InvalidInputLinearError('Argument value is not valid: filter.state.name')
     })
 
     expect.assertions(3)
@@ -417,6 +515,7 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
         flags: {},
         env: {},
         loadConfigOverride: () => STUB_CONFIG,
+        retryOptsOverride: { maxAttempts: 1 },
       })
     } catch (e) {
       expect(e).toBeInstanceOf(LinearAgentError)
@@ -441,9 +540,9 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
     }
   })
 
-  it('Test 12: LINEAR_API_ERROR (exit 13) — generic SDK failure', async () => {
+  it('Test 12: LINEAR_API_ERROR (exit 13) — generic LinearError subclass (InternalLinearError)', async () => {
     setMockIssues(async () => {
-      throw new Error('GraphQL Error: Unexpected internal server error')
+      throw new InternalLinearError('GraphQL Error: Unexpected internal server error')
     })
 
     expect.assertions(3)
@@ -452,6 +551,7 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
         flags: {},
         env: {},
         loadConfigOverride: () => STUB_CONFIG,
+        retryOptsOverride: { maxAttempts: 1 },
       })
     } catch (e) {
       expect(e).toBeInstanceOf(LinearAgentError)
@@ -461,13 +561,9 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
     }
   })
 
-  it('Test 13: RATELIMITED (exit 14, transient: true)', async () => {
+  it('Test 13: RATELIMITED (exit 14, transient: true) — RatelimitedLinearError', async () => {
     setMockIssues(async () => {
-      const err = new Error('rate limit exceeded') as Error & {
-        errors?: Array<{ extensions?: { code?: string } }>
-      }
-      err.errors = [{ extensions: { code: 'RATELIMITED' } }]
-      throw err
+      throw new RatelimitedLinearError()
     })
 
     expect.assertions(5)
@@ -476,6 +572,9 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
         flags: {},
         env: {},
         loadConfigOverride: () => STUB_CONFIG,
+        // maxAttempts: 1 disables retry so the test surfaces the failure
+        // immediately without sleeping.
+        retryOptsOverride: { maxAttempts: 1 },
       })
     } catch (e) {
       expect(e).toBeInstanceOf(LinearAgentError)
@@ -487,9 +586,9 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
     }
   })
 
-  it('Test 14: NETWORK_ERROR (exit 15, transient: true)', async () => {
+  it('Test 14: NETWORK_ERROR (exit 15, transient: true) — NetworkLinearError', async () => {
     setMockIssues(async () => {
-      throw new Error('fetch failed: ECONNREFUSED 1.2.3.4:443')
+      throw new NetworkLinearError('fetch failed: ECONNREFUSED 1.2.3.4:443')
     })
 
     expect.assertions(4)
@@ -498,6 +597,7 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
         flags: {},
         env: {},
         loadConfigOverride: () => STUB_CONFIG,
+        retryOptsOverride: { maxAttempts: 1 },
       })
     } catch (e) {
       expect(e).toBeInstanceOf(LinearAgentError)
@@ -505,6 +605,57 @@ describe('issueListRuntime — failure envelopes (KRN-09)', () => {
       expect(err.code).toBe('NETWORK_ERROR')
       expect(err.transient).toBe(true)
       expect(snapshotFailureEnvelope(err)).toMatchSnapshot('failure-NETWORK_ERROR')
+    }
+  })
+})
+
+// -----------------------------------------------------------------------------
+// SECTION B': Phase 2 PLAN 02-01 Task 3 — transport wiring (RAT-01..03)
+// -----------------------------------------------------------------------------
+
+describe('issueListRuntime — transport wiring (Phase 2 PLAN 02-01)', () => {
+  it('Phase 2 Task 3 Test 4: RatelimitedLinearError retries 3 attempts; sleep injected so no real wait', async () => {
+    let calls = 0
+    setMockIssues(async () => {
+      calls++
+      throw new RatelimitedLinearError()
+    })
+    const sleep = vi.fn().mockResolvedValue(undefined)
+
+    expect.assertions(3)
+    try {
+      await issueListRuntime({
+        flags: {},
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+        retryOptsOverride: { sleep, random: () => 0 },
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      expect((e as LinearAgentError).code).toBe('RATELIMITED')
+      // 3 attempts, 2 sleeps between them
+      expect(calls).toBe(3)
+    }
+  })
+
+  it('Phase 2 Task 3 Test 5: AuthenticationLinearError surfaces immediately with NO retry', async () => {
+    let calls = 0
+    setMockIssues(async () => {
+      calls++
+      throw new AuthenticationLinearError('Token rejected')
+    })
+
+    expect.assertions(3)
+    try {
+      await issueListRuntime({
+        flags: {},
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      expect((e as LinearAgentError).code).toBe('AUTH_INVALID')
+      expect(calls).toBe(1)
     }
   })
 })

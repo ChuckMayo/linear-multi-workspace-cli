@@ -36,6 +36,14 @@ import { Flags } from '@oclif/core'
 import { exitCodeFor, LinearAgentError } from '@/core/errors/index.js'
 import { type FailureMeta, failure, format, type Meta, success } from '@/core/output/index.js'
 
+/**
+ * `classifySdkError` lives in `src/core/transport/rate-limit.ts` as of
+ * Phase 2 PLAN 02-01 (RAT-03). The Phase 1 message-substring stopgap
+ * formerly defined here is GONE; existing import sites (`workspace/add.ts`,
+ * `workspace/replace-token.ts`) keep working via this re-export.
+ */
+export { classifySdkError } from '@/core/transport/index.js'
+
 export const BASE_FLAGS = {
   pretty: Flags.boolean({
     description: 'Human-readable output (default is JSON)',
@@ -102,42 +110,4 @@ export function readEnv(env: NodeJS.ProcessEnv = process.env): {
   if (env.LINEAR_WORKSPACE !== undefined) out.LINEAR_WORKSPACE = env.LINEAR_WORKSPACE
   if (env.LINEAR_API_KEY !== undefined) out.LINEAR_API_KEY = env.LINEAR_API_KEY
   return out
-}
-
-/**
- * Classify SDK errors thrown during `client.viewer` / `viewer.organization`
- * fetches into the kernel error taxonomy. v1 uses message-substring matching;
- * Phase 2's transport wrapper will do this properly.
- */
-export function classifySdkError(err: unknown): LinearAgentError {
-  const msg = err instanceof Error ? err.message : String(err)
-
-  // 401 / authentication-shaped errors → AUTH_INVALID (exit 11)
-  if (
-    /\b401\b/.test(msg) ||
-    /authentication/i.test(msg) ||
-    /unauthorized/i.test(msg) ||
-    /invalid api key/i.test(msg)
-  ) {
-    return LinearAgentError.auth.invalid('token rejected by Linear')
-  }
-
-  // network-shaped errors → NETWORK_ERROR (exit 15)
-  if (
-    /\bENOTFOUND\b/.test(msg) ||
-    /\bECONNREFUSED\b/.test(msg) ||
-    /\bETIMEDOUT\b/.test(msg) ||
-    /\bECONNRESET\b/.test(msg) ||
-    /network/i.test(msg) ||
-    /fetch failed/i.test(msg) ||
-    /dns/i.test(msg)
-  ) {
-    return LinearAgentError.network('network error during Linear API call')
-  }
-
-  // anything else from the SDK → LINEAR_API_ERROR (exit 13)
-  return LinearAgentError.linear.apiError({
-    message: 'Linear API call failed',
-    details: { cause: msg },
-  })
 }

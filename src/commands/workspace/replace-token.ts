@@ -3,11 +3,11 @@ import { createLinearClient } from '@/core/client/index.js'
 import { loadConfig, saveConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import {
-  BASE_FLAGS,
-  type CommandOutput,
-  classifySdkError,
-  runCommand,
-} from '@/lib/workspace-runtime.js'
+  type RetryOpts,
+  withFetchInterception,
+  withRateLimitRetry,
+} from '@/core/transport/index.js'
+import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
  * `linear-agent workspace replace-token <name> --token <new-key>`
@@ -26,6 +26,8 @@ export interface RunWorkspaceReplaceTokenArgs {
   name: string
   token: string
   pretty: boolean
+  /** Test-only seam — overrides RetryOpts on the transport wrapper. */
+  retryOptsOverride?: RetryOpts
 }
 
 export async function runWorkspaceReplaceToken(
@@ -50,14 +52,15 @@ export async function runWorkspaceReplaceToken(
         source: 'api-key-env',
       })
 
-      let actualOrgId: string
-      try {
-        const viewer = await client.viewer
-        const org = await viewer.organization
-        actualOrgId = org.id
-      } catch (e) {
-        throw classifySdkError(e)
-      }
+      // Phase 2 PLAN 02-01: SDK call routes through the transport wrapper
+      // for retry + classification. The previous try/catch + classifySdkError
+      // is gone; thrown errors are already LinearAgentError instances that
+      // flow through `runCommand`.
+      const actualOrgId = await withFetchInterception(async () => {
+        const viewer = await withRateLimitRetry(() => client.viewer, args.retryOptsOverride)
+        const org = await withRateLimitRetry(() => viewer.organization, args.retryOptsOverride)
+        return org.id
+      })
 
       if (actualOrgId !== expectedOrgId) {
         throw LinearAgentError.workspace.tokenMismatch(expectedOrgId, actualOrgId)

@@ -14,9 +14,72 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Stub @linear/sdk BEFORE importing modules that consume it.
+// Stub @linear/sdk BEFORE importing modules that consume it. Phase 2 PLAN
+// 02-01 routes every SDK call through `withRateLimitRetry` whose classifier
+// discriminates on `instanceof` of the typed error classes — the mock
+// therefore EXPORTS the error class hierarchy (not only `LinearClient`)
+// so `import { RatelimitedLinearError } from '@linear/sdk'` in the
+// transport resolves to the same class identity tests can `new` and
+// throw.
 vi.mock('@linear/sdk', () => {
+  class LinearError extends Error {
+    constructor(message?: string) {
+      super(message ?? 'mock LinearError')
+      this.name = 'LinearError'
+    }
+  }
+  class RatelimitedLinearError extends LinearError {
+    retryAfter?: number
+    complexityRemaining?: number
+    complexityLimit?: number
+    complexityResetAt?: number | Date
+    constructor(opts?: {
+      message?: string
+      retryAfter?: number
+      complexityRemaining?: number
+      complexityLimit?: number
+      complexityResetAt?: number | Date
+    }) {
+      super(opts?.message ?? 'rate limited')
+      this.name = 'RatelimitedLinearError'
+      if (opts?.retryAfter !== undefined) this.retryAfter = opts.retryAfter
+      if (opts?.complexityRemaining !== undefined)
+        this.complexityRemaining = opts.complexityRemaining
+      if (opts?.complexityLimit !== undefined) this.complexityLimit = opts.complexityLimit
+      if (opts?.complexityResetAt !== undefined) this.complexityResetAt = opts.complexityResetAt
+    }
+  }
+  class NetworkLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'network error')
+      this.name = 'NetworkLinearError'
+    }
+  }
+  class AuthenticationLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'auth error')
+      this.name = 'AuthenticationLinearError'
+    }
+  }
+  class InvalidInputLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'invalid input')
+      this.name = 'InvalidInputLinearError'
+    }
+  }
+  class InternalLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'internal')
+      this.name = 'InternalLinearError'
+    }
+  }
   return {
+    LinearError,
+    RatelimitedLinearError,
+    NetworkLinearError,
+    AuthenticationLinearError,
+    InvalidInputLinearError,
+    InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
       // store apiKey so tests can inspect which token a viewer call was associated with
@@ -54,6 +117,10 @@ function clearMockViewer(): void {
   mockViewerError = null
 }
 
+import {
+  AuthenticationLinearError as RealAuthenticationLinearError,
+  RatelimitedLinearError as RealRatelimitedLinearError,
+} from '@linear/sdk'
 import { runWorkspaceAdd } from '@/commands/workspace/add.js'
 import { runWorkspaceList } from '@/commands/workspace/list.js'
 import { runWorkspaceRemove } from '@/commands/workspace/remove.js'
@@ -62,6 +129,17 @@ import { runWorkspaceUse } from '@/commands/workspace/use.js'
 import { configPath } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import { runCommand } from '@/lib/workspace-runtime.js'
+
+// vi.mock above replaces @linear/sdk with our own classes whose
+// constructors accept a single string. Cast away the SDK constructor
+// signature for test-side use.
+const AuthenticationLinearError = RealAuthenticationLinearError as unknown as new (
+  msg?: string,
+) => Error
+const RatelimitedLinearError = RealRatelimitedLinearError as unknown as new (opts?: {
+  message?: string
+  retryAfter?: number
+}) => Error
 
 let tmpHome: string
 let configFile: string
@@ -223,7 +301,8 @@ describe('workspace add', () => {
       }
     })()
 
-    setMockViewerError(new Error('AuthenticationError: Invalid API key (HTTP 401)'))
+    // Phase 2 PLAN 02-01: classifySdkError uses instanceof discrimination.
+    setMockViewerError(new AuthenticationLinearError('Invalid API key (HTTP 401)'))
 
     const out = await runWorkspaceAdd({ name: 'acme', token: 'lin_api_bad', pretty: false })
     expect(out.exitCode).toBe(11)
@@ -253,6 +332,23 @@ describe('workspace add', () => {
     expect(env.ok).toBe(true)
     expect(env.data.warning).toMatch(/already registered.*acme/)
     expect(env.data.warning).toMatchSnapshot('add-org-collision-warning')
+  })
+
+  it('Phase 2 Task 3 Test 12: RatelimitedLinearError surfaces exit 14; retryOptsOverride.maxAttempts=1 disables wait', async () => {
+    // Phase 2 PLAN 02-01: workspace add now routes through withRateLimitRetry,
+    // so a real RatelimitedLinearError flows through the transport classifier.
+    setMockViewerError(new RatelimitedLinearError())
+    const out = await runWorkspaceAdd({
+      name: 'acme',
+      token: 'lin_api_test_xxx',
+      pretty: false,
+      retryOptsOverride: { maxAttempts: 1 },
+    })
+    expect(out.exitCode).toBe(14)
+    const env = JSON.parse(out.stdout.trim())
+    expect(env.ok).toBe(false)
+    expect(env.error.code).toBe('RATELIMITED')
+    expect(env.error.transient).toBe(true)
   })
 })
 
@@ -519,7 +615,8 @@ describe('workspace replace-token', () => {
     await runWorkspaceAdd({ name: 'acme', token: 'lin_api_old', pretty: false })
     const before = readFileSync(configFile, 'utf8')
 
-    setMockViewerError(new Error('AuthenticationError: Invalid API key (HTTP 401)'))
+    // Phase 2 PLAN 02-01: classifySdkError uses instanceof discrimination.
+    setMockViewerError(new AuthenticationLinearError('Invalid API key (HTTP 401)'))
     const out = await runWorkspaceReplaceToken({
       name: 'acme',
       token: 'lin_api_bad',

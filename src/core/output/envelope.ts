@@ -34,6 +34,24 @@ export type Meta = {
   workspace?: string | null
   workspaceSource?: WorkspaceSource
   pageInfo?: PageInfo
+  /**
+   * Linear's complexity-meter readout for the LAST response observed
+   * inside `withFetchInterception(...)` (Phase 2 PLAN 02-01, RAT-02).
+   *
+   * Strictly opt-in: runtimes must spread this only when
+   * `getLastComplexity()` returned a value:
+   *   `...(getLastComplexity() && { complexity: getLastComplexity() })`
+   * This keeps Phase 1 snapshots byte-identical when tests mock at the
+   * SDK class boundary (the mock bypasses globalThis.fetch, so no
+   * complexity is captured).
+   */
+  complexity?: { cost: number; remaining: number }
+  /**
+   * Total result count for searches that surface it (Phase 2 plan 02-05
+   * `issue search` → `IssueSearchPayload.totalCount`). Optional and
+   * additive; Phase 1 envelopes never set it.
+   */
+  totalCount?: number
 }
 
 export type FailureMeta = Pick<Meta, 'command' | 'workspace' | 'workspaceSource'>
@@ -64,15 +82,21 @@ export type Envelope<T = unknown> = SuccessEnvelope<T> | FailureEnvelope
 
 /**
  * Build a stable Meta record with the canonical key order:
- *   command, workspace, workspaceSource, pageInfo
+ *   command, workspace, workspaceSource, pageInfo, complexity, totalCount
  * Optional fields with `undefined` values are omitted; `null` workspaces
  * are preserved (they are meaningful — "ran via LINEAR_API_KEY env").
+ *
+ * `complexity` and `totalCount` are Phase 2 additions (PLAN 02-01). They
+ * are placed AFTER pageInfo so any envelope that omits them serializes
+ * identically to its Phase 1 byte-for-byte form.
  */
 function buildMeta(meta: Meta): Meta {
   const out: Meta = { command: meta.command }
   if (meta.workspace !== undefined) out.workspace = meta.workspace
   if (meta.workspaceSource !== undefined) out.workspaceSource = meta.workspaceSource
   if (meta.pageInfo !== undefined) out.pageInfo = meta.pageInfo
+  if (meta.complexity !== undefined) out.complexity = meta.complexity
+  if (meta.totalCount !== undefined) out.totalCount = meta.totalCount
   return out
 }
 

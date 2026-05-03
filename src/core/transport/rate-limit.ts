@@ -11,9 +11,9 @@
  * The classifier discriminates on `@linear/sdk` typed error classes
  * (`RatelimitedLinearError`, `AuthenticationLinearError`, `NetworkLinearError`,
  * `InvalidInputLinearError`, `LinearError`) — NOT regex on `err.message` and
- * NOT `errors[].extensions.code`. Phase 1's two regex-based stopgaps
- * (`classifyIssueListError` / `classifySdkError`) are retired in Plan 02-01
- * Task 3; this module is the canonical replacement.
+ * NOT `errors[].extensions.code`. Phase 1's two regex-based message-substring
+ * classifiers (formerly in issue-list-runtime + workspace-runtime) are
+ * retired in Plan 02-01 Task 3; this module is the canonical replacement.
  *
  * Default backoff policy (RAT-01):
  *   - Rate-limit: base 250ms doubling (250 → 500 → 1000) with full jitter,

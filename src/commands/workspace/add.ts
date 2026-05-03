@@ -3,11 +3,11 @@ import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig, saveConfig, type WorkspaceEntry } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import {
-  BASE_FLAGS,
-  type CommandOutput,
-  classifySdkError,
-  runCommand,
-} from '@/lib/workspace-runtime.js'
+  type RetryOpts,
+  withFetchInterception,
+  withRateLimitRetry,
+} from '@/core/transport/index.js'
+import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
  * `linear-agent workspace add <name> --token <api-key>`
@@ -27,6 +27,8 @@ export interface RunWorkspaceAddArgs {
   name: string
   token: string
   pretty: boolean
+  /** Test-only seam — overrides RetryOpts on the transport wrapper. */
+  retryOptsOverride?: RetryOpts
 }
 
 export async function runWorkspaceAdd(args: RunWorkspaceAddArgs): Promise<CommandOutput> {
@@ -50,15 +52,17 @@ export async function runWorkspaceAdd(args: RunWorkspaceAddArgs): Promise<Comman
         source: 'api-key-env',
       })
 
-      let orgId: string
-      try {
-        const viewer = await client.viewer
+      // Phase 2 PLAN 02-01: every SDK call routes through the transport.
+      // `withRateLimitRetry` does the classification + retry on
+      // RatelimitedLinearError / NetworkLinearError; `withFetchInterception`
+      // captures complexity headers for `meta.complexity` (no-op here since
+      // workspace add doesn't surface meta beyond `workspace`).
+      const orgId = await withFetchInterception(async () => {
+        const viewer = await withRateLimitRetry(() => client.viewer, args.retryOptsOverride)
         // viewer.organization is itself a Promise/getter in @linear/sdk v83
-        const org = await viewer.organization
-        orgId = org.id
-      } catch (e) {
-        throw classifySdkError(e)
-      }
+        const org = await withRateLimitRetry(() => viewer.organization, args.retryOptsOverride)
+        return org.id
+      })
 
       // Org-id collision check — succeeds with a warning rather than blocking
       // (per CONTEXT: deliberate same-org aliases are valid use cases).

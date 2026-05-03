@@ -16,30 +16,41 @@
  *      (PLAN-05 KRN-08 — INVALID_FIELD on unknown paths).
  *   4. parsePagination({ limit, cursor }) → { first, after }
  *      (PLAN-05 KRN-08 — USAGE_ERROR on out-of-range limit).
- *   5. buildIssueFilter(flags) → IssueFilter | undefined
- *      (UUID/email/key heuristics for state/assignee/team).
- *   6. await client.issues({ first, after, filter }) — typed SDK call.
+ *   5. buildIssueFilter(flags) → IssueFilter | undefined  (extracted to
+ *      `@/lib/filter-heuristics.js` in Phase 2 PLAN 02-01 so issue search
+ *      and future entity lists share the routing without drift).
+ *   6. await client.issues({ first, after, filter }) — typed SDK call,
+ *      wrapped in `withRateLimitRetry` inside `withFetchInterception` so
+ *      the kernel's rate-limit retry policy and complexity-meter capture
+ *      both engage. The Phase 1 regex-based message-substring stopgap
+ *      formerly in this file is GONE; the transport's `classifySdkError`
+ *      is the canonical replacement.
  *   7. Hydrate lazy entities (issue.state, issue.assignee, issue.team) on
  *      demand based on which paths the projection spec actually needs.
- *      Phase 2's transport-wrapper rewrite will replace this per-issue await
- *      with a single fragment query (PITFALLS § Pitfall 14 — N+1).
+ *      Phase 2's transport-wrapper rewrite still leaves the per-issue
+ *      hydration in place; PITFALLS § Pitfall 14 (N+1) remains a known
+ *      cliff for `--fields=full`.
  *   8. project(hydrated, spec) per issue.
- *   9. Return { data, meta } with pageInfo mirrored verbatim.
- *
- * Error handling: any thrown error from the SDK is funneled through
- * `classifyIssueListError(raw)` into a `LinearAgentError` with the right
- * code (KRN-09 taxonomy). `LinearAgentError` instances flow through
- * unchanged (resolver/parser already classify their own errors).
+ *   9. Return { data, meta } with pageInfo mirrored verbatim. `meta.complexity`
+ *      is spread ONLY when `getLastComplexity()` returned a value (strict
+ *      opt-in keeps Phase 1 snapshots byte-identical when tests mock the
+ *      SDK class instead of `globalThis.fetch`).
  */
 
 import type { LinearClient } from '@linear/sdk'
 import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
-import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { parsePagination } from '@/core/pagination/index.js'
 import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
+import {
+  getLastComplexity,
+  type RetryOpts,
+  withFetchInterception,
+  withRateLimitRetry,
+} from '@/core/transport/index.js'
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
+import { buildIssueFilter, type IssueFilterShape } from '@/lib/filter-heuristics.js'
 
 export interface IssueListFlags {
   workspace?: string
@@ -58,15 +69,14 @@ export interface IssueListInput {
   loadConfigOverride?: () => Config
   /** Test-only seam — defaults to `createLinearClient`. */
   clientFactoryOverride?: (resolved: ResolvedWorkspace) => LinearClient
+  /** Test-only seam — passes through to `withRateLimitRetry`. */
+  retryOptsOverride?: RetryOpts
 }
 
 export interface IssueListOutput {
   data: unknown[]
   meta: Omit<Meta, 'command'>
 }
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function issueListRuntime(input: IssueListInput): Promise<IssueListOutput> {
   const config = (input.loadConfigOverride ?? loadConfig)()
@@ -94,83 +104,37 @@ export async function issueListRuntime(input: IssueListInput): Promise<IssueList
 
   const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
 
-  let connection: SdkIssueConnection
-  try {
+  return withFetchInterception(async () => {
     const issuesArgs: { first: number; after?: string; filter?: IssueFilterShape } = { first }
     if (after !== undefined) issuesArgs.after = after
     if (filter !== undefined) issuesArgs.filter = filter
-    connection = (await client.issues(
-      issuesArgs as unknown as Parameters<LinearClient['issues']>[0],
+    const connection = (await withRateLimitRetry(
+      () => client.issues(issuesArgs as unknown as Parameters<LinearClient['issues']>[0]),
+      input.retryOptsOverride,
     )) as unknown as SdkIssueConnection
-  } catch (raw) {
-    throw classifyIssueListError(raw)
-  }
 
-  const projected = await Promise.all(
-    connection.nodes.map(async (issue) => {
-      const hydrated = await hydrateForProjection(issue, fields)
-      return project(hydrated, fields)
-    }),
-  )
+    const projected = await Promise.all(
+      connection.nodes.map(async (issue) => {
+        const hydrated = await hydrateForProjection(issue, fields)
+        return project(hydrated, fields)
+      }),
+    )
 
-  const meta: Omit<Meta, 'command'> = {
-    workspace: resolved.name,
-    workspaceSource: resolved.source,
-    pageInfo: {
-      hasNextPage: Boolean(connection.pageInfo?.hasNextPage),
-      endCursor: connection.pageInfo?.endCursor ?? null,
-      hasPreviousPage: Boolean(connection.pageInfo?.hasPreviousPage),
-      startCursor: connection.pageInfo?.startCursor ?? null,
-    },
-  }
-
-  return { data: projected, meta }
-}
-
-// -----------------------------------------------------------------------------
-// Filter builder
-// -----------------------------------------------------------------------------
-
-interface IssueFilterShape {
-  state?: { id?: { eq: string }; name?: { eq: string } }
-  assignee?: { id?: { eq: string }; email?: { eq: string }; isMe?: { eq: boolean } }
-  team?: { id?: { eq: string }; key?: { eq: string }; name?: { eq: string } }
-}
-
-function buildIssueFilter(flags: IssueListFlags): IssueFilterShape | undefined {
-  const filter: IssueFilterShape = {}
-
-  if (flags.state) {
-    filter.state = UUID_RE.test(flags.state)
-      ? { id: { eq: flags.state } }
-      : { name: { eq: flags.state } }
-  }
-
-  if (flags.assignee) {
-    if (flags.assignee === 'me') {
-      filter.assignee = { isMe: { eq: true } }
-    } else if (EMAIL_RE.test(flags.assignee)) {
-      filter.assignee = { email: { eq: flags.assignee } }
-    } else if (UUID_RE.test(flags.assignee)) {
-      filter.assignee = { id: { eq: flags.assignee } }
-    } else {
-      // Default: treat unknown shapes as email (most common Linear-public ID).
-      filter.assignee = { email: { eq: flags.assignee } }
+    const complexity = getLastComplexity()
+    const meta: Omit<Meta, 'command'> = {
+      workspace: resolved.name,
+      workspaceSource: resolved.source,
+      pageInfo: {
+        hasNextPage: Boolean(connection.pageInfo?.hasNextPage),
+        endCursor: connection.pageInfo?.endCursor ?? null,
+        hasPreviousPage: Boolean(connection.pageInfo?.hasPreviousPage),
+        startCursor: connection.pageInfo?.startCursor ?? null,
+      },
+      ...(complexity !== undefined ? { complexity } : {}),
     }
-  }
 
-  if (flags.team) {
-    if (UUID_RE.test(flags.team)) {
-      filter.team = { id: { eq: flags.team } }
-    } else if (/^[A-Z0-9]{2,6}$/i.test(flags.team)) {
-      filter.team = { key: { eq: flags.team.toUpperCase() } }
-    } else {
-      filter.team = { name: { eq: flags.team } }
-    }
-  }
-
-  if (Object.keys(filter).length === 0) return undefined
-  return filter
+    return { data: projected, meta }
+  })
 }
 
 // -----------------------------------------------------------------------------
@@ -237,72 +201,6 @@ async function resolveLazy(value: unknown): Promise<unknown> {
     return await (value as Promise<unknown>)
   }
   return value
-}
-
-// -----------------------------------------------------------------------------
-// Error classifier — maps SDK errors to the kernel taxonomy (KRN-09)
-// -----------------------------------------------------------------------------
-
-const RATELIMIT_DEFAULT_RETRY_MS = 30_000
-
-export function classifyIssueListError(raw: unknown): LinearAgentError {
-  if (raw instanceof LinearAgentError) return raw
-  const msg = raw instanceof Error ? raw.message : String(raw)
-
-  // Rate-limit shape: error.errors[0].extensions.code === 'RATELIMITED'
-  // (PITFALLS § Pitfall 5 — Linear returns rate limits as 400 with code in errors[]).
-  const rl = extractGraphqlCode(raw)
-  if (rl === 'RATELIMITED') {
-    return LinearAgentError.rateLimited(RATELIMIT_DEFAULT_RETRY_MS)
-  }
-
-  // Auth-shaped errors → AUTH_INVALID
-  if (
-    /\b401\b/.test(msg) ||
-    /authentication/i.test(msg) ||
-    /unauthorized/i.test(msg) ||
-    /invalid api key/i.test(msg) ||
-    /token is invalid/i.test(msg)
-  ) {
-    return LinearAgentError.auth.invalid('token rejected by Linear')
-  }
-
-  // Network-shaped errors → NETWORK_ERROR (transient: true)
-  if (
-    /\bENOTFOUND\b/.test(msg) ||
-    /\bECONNREFUSED\b/.test(msg) ||
-    /\bETIMEDOUT\b/.test(msg) ||
-    /\bECONNRESET\b/.test(msg) ||
-    /\bEAI_AGAIN\b/.test(msg) ||
-    /fetch failed/i.test(msg) ||
-    /network error/i.test(msg) ||
-    /\bdns\b/i.test(msg)
-  ) {
-    return LinearAgentError.network('network error during Linear API call')
-  }
-
-  // Validation-shaped errors → VALIDATION_FAILED (exit 12)
-  if (rl === 'INVALID_INPUT' || /argument value/i.test(msg) || /is not valid/i.test(msg)) {
-    return LinearAgentError.validation.failed('Linear rejected the request payload', {
-      cause: msg,
-    })
-  }
-
-  // Default: LINEAR_API_ERROR (exit 13)
-  return LinearAgentError.linear.apiError({
-    message: 'Linear API call failed',
-    details: { cause: msg },
-  })
-}
-
-function extractGraphqlCode(raw: unknown): string | undefined {
-  if (raw && typeof raw === 'object' && 'errors' in raw) {
-    const arr = (raw as { errors?: Array<{ extensions?: { code?: string } }> }).errors
-    if (Array.isArray(arr) && arr.length > 0) {
-      return arr[0]?.extensions?.code
-    }
-  }
-  return undefined
 }
 
 // -----------------------------------------------------------------------------
