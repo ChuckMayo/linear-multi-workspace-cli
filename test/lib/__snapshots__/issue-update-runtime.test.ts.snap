@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issueUpdateRuntime — VALIDATION_NO_FIELDS > Test 2: no field flags → VALIDATION_NO_FIELDS exit 2 BEFORE any SDK call > failure-VALIDATION_NO_FIELDS 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "VALIDATION_NO_FIELDS",
+    "message": "no fields to update -- pass at least one of --title, --description, --state, --assignee, --labels, --add-label, --remove-label, --priority, --project, --cycle",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue update",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueUpdateRuntime — single-field update > Test 1: ENG-1 + --title New → resolves issue, calls updateIssue with exactly { title: "New" } > update-success-title-only 1`] = `
+{
+  "data": {
+    "assignee": {
+      "email": null,
+    },
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "identifier": "ENG-1",
+    "priority": 0,
+    "state": {
+      "name": "In Progress",
+    },
+    "team": {
+      "key": "ENG",
+    },
+    "title": "New",
+    "updatedAt": "2026-01-02T00:00:00Z",
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
