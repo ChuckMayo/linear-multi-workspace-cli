@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectGetRuntime -- PROJECT_NOT_FOUND > Test 7: unknown name -> resolver throws PROJECT_NOT_FOUND with details.available > failure-PROJECT_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "PROJECT_NOT_FOUND",
+    "details": {
+      "available": [
+        "platform",
+        "roadmap q1",
+      ],
+      "requested": "BogusProject",
+      "workspace": "acme",
+    },
+    "message": "project not found: BogusProject",
+    "transient": false,
+  },
+  "meta": {
+    "command": "project get",
+  },
+  "ok": false,
+}
+`;
+
+exports[`projectGetRuntime -- UUID input > Test 5: UUID -> client.project(uuid) directly; resolveProjectId is NOT called > get-success-uuid 1`] = `
+{
+  "data": {
+    "description": "Roadmap",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "lead": {
+      "email": "lead@example.com",
+    },
+    "name": "Roadmap Q1",
+    "progress": 0.25,
+    "state": "started",
+    "targetDate": "2026-12-31",
+    "updatedAt": "2026-01-02T00:00:00Z",
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;

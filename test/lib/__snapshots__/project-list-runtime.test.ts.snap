@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectListRuntime -- workspace-wide > Test 1: client.projects({ first: 25 }) with no filter; lead is hydrated for default preset > list-success-workspace-wide 1`] = `
+{
+  "$apiVersion": "1",
+  "data": [
+    {
+      "description": "Half-year roadmap",
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "lead": {
+        "email": "lead@example.com",
+      },
+      "name": "Roadmap Q1",
+      "progress": 0.5,
+      "state": "started",
+      "targetDate": "2026-12-31",
+      "updatedAt": "2026-01-02T00:00:00Z",
+    },
+  ],
+  "meta": {
+    "command": "project list",
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
