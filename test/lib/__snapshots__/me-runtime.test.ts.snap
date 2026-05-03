@@ -1,0 +1,103 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`me / whoami runtime sharing > Test 19: runMe and runWhoami emit identical envelopes except for meta.command > me-success-shared-runtime 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "organization": {
+      "id": "org-acme",
+      "name": "Acme",
+      "urlKey": "acme",
+    },
+    "user": {
+      "active": true,
+      "admin": false,
+      "avatarUrl": null,
+      "displayName": "alice",
+      "email": "alice@acme.com",
+      "id": "user-uuid-1",
+      "isMe": true,
+      "name": "Alice",
+    },
+  },
+  "meta": {
+    "command": "me",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
+
+exports[`me / whoami runtime sharing > Test 19: runMe and runWhoami emit identical envelopes except for meta.command > whoami-success-shared-runtime 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "organization": {
+      "id": "org-acme",
+      "name": "Acme",
+      "urlKey": "acme",
+    },
+    "user": {
+      "active": true,
+      "admin": false,
+      "avatarUrl": null,
+      "displayName": "alice",
+      "email": "alice@acme.com",
+      "id": "user-uuid-1",
+      "isMe": true,
+      "name": "Alice",
+    },
+  },
+  "meta": {
+    "command": "whoami",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
+
+exports[`meRuntime -- AUTH_INVALID > Test 16: AuthenticationLinearError -> AUTH_INVALID > failure-AUTH_INVALID 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "AUTH_INVALID",
+    "message": "token rejected by Linear",
+    "transient": false,
+  },
+  "meta": {
+    "command": "me",
+  },
+  "ok": false,
+}
+`;
+
+exports[`meRuntime -- happy path > Test 15: viewer + organization both fetched and projected > me-success-defaults 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "organization": {
+      "id": "org-acme",
+      "name": "Acme",
+      "urlKey": "acme",
+    },
+    "user": {
+      "active": true,
+      "admin": false,
+      "avatarUrl": null,
+      "displayName": "alice",
+      "email": "alice@acme.com",
+      "id": "user-uuid-1",
+      "isMe": true,
+      "name": "Alice",
+    },
+  },
+  "meta": {
+    "command": "me",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;

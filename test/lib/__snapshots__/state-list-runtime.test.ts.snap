@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`stateListRuntime -- no filter > Test 11: no --team -> client.workflowStates({ first: 25 }) (no filter) > list-success-no-filter 1`] = `
+{
+  "$apiVersion": "1",
+  "data": [
+    {
+      "color": "#aaa",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "description": "",
+      "id": "state-uuid-1",
+      "name": "Todo",
+      "position": 1,
+      "team": {
+        "key": "ENG",
+      },
+      "type": "unstarted",
+    },
+  ],
+  "meta": {
+    "command": "state list",
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;

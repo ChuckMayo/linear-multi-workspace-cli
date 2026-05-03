@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`teamGetRuntime -- UUID input > Test 5: UUID -> client.team(uuid) directly (no filter lookup) > get-success-uuid 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "color": "#000",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "cycleEnabled": true,
+    "description": "eng team",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "key": "ENG",
+    "name": "Engineering",
+    "private": false,
+  },
+  "meta": {
+    "command": "team get",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
+
+exports[`teamGetRuntime -- not found > Test 8: empty filter result -> TEAM_NOT_FOUND with details.ref > failure-TEAM_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "TEAM_NOT_FOUND",
+    "details": {
+      "ref": "Engineering",
+    },
+    "message": "team not found: Engineering",
+    "transient": false,
+  },
+  "meta": {
+    "command": "team get",
+  },
+  "ok": false,
+}
+`;

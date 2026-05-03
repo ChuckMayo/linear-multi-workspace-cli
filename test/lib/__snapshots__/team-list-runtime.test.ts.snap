@@ -1,0 +1,41 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`teamListRuntime -- default pagination > Test 1: default pagination -> client.teams({ first: 25 }) and projects per defaults preset > list-success-defaults 1`] = `
+{
+  "$apiVersion": "1",
+  "data": [
+    {
+      "color": "#000",
+      "createdAt": "2026-01-01T00:00:00Z",
+      "cycleEnabled": true,
+      "description": "eng team",
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "key": "ENG",
+      "name": "Engineering",
+      "private": false,
+    },
+    {
+      "color": "#fff",
+      "createdAt": "2026-01-02T00:00:00Z",
+      "cycleEnabled": false,
+      "description": null,
+      "id": "bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+      "key": "DSGN",
+      "name": "Design",
+      "private": true,
+    },
+  ],
+  "meta": {
+    "command": "team list",
+    "pageInfo": {
+      "endCursor": "cursor-end",
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": "cursor-start",
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
