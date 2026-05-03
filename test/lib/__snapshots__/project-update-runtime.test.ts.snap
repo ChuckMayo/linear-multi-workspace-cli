@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectUpdateRuntime -- UUID input > Test 9: UUID + --name -> updateProject(uuid, { name }); resolveProjectId NOT called > update-success-uuid-name-only 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "description": "",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "lead": {
+      "email": null,
+    },
+    "name": "New",
+    "progress": 0,
+    "state": "started",
+    "targetDate": null,
+    "updatedAt": "2026-01-02T00:00:00Z",
+  },
+  "meta": {
+    "command": "project update",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
+
+exports[`projectUpdateRuntime -- VALIDATION_NO_FIELDS > Test 11: no field flags -> VALIDATION_NO_FIELDS exit 2 BEFORE any SDK call > failure-VALIDATION_NO_FIELDS 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "VALIDATION_NO_FIELDS",
+    "message": "no fields to update -- pass at least one of --name, --description, --state, --lead, --start-date, --target-date",
+    "transient": false,
+  },
+  "meta": {
+    "command": "project update",
+  },
+  "ok": false,
+}
+`;

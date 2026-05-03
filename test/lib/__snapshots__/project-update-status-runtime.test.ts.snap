@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectUpdateStatusRuntime -- WSP-06 > Test 18: no explicit workspace + active default -> WORKSPACE_REQUIRED_FOR_WRITE BEFORE any SDK call > failure-WSP-06-write-guard 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "project update-status",
+  },
+  "ok": false,
+}
+`;
+
+exports[`projectUpdateStatusRuntime -- happy path > Test 14: name + status name -> resolveProjectId + resolveProjectStatusId -> updateProject({ statusId }) > update-status-success 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "description": "",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "lead": {
+      "email": null,
+    },
+    "name": "Roadmap Q1",
+    "progress": 0,
+    "state": "started",
+    "targetDate": null,
+    "updatedAt": "2026-01-02T00:00:00Z",
+  },
+  "meta": {
+    "command": "project update-status",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;

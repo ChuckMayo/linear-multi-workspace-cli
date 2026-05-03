@@ -1,0 +1,45 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectCreateRuntime -- WSP-06 enforcement > Test 6: no explicit workspace + active default -> WORKSPACE_REQUIRED_FOR_WRITE BEFORE any SDK call > failure-WSP-06-write-guard 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "project create",
+  },
+  "ok": false,
+}
+`;
+
+exports[`projectCreateRuntime -- minimum + multi-team > Test 1: name + teams "ENG,DESIGN" -> resolveTeamId for each -> createProject teamIds > create-success-multi-team 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "description": "",
+    "id": "dddddddd-eeee-ffff-0000-111122223333",
+    "lead": {
+      "email": null,
+    },
+    "name": "Roadmap",
+    "progress": 0,
+    "state": "planned",
+    "targetDate": null,
+    "updatedAt": "2026-01-02T00:00:00Z",
+  },
+  "meta": {
+    "command": "project create",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
