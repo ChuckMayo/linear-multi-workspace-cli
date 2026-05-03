@@ -477,3 +477,96 @@ describe('issueSearchRuntime — --include-archived passthrough', () => {
     expect(handle.lastVars.current?.includeArchived).toBe(true)
   })
 })
+
+describe('issueSearchRuntime — no-N+1 guarantee on --fields=ids (CR-01 regression)', () => {
+  it('Test 13: --fields=ids does NOT touch state / assignee / team / project / cycle / parent relation getters', async () => {
+    const stateAccess = { count: 0 }
+    const assigneeAccess = { count: 0 }
+    const teamAccess = { count: 0 }
+    const projectAccess = { count: 0 }
+    const cycleAccess = { count: 0 }
+    const parentAccess = { count: 0 }
+    const result: Record<string, unknown> = {
+      id: 'u1',
+      identifier: 'ENG-1',
+      title: 'no relations needed',
+      priority: 0,
+      updatedAt: '2026-01-01T00:00:00Z',
+      // Snippet metadata is dropped from projection input by the runtime
+      // post-fix; include it so we also assert the projection drops it.
+      metadata: { snippet: 'should not appear in --fields=ids data' },
+    }
+    Object.defineProperty(result, 'state', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        stateAccess.count++
+        return Promise.resolve({ name: 'NEVER' })
+      },
+    })
+    Object.defineProperty(result, 'assignee', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        assigneeAccess.count++
+        return Promise.resolve({ email: 'never-read@example.com' })
+      },
+    })
+    Object.defineProperty(result, 'team', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        teamAccess.count++
+        return Promise.resolve({ key: 'NEV' })
+      },
+    })
+    Object.defineProperty(result, 'project', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        projectAccess.count++
+        return Promise.resolve({ name: 'never' })
+      },
+    })
+    Object.defineProperty(result, 'cycle', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        cycleAccess.count++
+        return Promise.resolve({ id: 'never' })
+      },
+    })
+    Object.defineProperty(result, 'parent', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        parentAccess.count++
+        return Promise.resolve(undefined)
+      },
+    })
+
+    const handle = makeMockClient({
+      searchIssues: async () => ({
+        totalCount: 1,
+        nodes: [result as unknown as SearchResultNode],
+        pageInfo: { hasNextPage: false, endCursor: null },
+      }),
+    })
+
+    const out = await issueSearchRuntime({
+      args: { query: 'q' },
+      flags: { workspace: 'acme', fields: 'ids' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    expect(stateAccess.count).toBe(0)
+    expect(assigneeAccess.count).toBe(0)
+    expect(teamAccess.count).toBe(0)
+    expect(projectAccess.count).toBe(0)
+    expect(cycleAccess.count).toBe(0)
+    expect(parentAccess.count).toBe(0)
+    expect(out.data).toEqual([{ id: 'u1', identifier: 'ENG-1' }])
+  })
+})

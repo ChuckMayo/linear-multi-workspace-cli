@@ -291,3 +291,62 @@ describe('CommentUpdate oclif command', () => {
     expect(typeof runCommentUpdate).toBe('function')
   })
 })
+
+describe('commentUpdateRuntime -- no-N+1 guarantee on --fields=ids (CR-01 regression)', () => {
+  it('Test 7: --fields=ids does NOT touch the user / issue / parent relation getters on the updated comment', async () => {
+    const userAccess = { count: 0 }
+    const issueAccess = { count: 0 }
+    const parentAccess = { count: 0 }
+    const updated: Record<string, unknown> = {
+      id: COMMENT_UUID,
+      body: 'edited',
+      createdAt: '2026-01-02T00:00:00Z',
+      updatedAt: '2026-01-02T00:00:01Z',
+    }
+    Object.defineProperty(updated, 'user', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        userAccess.count++
+        return Promise.resolve({ email: 'never-read@example.com' })
+      },
+    })
+    Object.defineProperty(updated, 'issue', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        issueAccess.count++
+        return Promise.resolve({ identifier: 'NEVER-1' })
+      },
+    })
+    Object.defineProperty(updated, 'parent', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        parentAccess.count++
+        return Promise.resolve(undefined)
+      },
+    })
+
+    const handle = makeMockClient({
+      updateComment: async () => ({
+        success: true,
+        lastSyncId: 100,
+        comment: Promise.resolve(updated),
+      }),
+    })
+
+    const out = await commentUpdateRuntime({
+      args: { id: COMMENT_UUID },
+      flags: { workspace: 'acme', body: 'edited', fields: 'ids' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    expect(userAccess.count).toBe(0)
+    expect(issueAccess.count).toBe(0)
+    expect(parentAccess.count).toBe(0)
+    expect(out.data).toEqual({ id: COMMENT_UUID })
+  })
+})

@@ -403,3 +403,63 @@ describe('CommentList oclif command', () => {
     expect(typeof runCommentList).toBe('function')
   })
 })
+
+describe('commentListRuntime -- no-N+1 guarantee on --fields=ids (CR-01 regression)', () => {
+  it('Test 10: --fields=ids does NOT touch the user / issue / parent relation getters', async () => {
+    // Spy counters mirror the issue-get-runtime Test 7b pattern: define
+    // each relation as an enumerable getter so a spread enumeration would
+    // fire it. The runtime MUST avoid that path on --fields=ids.
+    const userAccess = { count: 0 }
+    const issueAccess = { count: 0 }
+    const parentAccess = { count: 0 }
+    const node: Record<string, unknown> = {
+      id: COMMENT_UUID_1,
+      body: 'no relations needed',
+      createdAt: '2026-01-02T00:00:00Z',
+      updatedAt: '2026-01-02T00:00:00Z',
+    }
+    Object.defineProperty(node, 'user', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        userAccess.count++
+        return Promise.resolve({ email: 'never-read@example.com' })
+      },
+    })
+    Object.defineProperty(node, 'issue', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        issueAccess.count++
+        return Promise.resolve({ identifier: 'NEVER-1' })
+      },
+    })
+    Object.defineProperty(node, 'parent', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        parentAccess.count++
+        return Promise.resolve(undefined)
+      },
+    })
+
+    const handle = makeMockClient({
+      comments: async () => ({
+        nodes: [node],
+        pageInfo: { hasNextPage: false, endCursor: null },
+      }),
+    })
+
+    const out = await commentListRuntime({
+      flags: { workspace: 'acme', fields: 'ids' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    expect(userAccess.count).toBe(0)
+    expect(issueAccess.count).toBe(0)
+    expect(parentAccess.count).toBe(0)
+    expect((out.data as Array<Record<string, unknown>>)[0]).toEqual({ id: COMMENT_UUID_1 })
+  })
+})

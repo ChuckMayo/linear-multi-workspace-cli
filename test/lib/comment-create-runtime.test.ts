@@ -353,3 +353,62 @@ describe('CommentCreate oclif command', () => {
     expect(typeof runCommentCreate).toBe('function')
   })
 })
+
+describe('commentCreateRuntime -- no-N+1 guarantee on --fields=ids (CR-01 regression)', () => {
+  it('Test 9: --fields=ids does NOT touch the user / issue / parent relation getters on the created comment', async () => {
+    const userAccess = { count: 0 }
+    const issueAccess = { count: 0 }
+    const parentAccess = { count: 0 }
+    const created: Record<string, unknown> = {
+      id: COMMENT_UUID,
+      body: 'no relations needed',
+      createdAt: '2026-01-02T00:00:00Z',
+      updatedAt: '2026-01-02T00:00:00Z',
+    }
+    Object.defineProperty(created, 'user', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        userAccess.count++
+        return Promise.resolve({ email: 'never-read@example.com' })
+      },
+    })
+    Object.defineProperty(created, 'issue', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        issueAccess.count++
+        return Promise.resolve({ identifier: 'NEVER-1' })
+      },
+    })
+    Object.defineProperty(created, 'parent', {
+      enumerable: true,
+      configurable: true,
+      get() {
+        parentAccess.count++
+        return Promise.resolve(undefined)
+      },
+    })
+
+    const handle = makeMockClient({
+      createComment: async () => ({
+        success: true,
+        lastSyncId: 100,
+        comment: Promise.resolve(created),
+      }),
+    })
+
+    const out = await commentCreateRuntime({
+      args: {},
+      flags: { workspace: 'acme', issue: 'ENG-1', body: 'hi', fields: 'ids' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    expect(userAccess.count).toBe(0)
+    expect(issueAccess.count).toBe(0)
+    expect(parentAccess.count).toBe(0)
+    expect(out.data).toEqual({ id: COMMENT_UUID })
+  })
+})
