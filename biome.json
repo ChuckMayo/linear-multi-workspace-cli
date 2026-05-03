@@ -12,6 +12,7 @@
       "codegen/**",
       "bin/**",
       "!src/generated",
+      "!src/operations",
       "!dist",
       "!node_modules",
       "!**/*.graphql"
