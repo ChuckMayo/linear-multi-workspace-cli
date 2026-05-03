@@ -115,16 +115,6 @@ export async function commentUpdateRuntime(
   return withFetchInterception(async () => {
     const updateInput: Record<string, unknown> = { body: input.flags.body }
 
-    // Defense-in-depth: even though body !== undefined was just checked,
-    // guard against a future flag whose resolution path could yield an
-    // empty input object.
-    if (Object.keys(updateInput).length === 0) {
-      throw new LinearAgentError({
-        code: 'VALIDATION_NO_FIELDS',
-        message: NO_FIELDS_MESSAGE,
-      })
-    }
-
     const payload = (await withRateLimitRetry(
       () =>
         client.updateComment(
