@@ -1,0 +1,49 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cycleMoveRuntime -- WSP-06 > Test 5: no explicit workspace + active default -> WORKSPACE_REQUIRED_FOR_WRITE BEFORE any SDK call > failure-WSP-06-write-guard 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "cycle move",
+  },
+  "ok": false,
+}
+`;
+
+exports[`cycleMoveRuntime -- happy path > Test 1: ENG-1 + --to next -> resolveIssue (filter) + resolveCycleId(next) + updateIssue > move-success 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "assignee": {
+      "email": "a@example.com",
+    },
+    "id": "11111111-2222-3333-4444-555555555555",
+    "identifier": "ENG-1",
+    "priority": 0,
+    "state": {
+      "name": "In Progress",
+    },
+    "team": {
+      "key": "ENG",
+    },
+    "title": "Test issue",
+    "updatedAt": "2026-04-02T00:00:00Z",
+  },
+  "meta": {
+    "command": "cycle move",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
