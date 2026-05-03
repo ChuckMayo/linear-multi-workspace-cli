@@ -123,11 +123,33 @@ describe('ERROR_CODES tuple', () => {
       'NETWORK_ERROR',
       'USAGE_ERROR',
       'GENERIC_ERROR',
+      // Phase 2 PLAN 02-01 additions
+      'VALIDATION_NO_FIELDS',
+      'WORKFLOW_TEAM_REQUIRED',
+      'CONFIRMATION_REQUIRED',
+      'WORKFLOW_STATE_NOT_FOUND',
+      'ISSUE_NOT_FOUND',
+      'LABEL_NOT_FOUND',
+      'TEAM_NOT_FOUND',
+      'PROJECT_NOT_FOUND',
+      'CYCLE_NOT_FOUND',
     ] as const
     for (const c of expected) {
       expect(ERROR_CODES).toContain(c)
     }
     expect(ERROR_CODES.length).toBe(expected.length)
+  })
+
+  it('Phase 2 Test 1 (RED): tuple includes 9 new Phase 2 literals', () => {
+    expect(ERROR_CODES).toContain('VALIDATION_NO_FIELDS')
+    expect(ERROR_CODES).toContain('WORKFLOW_STATE_NOT_FOUND')
+    expect(ERROR_CODES).toContain('ISSUE_NOT_FOUND')
+    expect(ERROR_CODES).toContain('LABEL_NOT_FOUND')
+    expect(ERROR_CODES).toContain('TEAM_NOT_FOUND')
+    expect(ERROR_CODES).toContain('PROJECT_NOT_FOUND')
+    expect(ERROR_CODES).toContain('CYCLE_NOT_FOUND')
+    expect(ERROR_CODES).toContain('WORKFLOW_TEAM_REQUIRED')
+    expect(ERROR_CODES).toContain('CONFIRMATION_REQUIRED')
   })
 
   it('the ErrorCode type is the element-union of ERROR_CODES', () => {
@@ -175,6 +197,29 @@ describe('exitCodeFor', () => {
     }
     expect(ones).toBe(1)
     expect(exitCodeFor('GENERIC_ERROR')).toBe(1)
+  })
+
+  // ─── Phase 2 PLAN 02-01 Tests 2-7 ────────────────────────────────────
+  it('Phase 2 Test 2: VALIDATION_NO_FIELDS maps to USAGE (exit 2)', () => {
+    expect(exitCodeFor('VALIDATION_NO_FIELDS')).toBe(2)
+  })
+  it('Phase 2 Test 3: WORKFLOW_TEAM_REQUIRED maps to USAGE (exit 2)', () => {
+    expect(exitCodeFor('WORKFLOW_TEAM_REQUIRED')).toBe(2)
+  })
+  it('Phase 2 Test 4: CONFIRMATION_REQUIRED maps to USAGE (exit 2)', () => {
+    expect(exitCodeFor('CONFIRMATION_REQUIRED')).toBe(2)
+  })
+  it('Phase 2 Test 5: WORKFLOW_STATE_NOT_FOUND maps to LINEAR_API (exit 13)', () => {
+    expect(exitCodeFor('WORKFLOW_STATE_NOT_FOUND')).toBe(13)
+  })
+  it('Phase 2 Test 6: ISSUE_NOT_FOUND maps to LINEAR_API (exit 13)', () => {
+    expect(exitCodeFor('ISSUE_NOT_FOUND')).toBe(13)
+  })
+  it('Phase 2 Test 7: LABEL/TEAM/PROJECT/CYCLE_NOT_FOUND all map to exit 13', () => {
+    expect(exitCodeFor('LABEL_NOT_FOUND')).toBe(13)
+    expect(exitCodeFor('TEAM_NOT_FOUND')).toBe(13)
+    expect(exitCodeFor('PROJECT_NOT_FOUND')).toBe(13)
+    expect(exitCodeFor('CYCLE_NOT_FOUND')).toBe(13)
   })
 })
 

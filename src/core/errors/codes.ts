@@ -39,6 +39,18 @@ export const ERROR_CODES = [
   'USAGE_ERROR',
   // Generic catch-all — exit 1
   'GENERIC_ERROR',
+  // ─── Phase 2 PLAN 02-01 additions ──────────────────────────────────────
+  // Validation / usage family — exit 2 (joins USAGE_ERROR)
+  'VALIDATION_NO_FIELDS',
+  'WORKFLOW_TEAM_REQUIRED',
+  'CONFIRMATION_REQUIRED',
+  // Linear API family — exit 13 (joins LINEAR_API_ERROR)
+  'WORKFLOW_STATE_NOT_FOUND',
+  'ISSUE_NOT_FOUND',
+  'LABEL_NOT_FOUND',
+  'TEAM_NOT_FOUND',
+  'PROJECT_NOT_FOUND',
+  'CYCLE_NOT_FOUND',
 ] as const
 
 export type ErrorCode = (typeof ERROR_CODES)[number]

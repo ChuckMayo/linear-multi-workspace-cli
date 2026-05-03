@@ -49,7 +49,20 @@ export function exitCodeFor(code: ErrorCode): number {
     case 'NETWORK_ERROR':
       return EXIT_CODES.NETWORK
     case 'USAGE_ERROR':
+    // Phase 2 PLAN 02-01: validation/usage codes share exit 2 with USAGE_ERROR.
+    // The taxonomy reuses existing exit numbers — no new codes.
+    case 'VALIDATION_NO_FIELDS':
+    case 'WORKFLOW_TEAM_REQUIRED':
+    case 'CONFIRMATION_REQUIRED':
       return EXIT_CODES.USAGE
+    // Phase 2 PLAN 02-01: entity-not-found codes share exit 13 with LINEAR_API_ERROR.
+    case 'WORKFLOW_STATE_NOT_FOUND':
+    case 'ISSUE_NOT_FOUND':
+    case 'LABEL_NOT_FOUND':
+    case 'TEAM_NOT_FOUND':
+    case 'PROJECT_NOT_FOUND':
+    case 'CYCLE_NOT_FOUND':
+      return EXIT_CODES.LINEAR_API
     case 'GENERIC_ERROR':
       return EXIT_CODES.GENERIC
     default: {
