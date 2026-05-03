@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`commentListRuntime -- ISSUE_NOT_FOUND > Test 8: --issue ENG-99 with no matching node -> ISSUE_NOT_FOUND > failure-ISSUE_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "ISSUE_NOT_FOUND",
+    "details": {
+      "ref": "ENG-99",
+    },
+    "message": "issue not found: ENG-99",
+    "transient": false,
+  },
+  "meta": {
+    "command": "comment list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`commentListRuntime -- workspace-wide > Test 1: no --issue -> client.comments({ first: 25 }) with no filter > list-success-workspace-wide 1`] = `
+{
+  "$apiVersion": "1",
+  "data": [
+    {
+      "body": "looks good",
+      "createdAt": "2026-01-02T00:00:00Z",
+      "id": "bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+      "issue": {
+        "identifier": "ENG-1",
+      },
+      "parent": {
+        "id": null,
+      },
+      "updatedAt": "2026-01-02T00:00:00Z",
+      "user": {
+        "email": "alice@example.com",
+        "name": "Alice",
+      },
+    },
+  ],
+  "meta": {
+    "command": "comment list",
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
