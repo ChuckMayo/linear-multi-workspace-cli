@@ -143,9 +143,29 @@ export async function issueSearchRuntime(input: IssueSearchInput): Promise<Issue
     const projected = await Promise.all(
       payload.nodes.map(async (result) => {
         // Copy snippet from metadata to a top-level field BEFORE projection
-        // so `--fields=snippet` resolves. The metadata object is read once
-        // and never deeply walked -- we only surface metadata.snippet.
-        const issue: Record<string, unknown> = { ...result }
+        // so `--fields=snippet` resolves. We do NOT spread `result` -- that
+        // enumerates every enumerable property including the lazy SDK
+        // relation getters (state, assignee, team, project, cycle, parent),
+        // which would fire N network calls per hit on `--fields=ids`. We
+        // also drop `metadata` from the projection input so it does not
+        // leak through `--fields=full` as a duplicate of the top-level
+        // `snippet`.
+        //
+        // Relation keys are preserved as property descriptors (still lazy)
+        // so `hydrateForProjection` can decide whether to read each one
+        // based on the projection spec.
+        const issue: Record<string, unknown> = {}
+        for (const k of Object.keys(result)) {
+          if (k === 'metadata') continue
+          if (RELATION_KEYS.has(k)) {
+            const desc = Object.getOwnPropertyDescriptor(result, k)
+            if (desc) {
+              Object.defineProperty(issue, k, desc)
+            }
+            continue
+          }
+          issue[k] = (result as Record<string, unknown>)[k]
+        }
         if (!noSnippet) {
           const md = (result as { metadata?: unknown }).metadata
           if (md && typeof md === 'object') {
@@ -190,27 +210,28 @@ async function hydrateForProjection(
   spec: ProjectionSpec,
 ): Promise<Record<string, unknown>> {
   const needs = neededRelations(spec)
-  const hydrated: Record<string, unknown> = { ...issue }
-
-  if (needs.has('state') && hydrated.state !== undefined) {
-    hydrated.state = await resolveLazy(hydrated.state)
+  if (needs.size === 0) {
+    // No relations needed -- copy non-relation keys only so we don't
+    // accidentally trigger a relation getter via spread enumeration on
+    // `--fields=ids`.
+    const out: Record<string, unknown> = {}
+    for (const k of Object.keys(issue)) {
+      if (!RELATION_KEYS.has(k)) out[k] = issue[k]
+    }
+    return out
   }
-  if (needs.has('assignee') && hydrated.assignee !== undefined) {
-    hydrated.assignee = await resolveLazy(hydrated.assignee)
+  const hydrated: Record<string, unknown> = {}
+  for (const k of Object.keys(issue)) {
+    if (RELATION_KEYS.has(k)) {
+      if (needs.has(k)) {
+        const value = issue[k]
+        hydrated[k] = await resolveLazy(value)
+      }
+      // else: skip -- don't read the lazy getter at all
+    } else {
+      hydrated[k] = issue[k]
+    }
   }
-  if (needs.has('team') && hydrated.team !== undefined) {
-    hydrated.team = await resolveLazy(hydrated.team)
-  }
-  if (needs.has('project') && hydrated.project !== undefined) {
-    hydrated.project = await resolveLazy(hydrated.project)
-  }
-  if (needs.has('cycle') && hydrated.cycle !== undefined) {
-    hydrated.cycle = await resolveLazy(hydrated.cycle)
-  }
-  if (needs.has('parent') && hydrated.parent !== undefined) {
-    hydrated.parent = await resolveLazy(hydrated.parent)
-  }
-
   return hydrated
 }
 
