@@ -76,26 +76,30 @@ interface SdkOrganization {
 }
 
 export async function meRuntime(input: MeInput): Promise<MeOutput> {
+  // Match the rest of the Phase 2 fleet: load config / resolve workspace /
+  // parseFields / build client BEFORE opening the fetch-interception ALS
+  // frame. Plain bug surfaces (WORKSPACE_NOT_RESOLVED, INVALID_FIELD) no
+  // longer pay for an unnecessary frame open/close pair.
+  const config = (input.loadConfigOverride ?? loadConfig)()
+
+  const envForResolver: { LINEAR_WORKSPACE?: string; LINEAR_API_KEY?: string } = {}
+  if (input.env.LINEAR_WORKSPACE !== undefined) {
+    envForResolver.LINEAR_WORKSPACE = input.env.LINEAR_WORKSPACE
+  }
+  if (input.env.LINEAR_API_KEY !== undefined) {
+    envForResolver.LINEAR_API_KEY = input.env.LINEAR_API_KEY
+  }
+  const resolveFlags = input.flags.workspace ? { workspace: input.flags.workspace } : {}
+  const resolved = resolveWorkspace({
+    flags: resolveFlags,
+    env: envForResolver,
+    config,
+  })
+
+  const fields = parseFields(input.flags.fields ?? 'defaults', 'user')
+  const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
+
   return withFetchInterception(async () => {
-    const config = (input.loadConfigOverride ?? loadConfig)()
-
-    const envForResolver: { LINEAR_WORKSPACE?: string; LINEAR_API_KEY?: string } = {}
-    if (input.env.LINEAR_WORKSPACE !== undefined) {
-      envForResolver.LINEAR_WORKSPACE = input.env.LINEAR_WORKSPACE
-    }
-    if (input.env.LINEAR_API_KEY !== undefined) {
-      envForResolver.LINEAR_API_KEY = input.env.LINEAR_API_KEY
-    }
-    const resolveFlags = input.flags.workspace ? { workspace: input.flags.workspace } : {}
-    const resolved = resolveWorkspace({
-      flags: resolveFlags,
-      env: envForResolver,
-      config,
-    })
-
-    const fields = parseFields(input.flags.fields ?? 'defaults', 'user')
-    const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
-
     // RESEARCH § Pitfall 6: BOTH viewer and viewer.organization are lazy
     // promise getters that fire network calls; MUST be inside withRateLimitRetry.
     const user = (await withRateLimitRetry(
