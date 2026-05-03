@@ -1,0 +1,44 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`commentUpdateRuntime -- VALIDATION_NO_FIELDS > Test 2: no --body -> VALIDATION_NO_FIELDS exit 2 BEFORE any SDK call > failure-VALIDATION_NO_FIELDS 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "VALIDATION_NO_FIELDS",
+    "message": "no fields to update -- pass --body",
+    "transient": false,
+  },
+  "meta": {
+    "command": "comment update",
+  },
+  "ok": false,
+}
+`;
+
+exports[`commentUpdateRuntime -- success > Test 1: --body "edited" -> updateComment(<uuid>, { body: "edited" }) > update-success-body 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "body": "edited",
+    "createdAt": "2026-01-02T00:00:00Z",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "issue": {
+      "identifier": "ENG-1",
+    },
+    "parent": {
+      "id": null,
+    },
+    "updatedAt": "2026-01-02T00:00:01Z",
+    "user": {
+      "email": "me@example.com",
+      "name": "Me",
+    },
+  },
+  "meta": {
+    "command": "comment update",
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+  "ok": true,
+}
+`;
