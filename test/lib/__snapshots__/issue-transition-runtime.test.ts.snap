@@ -1,0 +1,69 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issueTransitionRuntime — WSP-06 enforcement > Test 2: without explicit workspace, throws WORKSPACE_REQUIRED_FOR_WRITE BEFORE any SDK call > failure-WSP-06-write-guard 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue transition",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueTransitionRuntime — failure envelopes > Test 4: unknown state name surfaces WORKFLOW_STATE_NOT_FOUND with details.available > failure-WORKFLOW_STATE_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKFLOW_STATE_NOT_FOUND",
+    "details": {
+      "available": [
+        "done",
+        "todo",
+      ],
+      "requested": "BogusState",
+      "teamId": "bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+    },
+    "message": "workflow state not found: BogusState",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue transition",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueTransitionRuntime — happy path > Test 1: ENG-123 + state name "In Progress" → resolves identifier, fetches team, resolves state, updates issue > transition-success-identifier-name 1`] = `
+{
+  "data": {
+    "assignee": {
+      "email": "alice@example.com",
+    },
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "identifier": "ENG-123",
+    "priority": 0,
+    "state": {
+      "name": "In Progress",
+    },
+    "team": {
+      "key": "ENG",
+    },
+    "title": "updated",
+    "updatedAt": "2026-01-02T00:00:00Z",
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
