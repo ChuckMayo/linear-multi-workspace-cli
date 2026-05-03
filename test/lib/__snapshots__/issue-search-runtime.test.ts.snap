@@ -1,0 +1,47 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issueSearchRuntime — snippet projection > Test 6: default projection adds \`snippet\` from result.metadata.snippet > search-success-with-snippet 1`] = `
+{
+  "data": [
+    {
+      "id": "u1",
+      "identifier": "ENG-1",
+      "snippet": "matched **here**",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": "cursor-1",
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "totalCount": 1,
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
+exports[`issueSearchRuntime — snippet projection > Test 7: --no-snippet drops the snippet field from data > search-success-no-snippet 1`] = `
+{
+  "data": [
+    {
+      "id": "u1",
+      "identifier": "ENG-1",
+      "snippet": null,
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": "cursor-1",
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "totalCount": 1,
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
