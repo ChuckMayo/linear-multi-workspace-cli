@@ -92,6 +92,15 @@ function resolveOpts(opts?: RetryOpts): ResolvedRetryOpts {
  */
 export async function withRateLimitRetry<T>(call: () => Promise<T>, opts?: RetryOpts): Promise<T> {
   const o = resolveOpts(opts)
+  // Guard: maxAttempts < 1 would skip the loop entirely and surface a
+  // synthetic LINEAR_API_ERROR (`classifySdkError(undefined)`). Fail loud
+  // on the misconfiguration instead -- callers always intend at least one
+  // attempt.
+  if (o.maxAttempts < 1) {
+    throw LinearAgentError.usage(
+      `withRateLimitRetry: maxAttempts must be >= 1 (got ${o.maxAttempts})`,
+    )
+  }
   let attempt = 0
   let lastErr: unknown
   while (attempt < o.maxAttempts) {
@@ -103,7 +112,13 @@ export async function withRateLimitRetry<T>(call: () => Promise<T>, opts?: Retry
         if (attempt === o.maxAttempts - 1) break
         const base = o.rateLimitBaseMs * 2 ** attempt
         const hint = err.retryAfter !== undefined ? err.retryAfter * 1000 : undefined
-        const sleepMs = hint !== undefined ? Math.min(hint, base * 4) : base + o.random() * base
+        // Floor `hint` at `base` so a malformed `retry-after: 0` header
+        // (or a misbehaving proxy / fixture) cannot collapse the delay to
+        // 0ms and cause a tight retry loop.
+        const sleepMs =
+          hint !== undefined
+            ? Math.max(Math.min(hint, base * 4), base)
+            : base + o.random() * base
         await o.sleep(sleepMs)
         attempt++
         continue
