@@ -116,9 +116,7 @@ export async function withRateLimitRetry<T>(call: () => Promise<T>, opts?: Retry
         // (or a misbehaving proxy / fixture) cannot collapse the delay to
         // 0ms and cause a tight retry loop.
         const sleepMs =
-          hint !== undefined
-            ? Math.max(Math.min(hint, base * 4), base)
-            : base + o.random() * base
+          hint !== undefined ? Math.max(Math.min(hint, base * 4), base) : base + o.random() * base
         await o.sleep(sleepMs)
         attempt++
         continue
