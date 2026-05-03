@@ -162,11 +162,18 @@ async function resolveIssueRef(
   }
   const teamKey = (m[1] as string).toUpperCase()
   const number = Number(m[2])
+  // includeArchived:true -- purge MUST resolve archived/trashed issues.
+  // Linear marks trashed issues as archived, and the `issues` connection
+  // filters those out by default. Without this, an archive→trash→purge
+  // chain on the same identifier maps to ISSUE_NOT_FOUND on the purge
+  // step. Purge is the terminal lifecycle action -- it operates exclusively
+  // on issues that are already archived/trashed.
   const conn = (await withRateLimitRetry(
     () =>
       client.issues({
         filter: { team: { key: { eq: teamKey } }, number: { eq: number } },
         first: 1,
+        includeArchived: true,
       } as unknown as Parameters<LinearClient['issues']>[0]),
     retryOpts,
   )) as unknown as SdkIssueConnection

@@ -144,11 +144,17 @@ async function resolveIssueRef(
   }
   const teamKey = (m[1] as string).toUpperCase()
   const number = Number(m[2])
+  // includeArchived:true -- trash MUST resolve archived issues. `issue archive`
+  // flips the archived flag, and Linear's `issues` connection filters those
+  // out by default. Without this, an archive→trash chain on the same
+  // identifier maps to ISSUE_NOT_FOUND. Trashing an archived issue is a
+  // valid Linear operation (trash is a strict superset of archive).
   const conn = (await withRateLimitRetry(
     () =>
       client.issues({
         filter: { team: { key: { eq: teamKey } }, number: { eq: number } },
         first: 1,
+        includeArchived: true,
       } as unknown as Parameters<LinearClient['issues']>[0]),
     retryOpts,
   )) as unknown as SdkIssueConnection

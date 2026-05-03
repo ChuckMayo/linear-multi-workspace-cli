@@ -19,21 +19,6 @@ exports[`issueListRuntime — failure envelopes (KRN-09) > Test 9: WORKSPACE_NOT
 }
 `;
 
-exports[`issueListRuntime — failure envelopes (KRN-09) > Test 10: AUTH_INVALID (exit 11) — SDK throws 401-shaped error > failure-AUTH_INVALID 1`] = `
-{
-  "$apiVersion": "1",
-  "error": {
-    "code": "AUTH_INVALID",
-    "message": "token rejected by Linear",
-    "transient": false,
-  },
-  "meta": {
-    "command": "issue list",
-  },
-  "ok": false,
-}
-`;
-
 exports[`issueListRuntime — failure envelopes (KRN-09) > Test 10: AUTH_INVALID (exit 11) — SDK throws AuthenticationLinearError > failure-AUTH_INVALID 1`] = `
 {
   "$apiVersion": "1",
@@ -50,24 +35,6 @@ exports[`issueListRuntime — failure envelopes (KRN-09) > Test 10: AUTH_INVALID
 `;
 
 exports[`issueListRuntime — failure envelopes (KRN-09) > Test 11a: VALIDATION_FAILED via SDK input validation (InvalidInputLinearError) > failure-VALIDATION_FAILED-sdk 1`] = `
-{
-  "$apiVersion": "1",
-  "error": {
-    "code": "VALIDATION_FAILED",
-    "details": {
-      "cause": "Argument value is not valid: filter.state.name",
-    },
-    "message": "Linear rejected the request payload",
-    "transient": false,
-  },
-  "meta": {
-    "command": "issue list",
-  },
-  "ok": false,
-}
-`;
-
-exports[`issueListRuntime — failure envelopes (KRN-09) > Test 11a: VALIDATION_FAILED via SDK input validation > failure-VALIDATION_FAILED-sdk 1`] = `
 {
   "$apiVersion": "1",
   "error": {
@@ -103,40 +70,6 @@ exports[`issueListRuntime — failure envelopes (KRN-09) > Test 12: LINEAR_API_E
 }
 `;
 
-exports[`issueListRuntime — failure envelopes (KRN-09) > Test 12: LINEAR_API_ERROR (exit 13) — generic SDK failure > failure-LINEAR_API_ERROR 1`] = `
-{
-  "$apiVersion": "1",
-  "error": {
-    "code": "LINEAR_API_ERROR",
-    "details": {
-      "cause": "GraphQL Error: Unexpected internal server error",
-    },
-    "message": "Linear API call failed",
-    "transient": false,
-  },
-  "meta": {
-    "command": "issue list",
-  },
-  "ok": false,
-}
-`;
-
-exports[`issueListRuntime — failure envelopes (KRN-09) > Test 13: RATELIMITED (exit 14, transient: true) > failure-RATELIMITED 1`] = `
-{
-  "$apiVersion": "1",
-  "error": {
-    "code": "RATELIMITED",
-    "message": "Linear rate limit exceeded",
-    "retryAfterMs": 30000,
-    "transient": true,
-  },
-  "meta": {
-    "command": "issue list",
-  },
-  "ok": false,
-}
-`;
-
 exports[`issueListRuntime — failure envelopes (KRN-09) > Test 13: RATELIMITED (exit 14, transient: true) — RatelimitedLinearError > failure-RATELIMITED 1`] = `
 {
   "$apiVersion": "1",
@@ -144,21 +77,6 @@ exports[`issueListRuntime — failure envelopes (KRN-09) > Test 13: RATELIMITED 
     "code": "RATELIMITED",
     "message": "Linear rate limit exceeded",
     "retryAfterMs": 30000,
-    "transient": true,
-  },
-  "meta": {
-    "command": "issue list",
-  },
-  "ok": false,
-}
-`;
-
-exports[`issueListRuntime — failure envelopes (KRN-09) > Test 14: NETWORK_ERROR (exit 15, transient: true) > failure-NETWORK_ERROR 1`] = `
-{
-  "$apiVersion": "1",
-  "error": {
-    "code": "NETWORK_ERROR",
-    "message": "network error during Linear API call",
     "transient": true,
   },
   "meta": {

@@ -209,8 +209,12 @@ const commentId = getData(commented, 'data.id')
 run('comment list --issue', ['comment', 'list', '--issue', testIssueIdentifier])
 
 if (commentId) {
-  run('comment update', ['comment', 'update', '--id', commentId, '--body', 'smoke comment 1 (updated)'])
-  run('comment delete', ['comment', 'delete', '--id', commentId])
+  // `comment update` and `comment delete` take the comment UUID as a positional
+  // argument (matching `issue update <id>` / `issue transition <id>` style),
+  // not a `--id` flag. Pre-fix this script passed `--id <uuid>`, which oclif
+  // rejected with help text + exit 2.
+  run('comment update', ['comment', 'update', commentId, '--body', 'smoke comment 1 (updated)'])
+  run('comment delete', ['comment', 'delete', commentId])
 }
 
 // ───────────────────────────────────────── 4. Three-state delete ─────────────────────────────────────────
