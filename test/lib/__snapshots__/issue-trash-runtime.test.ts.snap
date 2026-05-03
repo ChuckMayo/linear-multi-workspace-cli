@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issueTrashRuntime — WSP-06 enforcement > Test 7: no explicit workspace → WORKSPACE_REQUIRED_FOR_WRITE BEFORE any SDK call > failure-WORKSPACE_REQUIRED_FOR_WRITE 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue trash",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueTrashRuntime — happy path > Test 6: identifier ENG-1 → resolves UUID, calls deleteIssue(uuid) with NO permanentlyDelete:true > trash-success 1`] = `
+{
+  "data": {
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "identifier": "ENG-1",
+    "trashed": true,
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;

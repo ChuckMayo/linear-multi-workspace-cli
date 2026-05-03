@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issueArchiveRuntime — ISSUE_NOT_FOUND > Test 3: identifier resolves to empty → ISSUE_NOT_FOUND; archiveIssue never called > failure-ISSUE_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "ISSUE_NOT_FOUND",
+    "details": {
+      "ref": "ENG-999",
+    },
+    "message": "issue not found: ENG-999",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue archive",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issueArchiveRuntime — happy path > Test 1: identifier ENG-1 → resolves UUID, calls archiveIssue(uuid), returns archived: true > archive-success 1`] = `
+{
+  "data": {
+    "archived": true,
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "identifier": "ENG-1",
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;

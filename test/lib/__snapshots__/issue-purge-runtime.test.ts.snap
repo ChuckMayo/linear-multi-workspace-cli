@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`issuePurgeRuntime — CONFIRMATION_REQUIRED gate > Test 9: --yes false (default) → CONFIRMATION_REQUIRED BEFORE any SDK call > failure-CONFIRMATION_REQUIRED 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "CONFIRMATION_REQUIRED",
+    "details": {
+      "remediation": "pass --yes to confirm permanent deletion",
+    },
+    "message": "purge is permanent -- re-run with --yes to confirm",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue purge",
+  },
+  "ok": false,
+}
+`;
+
+exports[`issuePurgeRuntime — success envelope shape > Test 13: data has permanentlyDeleted: true > purge-success 1`] = `
+{
+  "data": {
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "identifier": "ENG-1",
+    "permanentlyDeleted": true,
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
