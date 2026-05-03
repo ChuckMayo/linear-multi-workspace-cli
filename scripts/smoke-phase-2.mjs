@@ -64,8 +64,12 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
+// Fall back to TEAM env var (commonly set in .env loaded via Node 22's
+// --env-file=.env, or via `npm run smoke:phase-2` which wires it for you).
+if (!team && process.env.TEAM) team = process.env.TEAM
+
 if (!team) {
-  console.error('ERROR: --team <key|uuid> is required')
+  console.error('ERROR: --team <key|uuid> is required (or set TEAM in .env / process env)')
   process.exit(2)
 }
 
