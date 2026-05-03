@@ -28,7 +28,8 @@
     "build": "tsdown",
     "prepack": "npm run build && oclif manifest",
     "postpack": "rm -f oclif.manifest.json",
-    "codegen": "graphql-codegen",
+    "codegen": "npm run build-operations && graphql-codegen",
+    "build-operations": "tsx codegen/build-operations.ts",
     "fetch-schema": "tsx codegen/fetch-schema.ts",
     "verify-pack": "node scripts/verify-pack.mjs",
     "smoke:phase-2": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs",
@@ -45,6 +46,7 @@
     "@linear/sdk": "^83.0.0",
     "@oclif/core": "^4.11.0",
     "conf": "^14.0.0",
+    "graphql": "^16.13.2",
     "picocolors": "^1.1.0",
     "zod": "^4.4.2"
   },

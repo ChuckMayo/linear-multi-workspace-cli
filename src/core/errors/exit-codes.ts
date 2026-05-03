@@ -54,7 +54,19 @@ export function exitCodeFor(code: ErrorCode): number {
     case 'VALIDATION_NO_FIELDS':
     case 'WORKFLOW_TEAM_REQUIRED':
     case 'CONFIRMATION_REQUIRED':
+    // Phase 3 PLAN 03-01: raw / graphql / batch usage-class errors share exit 2.
+    case 'RAW_OPERATION_NOT_FOUND':
+    case 'RAW_MUTATION_REQUIRES_FLAG':
+    case 'OPERATION_SUBSCRIPTIONS_UNSUPPORTED':
+    case 'GRAPHQL_QUERY_FILE_NOT_FOUND':
+    case 'BATCH_REQUIRES_YES':
+    case 'INVALID_INCLUDE':
       return EXIT_CODES.USAGE
+    // Phase 3 PLAN 03-01: validation-class errors join exit 12.
+    case 'RAW_VARS_INVALID':
+    case 'GRAPHQL_VALIDATION_FAILED':
+    case 'BATCH_PLAN_INVALID':
+      return EXIT_CODES.VALIDATION
     // Phase 2 PLAN 02-01: entity-not-found codes share exit 13 with LINEAR_API_ERROR.
     case 'WORKFLOW_STATE_NOT_FOUND':
     case 'ISSUE_NOT_FOUND':

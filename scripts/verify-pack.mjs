@@ -57,6 +57,7 @@ const REQUIRED_RUNTIME_DEPS = [
   '@linear/sdk',
   '@oclif/core',
   'conf',
+  'graphql',
   'picocolors',
   'zod',
 ]

@@ -51,6 +51,18 @@ export const ERROR_CODES = [
   'TEAM_NOT_FOUND',
   'PROJECT_NOT_FOUND',
   'CYCLE_NOT_FOUND',
+  // ─── Phase 3 PLAN 03-01 additions ──────────────────────────────────────
+  // Usage family — exit 2 (joins USAGE_ERROR)
+  'RAW_OPERATION_NOT_FOUND',
+  'RAW_MUTATION_REQUIRES_FLAG',
+  'OPERATION_SUBSCRIPTIONS_UNSUPPORTED',
+  'GRAPHQL_QUERY_FILE_NOT_FOUND',
+  'BATCH_REQUIRES_YES',
+  'INVALID_INCLUDE',
+  // Validation family — exit 12 (joins VALIDATION_FAILED)
+  'RAW_VARS_INVALID',
+  'GRAPHQL_VALIDATION_FAILED',
+  'BATCH_PLAN_INVALID',
 ] as const
 
 export type ErrorCode = (typeof ERROR_CODES)[number]

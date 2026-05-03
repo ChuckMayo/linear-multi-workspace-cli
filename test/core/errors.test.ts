@@ -133,6 +133,16 @@ describe('ERROR_CODES tuple', () => {
       'TEAM_NOT_FOUND',
       'PROJECT_NOT_FOUND',
       'CYCLE_NOT_FOUND',
+      // Phase 3 PLAN 03-01 additions
+      'RAW_OPERATION_NOT_FOUND',
+      'RAW_MUTATION_REQUIRES_FLAG',
+      'OPERATION_SUBSCRIPTIONS_UNSUPPORTED',
+      'GRAPHQL_QUERY_FILE_NOT_FOUND',
+      'BATCH_REQUIRES_YES',
+      'INVALID_INCLUDE',
+      'RAW_VARS_INVALID',
+      'GRAPHQL_VALIDATION_FAILED',
+      'BATCH_PLAN_INVALID',
     ] as const
     for (const c of expected) {
       expect(ERROR_CODES).toContain(c)
@@ -220,6 +230,27 @@ describe('exitCodeFor', () => {
     expect(exitCodeFor('TEAM_NOT_FOUND')).toBe(13)
     expect(exitCodeFor('PROJECT_NOT_FOUND')).toBe(13)
     expect(exitCodeFor('CYCLE_NOT_FOUND')).toBe(13)
+  })
+
+  // ─── Phase 3 PLAN 03-01 Test 4 — table-driven 9-code exit mapping ────
+  // Per CONTEXT.md § Decisions line 58: 6 codes -> USAGE (2), 3 -> VALIDATION (12).
+  describe('Phase 3 PLAN 03-01: 9 new codes map to existing exit numbers', () => {
+    const cases: Array<[ErrorCode, number]> = [
+      ['RAW_OPERATION_NOT_FOUND', 2],
+      ['RAW_MUTATION_REQUIRES_FLAG', 2],
+      ['OPERATION_SUBSCRIPTIONS_UNSUPPORTED', 2],
+      ['GRAPHQL_QUERY_FILE_NOT_FOUND', 2],
+      ['BATCH_REQUIRES_YES', 2],
+      ['INVALID_INCLUDE', 2],
+      ['RAW_VARS_INVALID', 12],
+      ['GRAPHQL_VALIDATION_FAILED', 12],
+      ['BATCH_PLAN_INVALID', 12],
+    ]
+    for (const [code, expected] of cases) {
+      it(`${code} -> exit ${expected}`, () => {
+        expect(exitCodeFor(code)).toBe(expected)
+      })
+    }
   })
 })
 

@@ -7,7 +7,8 @@
  *
  * Phase 0 has zero `.graphql` operation documents in `src/operations/`, so
  * `ignoreNoDocuments: true` is required — without it, codegen exits non-zero
- * the first time. Phase 2/3 will populate `src/operations/`.
+ * the first time. Phase 3 PLAN 03-01 Task 2 flips this to `false` once
+ * `codegen/build-operations.ts` populates `src/operations/_registry.graphql`.
  */
 
 import type { CodegenConfig } from '@graphql-codegen/cli'

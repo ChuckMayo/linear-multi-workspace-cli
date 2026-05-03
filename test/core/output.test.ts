@@ -52,6 +52,37 @@ describe('success() envelope', () => {
     expect(json).not.toContain('"workspace":')
     expect(json).not.toContain('"workspaceSource":')
     expect(json).not.toContain('"pageInfo":')
+    // Phase 3 PLAN 03-01: batch must also be omitted when undefined.
+    expect(json).not.toContain('"batch":')
+  })
+
+  // ─── Phase 3 PLAN 03-01 Test 5 — Meta.batch serialization ─────────────
+  it('Phase 3 Test 5a: meta.batch is serialized when populated', () => {
+    const env = success(
+      { plan: [{ operation: 'IssueUpdate', kind: 'mutation' }] },
+      {
+        command: 'raw batch',
+        workspace: 'acme',
+        workspaceSource: 'flag',
+        batch: { count: 1, kinds: { query: 0, mutation: 1 } },
+      },
+    )
+    const json = JSON.stringify(env)
+    expect(json).toContain('"batch":')
+    expect(json).toContain('"count":1')
+    expect(json).toContain('"kinds":{"query":0,"mutation":1}')
+  })
+
+  it('Phase 3 Test 5b: omitting batch keeps Phase 1/2 envelope byte-identical', () => {
+    // The exact byte sequence below is what Phase 1/2 commands produce; the
+    // Meta.batch addition MUST be invisible in this case.
+    const env = success(
+      { issues: [] },
+      { command: 'issue list', workspace: 'acme', workspaceSource: 'flag' },
+    )
+    expect(JSON.stringify(env)).toBe(
+      '{"$apiVersion":"1","ok":true,"data":{"issues":[]},"meta":{"command":"issue list","workspace":"acme","workspaceSource":"flag"}}',
+    )
   })
 })
 
