@@ -1,0 +1,9651 @@
+query AdministrableTeams($after: String, $before: String, $filter: TeamFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  administrableTeams(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      activeCycle {
+        id
+        name
+      }
+      aiDiscussionSummariesEnabled
+      aiThreadSummariesEnabled
+      allMembersCanJoin
+      ancestors {
+        id
+        name
+      }
+      archivedAt
+      autoArchivePeriod
+      autoCloseChildIssues
+      autoCloseParentIssues
+      autoClosePeriod
+      autoCloseStateId
+      children {
+        id
+        name
+      }
+      color
+      createdAt
+      currentProgress
+      cycleCalenderUrl
+      cycleCooldownTime
+      cycleDuration
+      cycleIssueAutoAssignCompleted
+      cycleIssueAutoAssignStarted
+      cycleLockToActive
+      cyclesEnabled
+      cycleStartDay
+      defaultIssueEstimate
+      defaultIssueState {
+        id
+        name
+      }
+      defaultProjectTemplate {
+        id
+        name
+      }
+      defaultTemplateForMembers {
+        id
+        name
+      }
+      defaultTemplateForMembersId
+      defaultTemplateForNonMembers {
+        id
+        name
+      }
+      defaultTemplateForNonMembersId
+      description
+      displayName
+      draftWorkflowState {
+        id
+        name
+      }
+      facets {
+        id
+      }
+      groupIssueHistory
+      icon
+      id
+      inheritIssueEstimation
+      inheritSlackAutoCreateProjectChannel
+      inheritWorkflowStatuses
+      integrationsSettings {
+        id
+      }
+      inviteHash
+      issueCount
+      issueEstimationAllowZero
+      issueEstimationExtended
+      issueEstimationType
+      issueOrderingNoPriorityFirst
+      issueSortOrderDefaultToBottom
+      joinByDefault
+      key
+      markedAsDuplicateWorkflowState {
+        id
+        name
+      }
+      mergeableWorkflowState {
+        id
+        name
+      }
+      mergeWorkflowState {
+        id
+        name
+      }
+      name
+      organization {
+        id
+        name
+      }
+      parent {
+        id
+        name
+      }
+      posts {
+        id
+      }
+      private
+      progressHistory
+      requirePriorityToLeaveTriage
+      retiredAt
+      reviewWorkflowState {
+        id
+        name
+      }
+      scimGroupName
+      scimManaged
+      securitySettings
+      setIssueSortOrderOnStateChange
+      slackAutoCreateProjectChannel
+      slackIssueComments
+      slackIssueStatuses
+      slackNewIssue
+      startWorkflowState {
+        id
+        name
+      }
+      timezone
+      triageEnabled
+      triageIssueState {
+        id
+        name
+      }
+      triageResponsibility {
+        id
+      }
+      upcomingCycleCount
+      updatedAt
+    }
+  }
+}
+
+query AgentActivities($after: String, $before: String, $filter: AgentActivityFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  agentActivities(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      agentSession {
+        id
+      }
+      archivedAt
+      contextualMetadata
+      createdAt
+      ephemeral
+      id
+      signal
+      signalMetadata
+      sourceComment {
+        id
+      }
+      sourceMetadata
+      updatedAt
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+query AgentActivity($id: String!) {
+  agentActivity(id: $id) {
+    agentSession {
+      id
+    }
+    archivedAt
+    contextualMetadata
+    createdAt
+    ephemeral
+    id
+    signal
+    signalMetadata
+    sourceComment {
+      id
+    }
+    sourceMetadata
+    updatedAt
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation AgentActivityCreate($input: AgentActivityCreateInput!) {
+  agentActivityCreate(input: $input) {
+    agentActivity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AgentActivityCreatePrompt($input: AgentActivityCreatePromptInput!) {
+  agentActivityCreatePrompt(input: $input) {
+    agentActivity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query AgentSession($id: String!) {
+  agentSession(id: $id) {
+    appUser {
+      id
+      name
+    }
+    archivedAt
+    comment {
+      id
+    }
+    context
+    createdAt
+    creator {
+      id
+      name
+    }
+    dismissedAt
+    dismissedBy {
+      id
+      name
+    }
+    endedAt
+    externalLink
+    externalUrls
+    id
+    issue {
+      id
+    }
+    plan
+    slugId
+    sourceComment {
+      id
+    }
+    sourceMetadata
+    startedAt
+    status
+    summary
+    type
+    updatedAt
+    url
+  }
+}
+
+mutation AgentSessionCreate($input: AgentSessionCreateInput!, $pullRequestId: String) {
+  agentSessionCreate(input: $input, pullRequestId: $pullRequestId) {
+    agentSession {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AgentSessionCreateOnComment($input: AgentSessionCreateOnComment!) {
+  agentSessionCreateOnComment(input: $input) {
+    agentSession {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AgentSessionCreateOnIssue($input: AgentSessionCreateOnIssue!) {
+  agentSessionCreateOnIssue(input: $input) {
+    agentSession {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query AgentSessions($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  agentSessions(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      appUser {
+        id
+        name
+      }
+      archivedAt
+      comment {
+        id
+      }
+      context
+      createdAt
+      creator {
+        id
+        name
+      }
+      dismissedAt
+      dismissedBy {
+        id
+        name
+      }
+      endedAt
+      externalLink
+      externalUrls
+      id
+      issue {
+        id
+      }
+      plan
+      slugId
+      sourceComment {
+        id
+      }
+      sourceMetadata
+      startedAt
+      status
+      summary
+      type
+      updatedAt
+      url
+    }
+  }
+}
+
+query AgentSessionSandbox($agentSessionId: String!) {
+  agentSessionSandbox(agentSessionId: $agentSessionId) {
+    agentSessionId
+    datadogLogsUrl
+    sandboxes {
+      id
+    }
+    temporalWorkflowsUrl
+  }
+}
+
+mutation AgentSessionUpdate($id: String!, $input: AgentSessionUpdateInput!) {
+  agentSessionUpdate(id: $id, input: $input) {
+    agentSession {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AgentSessionUpdateExternalUrl($id: String!, $input: AgentSessionUpdateExternalUrlInput!) {
+  agentSessionUpdateExternalUrl(id: $id, input: $input) {
+    agentSession {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AirbyteIntegrationConnect($input: AirbyteConfigurationInput!) {
+  airbyteIntegrationConnect(input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query ApplicationInfo($clientId: String!) {
+  applicationInfo(clientId: $clientId) {
+    clientId
+    description
+    developer
+    developerUrl
+    id
+    imageUrl
+    name
+  }
+}
+
+query ArchivedTeams {
+  archivedTeams {
+    activeCycle {
+      id
+      name
+    }
+    aiDiscussionSummariesEnabled
+    aiThreadSummariesEnabled
+    allMembersCanJoin
+    ancestors {
+      id
+      name
+    }
+    archivedAt
+    autoArchivePeriod
+    autoCloseChildIssues
+    autoCloseParentIssues
+    autoClosePeriod
+    autoCloseStateId
+    children {
+      id
+      name
+    }
+    color
+    createdAt
+    currentProgress
+    cycleCalenderUrl
+    cycleCooldownTime
+    cycleDuration
+    cycleIssueAutoAssignCompleted
+    cycleIssueAutoAssignStarted
+    cycleLockToActive
+    cyclesEnabled
+    cycleStartDay
+    defaultIssueEstimate
+    defaultIssueState {
+      id
+      name
+    }
+    defaultProjectTemplate {
+      id
+      name
+    }
+    defaultTemplateForMembers {
+      id
+      name
+    }
+    defaultTemplateForMembersId
+    defaultTemplateForNonMembers {
+      id
+      name
+    }
+    defaultTemplateForNonMembersId
+    description
+    displayName
+    draftWorkflowState {
+      id
+      name
+    }
+    facets {
+      id
+    }
+    groupIssueHistory
+    icon
+    id
+    inheritIssueEstimation
+    inheritSlackAutoCreateProjectChannel
+    inheritWorkflowStatuses
+    integrationsSettings {
+      id
+    }
+    inviteHash
+    issueCount
+    issueEstimationAllowZero
+    issueEstimationExtended
+    issueEstimationType
+    issueOrderingNoPriorityFirst
+    issueSortOrderDefaultToBottom
+    joinByDefault
+    key
+    markedAsDuplicateWorkflowState {
+      id
+      name
+    }
+    mergeableWorkflowState {
+      id
+      name
+    }
+    mergeWorkflowState {
+      id
+      name
+    }
+    name
+    organization {
+      id
+      name
+    }
+    parent {
+      id
+      name
+    }
+    posts {
+      id
+    }
+    private
+    progressHistory
+    requirePriorityToLeaveTriage
+    retiredAt
+    reviewWorkflowState {
+      id
+      name
+    }
+    scimGroupName
+    scimManaged
+    securitySettings
+    setIssueSortOrderOnStateChange
+    slackAutoCreateProjectChannel
+    slackIssueComments
+    slackIssueStatuses
+    slackNewIssue
+    startWorkflowState {
+      id
+      name
+    }
+    timezone
+    triageEnabled
+    triageIssueState {
+      id
+      name
+    }
+    triageResponsibility {
+      id
+    }
+    upcomingCycleCount
+    updatedAt
+  }
+}
+
+query Attachment($id: String!) {
+  attachment(id: $id) {
+    archivedAt
+    bodyData
+    createdAt
+    creator {
+      id
+      name
+    }
+    externalUserCreator {
+      id
+      name
+    }
+    groupBySource
+    id
+    issue {
+      id
+    }
+    metadata
+    originalIssue {
+      id
+    }
+    source
+    sourceType
+    subtitle
+    title
+    updatedAt
+    url
+  }
+}
+
+mutation AttachmentCreate($input: AttachmentCreateInput!) {
+  attachmentCreate(input: $input) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentDelete($id: String!) {
+  attachmentDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query AttachmentIssue($id: String!) {
+  attachmentIssue(id: $id) {
+    activitySummary
+    addedToCycleAt
+    addedToProjectAt
+    addedToTeamAt
+    archivedAt
+    asksExternalUserRequester {
+      id
+      name
+    }
+    asksRequester {
+      id
+      name
+    }
+    assignee {
+      id
+      name
+    }
+    autoArchivedAt
+    autoClosedAt
+    boardOrder
+    botActor {
+      id
+      name
+    }
+    branchName
+    canceledAt
+    completedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    customerTicketCount
+    cycle {
+      id
+      name
+    }
+    delegate {
+      id
+      name
+    }
+    description
+    descriptionState
+    documentContent {
+      id
+    }
+    dueDate
+    estimate
+    externalUserCreator {
+      id
+      name
+    }
+    favorite {
+      id
+    }
+    id
+    identifier
+    inheritsSharedAccess
+    integrationSourceType
+    labelIds
+    lastAppliedTemplate {
+      id
+      name
+    }
+    number
+    parent {
+      id
+    }
+    previousIdentifiers
+    priority
+    priorityLabel
+    prioritySortOrder
+    project {
+      id
+      name
+    }
+    projectMilestone {
+      id
+      name
+    }
+    reactionData
+    reactions {
+      id
+    }
+    recurringIssueTemplate {
+      id
+      name
+    }
+    slaBreachesAt
+    slaHighRiskAt
+    slaMediumRiskAt
+    slaStartedAt
+    slaType
+    snoozedBy {
+      id
+      name
+    }
+    snoozedUntilAt
+    sortOrder
+    sourceComment {
+      id
+    }
+    startedAt
+    startedTriageAt
+    state {
+      id
+      name
+    }
+    subIssueSortOrder
+    suggestionsGeneratedAt
+    summary {
+      id
+    }
+    syncedWith {
+      id
+    }
+    team {
+      id
+      name
+    }
+    title
+    trashed
+    triagedAt
+    updatedAt
+    url
+  }
+}
+
+mutation AttachmentLinkDiscord($channelId: String!, $createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $messageId: String!, $title: String, $url: String!) {
+  attachmentLinkDiscord(
+    channelId: $channelId
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    messageId: $messageId
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkFront($conversationId: String!, $createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $title: String) {
+  attachmentLinkFront(
+    conversationId: $conversationId
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkGitHubIssue($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $title: String, $url: String!) {
+  attachmentLinkGitHubIssue(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkGitHubPr($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $linkKind: GitLinkKind, $title: String, $url: String!) {
+  attachmentLinkGitHubPR(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    linkKind: $linkKind
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkGitLabMr($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $number: Float!, $projectPathWithNamespace: String!, $title: String, $url: String!) {
+  attachmentLinkGitLabMR(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    number: $number
+    projectPathWithNamespace: $projectPathWithNamespace
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkIntercom($conversationId: String!, $createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $partId: String, $title: String) {
+  attachmentLinkIntercom(
+    conversationId: $conversationId
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    partId: $partId
+    title: $title
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkJiraIssue($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $jiraIssueId: String!, $title: String, $url: String) {
+  attachmentLinkJiraIssue(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    jiraIssueId: $jiraIssueId
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkSalesforce($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $title: String, $url: String!) {
+  attachmentLinkSalesforce(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkSlack($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $syncToCommentThread: Boolean, $title: String, $url: String!) {
+  attachmentLinkSlack(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    syncToCommentThread: $syncToCommentThread
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkUrl($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $title: String, $url: String!) {
+  attachmentLinkURL(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentLinkZendesk($createAsUser: String, $displayIconUrl: String, $id: String, $issueId: String!, $ticketId: String!, $title: String, $url: String) {
+  attachmentLinkZendesk(
+    createAsUser: $createAsUser
+    displayIconUrl: $displayIconUrl
+    id: $id
+    issueId: $issueId
+    ticketId: $ticketId
+    title: $title
+    url: $url
+  ) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Attachments($after: String, $before: String, $filter: AttachmentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  attachments(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      bodyData
+      createdAt
+      creator {
+        id
+        name
+      }
+      externalUserCreator {
+        id
+        name
+      }
+      groupBySource
+      id
+      issue {
+        id
+      }
+      metadata
+      originalIssue {
+        id
+      }
+      source
+      sourceType
+      subtitle
+      title
+      updatedAt
+      url
+    }
+  }
+}
+
+query AttachmentsForUrl($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $url: String!) {
+  attachmentsForURL(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    url: $url
+  ) {
+    nodes {
+      archivedAt
+      bodyData
+      createdAt
+      creator {
+        id
+        name
+      }
+      externalUserCreator {
+        id
+        name
+      }
+      groupBySource
+      id
+      issue {
+        id
+      }
+      metadata
+      originalIssue {
+        id
+      }
+      source
+      sourceType
+      subtitle
+      title
+      updatedAt
+      url
+    }
+  }
+}
+
+query AttachmentSources($teamId: String) {
+  attachmentSources(teamId: $teamId) {
+    sources
+  }
+}
+
+mutation AttachmentSyncToSlack($id: String!) {
+  attachmentSyncToSlack(id: $id) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation AttachmentUpdate($id: String!, $input: AttachmentUpdateInput!) {
+  attachmentUpdate(id: $id, input: $input) {
+    attachment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query AuditEntries($after: String, $before: String, $filter: AuditEntryFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  auditEntries(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      actor {
+        id
+        name
+      }
+      actorId
+      archivedAt
+      countryCode
+      createdAt
+      id
+      ip
+      metadata
+      organization {
+        id
+        name
+      }
+      requestInformation
+      type
+      updatedAt
+    }
+  }
+}
+
+query AuditEntryTypes {
+  auditEntryTypes {
+    description
+    type
+  }
+}
+
+query AuthenticationSessions {
+  authenticationSessions {
+    browserType
+    client
+    countryCodes
+    createdAt
+    detailedName
+    id
+    ip
+    isCurrentSession
+    lastActiveAt
+    location
+    locationCity
+    locationCountry
+    locationCountryCode
+    locationRegionCode
+    name
+    operatingSystem
+    service
+    type
+    updatedAt
+    userAgent
+  }
+}
+
+query AvailableUsers {
+  availableUsers {
+    allowDomainAccess
+    availableOrganizations {
+      id
+      name
+    }
+    email
+    id
+    lastUsedOrganizationId
+    lockedOrganizations {
+      id
+      name
+    }
+    lockedUsers {
+      id
+      name
+    }
+    service
+    token
+    users {
+      id
+      name
+    }
+  }
+}
+
+query Comment($hash: String, $id: String) {
+  comment(hash: $hash, id: $id) {
+    agentSession {
+      id
+    }
+    archivedAt
+    body
+    bodyData
+    botActor {
+      id
+      name
+    }
+    createdAt
+    documentContent {
+      id
+    }
+    documentContentId
+    editedAt
+    externalThread {
+      id
+      name
+    }
+    externalUser {
+      id
+      name
+    }
+    hideInLinear
+    id
+    initiative {
+      id
+      name
+    }
+    initiativeId
+    initiativeUpdate {
+      id
+    }
+    initiativeUpdateId
+    isArtificialAgentSessionRoot
+    issue {
+      id
+    }
+    issueId
+    onBehalfOf {
+      id
+      name
+    }
+    parent {
+      id
+    }
+    parentId
+    post {
+      id
+    }
+    project {
+      id
+      name
+    }
+    projectId
+    projectUpdate {
+      id
+    }
+    projectUpdateId
+    quotedText
+    reactionData
+    reactions {
+      id
+    }
+    resolvedAt
+    resolvingComment {
+      id
+    }
+    resolvingCommentId
+    resolvingUser {
+      id
+      name
+    }
+    syncedWith {
+      id
+    }
+    threadSummary
+    updatedAt
+    url
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation CommentCreate($input: CommentCreateInput!) {
+  commentCreate(input: $input) {
+    comment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CommentDelete($id: String!) {
+  commentDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation CommentResolve($id: String!, $resolvingCommentId: String) {
+  commentResolve(id: $id, resolvingCommentId: $resolvingCommentId) {
+    comment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Comments($after: String, $before: String, $filter: CommentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  comments(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      agentSession {
+        id
+      }
+      archivedAt
+      body
+      bodyData
+      botActor {
+        id
+        name
+      }
+      createdAt
+      documentContent {
+        id
+      }
+      documentContentId
+      editedAt
+      externalThread {
+        id
+        name
+      }
+      externalUser {
+        id
+        name
+      }
+      hideInLinear
+      id
+      initiative {
+        id
+        name
+      }
+      initiativeId
+      initiativeUpdate {
+        id
+      }
+      initiativeUpdateId
+      isArtificialAgentSessionRoot
+      issue {
+        id
+      }
+      issueId
+      onBehalfOf {
+        id
+        name
+      }
+      parent {
+        id
+      }
+      parentId
+      post {
+        id
+      }
+      project {
+        id
+        name
+      }
+      projectId
+      projectUpdate {
+        id
+      }
+      projectUpdateId
+      quotedText
+      reactionData
+      reactions {
+        id
+      }
+      resolvedAt
+      resolvingComment {
+        id
+      }
+      resolvingCommentId
+      resolvingUser {
+        id
+        name
+      }
+      syncedWith {
+        id
+      }
+      threadSummary
+      updatedAt
+      url
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation CommentUnresolve($id: String!) {
+  commentUnresolve(id: $id) {
+    comment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CommentUpdate($id: String!, $input: CommentUpdateInput!, $skipEditedAt: Boolean) {
+  commentUpdate(id: $id, input: $input, skipEditedAt: $skipEditedAt) {
+    comment {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ContactCreate($input: ContactCreateInput!) {
+  contactCreate(input: $input) {
+    success
+  }
+}
+
+mutation ContactSalesCreate($input: ContactSalesCreateInput!) {
+  contactSalesCreate(input: $input) {
+    success
+  }
+}
+
+mutation CreateCsvExportReport($includePrivateTeamIds: [String!]) {
+  createCsvExportReport(includePrivateTeamIds: $includePrivateTeamIds) {
+    success
+  }
+}
+
+mutation CreateInitiativeUpdateReminder($initiativeId: String!, $userId: String) {
+  createInitiativeUpdateReminder(initiativeId: $initiativeId, userId: $userId) {
+    lastSyncId
+    success
+  }
+}
+
+mutation CreateOrganizationFromOnboarding($input: CreateOrganizationInput!, $sessionId: String, $survey: OnboardingCustomerSurvey) {
+  createOrganizationFromOnboarding(
+    input: $input
+    sessionId: $sessionId
+    survey: $survey
+  ) {
+    organization {
+      id
+      name
+    }
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation CreateProjectUpdateReminder($projectId: String!, $userId: String) {
+  createProjectUpdateReminder(projectId: $projectId, userId: $userId) {
+    lastSyncId
+    success
+  }
+}
+
+query Customer($id: String!) {
+  customer(id: $id) {
+    approximateNeedCount
+    archivedAt
+    createdAt
+    domains
+    externalIds
+    id
+    integration {
+      id
+    }
+    logoUrl
+    mainSourceId
+    name
+    needs {
+      id
+    }
+    owner {
+      id
+      name
+    }
+    revenue
+    size
+    slackChannelId
+    slugId
+    status {
+      id
+      name
+    }
+    tier {
+      id
+      name
+    }
+    updatedAt
+    url
+  }
+}
+
+mutation CustomerCreate($input: CustomerCreateInput!) {
+  customerCreate(input: $input) {
+    customer {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomerDelete($id: String!) {
+  customerDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomerMerge($sourceCustomerId: String!, $targetCustomerId: String!) {
+  customerMerge(
+    sourceCustomerId: $sourceCustomerId
+    targetCustomerId: $targetCustomerId
+  ) {
+    customer {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query CustomerNeed($hash: String, $id: String) {
+  customerNeed(hash: $hash, id: $id) {
+    archivedAt
+    attachment {
+      id
+    }
+    body
+    bodyData
+    comment {
+      id
+    }
+    createdAt
+    creator {
+      id
+      name
+    }
+    customer {
+      id
+      name
+    }
+    id
+    issue {
+      id
+    }
+    originalIssue {
+      id
+    }
+    priority
+    project {
+      id
+      name
+    }
+    projectAttachment {
+      id
+    }
+    updatedAt
+    url
+  }
+}
+
+mutation CustomerNeedArchive($id: String!) {
+  customerNeedArchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomerNeedCreate($input: CustomerNeedCreateInput!) {
+  customerNeedCreate(input: $input) {
+    lastSyncId
+    need {
+      id
+    }
+    success
+  }
+}
+
+mutation CustomerNeedCreateFromAttachment($input: CustomerNeedCreateFromAttachmentInput!) {
+  customerNeedCreateFromAttachment(input: $input) {
+    lastSyncId
+    need {
+      id
+    }
+    success
+  }
+}
+
+mutation CustomerNeedDelete($id: String!, $keepAttachment: Boolean) {
+  customerNeedDelete(id: $id, keepAttachment: $keepAttachment) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query CustomerNeeds($after: String, $before: String, $filter: CustomerNeedFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  customerNeeds(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      attachment {
+        id
+      }
+      body
+      bodyData
+      comment {
+        id
+      }
+      createdAt
+      creator {
+        id
+        name
+      }
+      customer {
+        id
+        name
+      }
+      id
+      issue {
+        id
+      }
+      originalIssue {
+        id
+      }
+      priority
+      project {
+        id
+        name
+      }
+      projectAttachment {
+        id
+      }
+      updatedAt
+      url
+    }
+  }
+}
+
+mutation CustomerNeedUnarchive($id: String!) {
+  customerNeedUnarchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomerNeedUpdate($clearAttachment: Boolean, $id: String!, $input: CustomerNeedUpdateInput!) {
+  customerNeedUpdate(clearAttachment: $clearAttachment, id: $id, input: $input) {
+    lastSyncId
+    need {
+      id
+    }
+    success
+    updatedRelatedNeeds {
+      id
+    }
+  }
+}
+
+query Customers($after: String, $before: String, $filter: CustomerFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sorts: [CustomerSortInput!]) {
+  customers(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sorts: $sorts
+  ) {
+    nodes {
+      approximateNeedCount
+      archivedAt
+      createdAt
+      domains
+      externalIds
+      id
+      integration {
+        id
+      }
+      logoUrl
+      mainSourceId
+      name
+      needs {
+        id
+      }
+      owner {
+        id
+        name
+      }
+      revenue
+      size
+      slackChannelId
+      slugId
+      status {
+        id
+        name
+      }
+      tier {
+        id
+        name
+      }
+      updatedAt
+      url
+    }
+  }
+}
+
+query CustomerStatus($id: String!) {
+  customerStatus(id: $id) {
+    archivedAt
+    color
+    createdAt
+    description
+    displayName
+    id
+    name
+    position
+    type
+    updatedAt
+  }
+}
+
+mutation CustomerStatusCreate($input: CustomerStatusCreateInput!) {
+  customerStatusCreate(input: $input) {
+    lastSyncId
+    status {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation CustomerStatusDelete($id: String!) {
+  customerStatusDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query CustomerStatuses($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  customerStatuses(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      description
+      displayName
+      id
+      name
+      position
+      type
+      updatedAt
+    }
+  }
+}
+
+mutation CustomerStatusUpdate($id: String!, $input: CustomerStatusUpdateInput!) {
+  customerStatusUpdate(id: $id, input: $input) {
+    lastSyncId
+    status {
+      id
+      name
+    }
+    success
+  }
+}
+
+query CustomerTier($id: String!) {
+  customerTier(id: $id) {
+    archivedAt
+    color
+    createdAt
+    description
+    displayName
+    id
+    name
+    position
+    updatedAt
+  }
+}
+
+mutation CustomerTierCreate($input: CustomerTierCreateInput!) {
+  customerTierCreate(input: $input) {
+    lastSyncId
+    success
+    tier {
+      id
+      name
+    }
+  }
+}
+
+mutation CustomerTierDelete($id: String!) {
+  customerTierDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query CustomerTiers($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  customerTiers(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      description
+      displayName
+      id
+      name
+      position
+      updatedAt
+    }
+  }
+}
+
+mutation CustomerTierUpdate($id: String!, $input: CustomerTierUpdateInput!) {
+  customerTierUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    tier {
+      id
+      name
+    }
+  }
+}
+
+mutation CustomerUnsync($id: String!) {
+  customerUnsync(id: $id) {
+    customer {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomerUpdate($id: String!, $input: CustomerUpdateInput!) {
+  customerUpdate(id: $id, input: $input) {
+    customer {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomerUpsert($input: CustomerUpsertInput!) {
+  customerUpsert(input: $input) {
+    customer {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query CustomView($id: String!) {
+  customView(id: $id) {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    facet {
+      id
+    }
+    feedItemFilterData
+    filterData
+    filters
+    icon
+    id
+    initiativeFilterData
+    modelName
+    name
+    organization {
+      id
+      name
+    }
+    organizationViewPreferences {
+      id
+    }
+    owner {
+      id
+      name
+    }
+    projectFilterData
+    shared
+    slugId
+    team {
+      id
+      name
+    }
+    updatedAt
+    updatedBy {
+      id
+      name
+    }
+    userViewPreferences {
+      id
+    }
+  }
+}
+
+mutation CustomViewCreate($input: CustomViewCreateInput!) {
+  customViewCreate(input: $input) {
+    customView {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CustomViewDelete($id: String!) {
+  customViewDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query CustomViewDetailsSuggestion($filter: JSONObject!, $modelName: String) {
+  customViewDetailsSuggestion(filter: $filter, modelName: $modelName) {
+    description
+    icon
+    name
+  }
+}
+
+query CustomViewHasSubscribers($id: String!) {
+  customViewHasSubscribers(id: $id) {
+    hasSubscribers
+  }
+}
+
+query CustomViews($after: String, $before: String, $filter: CustomViewFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [CustomViewSortInput!]) {
+  customViews(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      creator {
+        id
+        name
+      }
+      description
+      facet {
+        id
+      }
+      feedItemFilterData
+      filterData
+      filters
+      icon
+      id
+      initiativeFilterData
+      modelName
+      name
+      organization {
+        id
+        name
+      }
+      organizationViewPreferences {
+        id
+      }
+      owner {
+        id
+        name
+      }
+      projectFilterData
+      shared
+      slugId
+      team {
+        id
+        name
+      }
+      updatedAt
+      updatedBy {
+        id
+        name
+      }
+      userViewPreferences {
+        id
+      }
+    }
+  }
+}
+
+mutation CustomViewUpdate($id: String!, $input: CustomViewUpdateInput!) {
+  customViewUpdate(id: $id, input: $input) {
+    customView {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Cycle($id: String!) {
+  cycle(id: $id) {
+    archivedAt
+    autoArchivedAt
+    completedAt
+    completedIssueCountHistory
+    completedScopeHistory
+    createdAt
+    currentProgress
+    description
+    endsAt
+    id
+    inheritedFrom {
+      id
+      name
+    }
+    inProgressScopeHistory
+    isActive
+    isFuture
+    isNext
+    isPast
+    isPrevious
+    issueCountHistory
+    name
+    number
+    progress
+    progressHistory
+    scopeHistory
+    startsAt
+    team {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation CycleArchive($id: String!) {
+  cycleArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CycleCreate($input: CycleCreateInput!) {
+  cycleCreate(input: $input) {
+    cycle {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Cycles($after: String, $before: String, $filter: CycleFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  cycles(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      autoArchivedAt
+      completedAt
+      completedIssueCountHistory
+      completedScopeHistory
+      createdAt
+      currentProgress
+      description
+      endsAt
+      id
+      inheritedFrom {
+        id
+        name
+      }
+      inProgressScopeHistory
+      isActive
+      isFuture
+      isNext
+      isPast
+      isPrevious
+      issueCountHistory
+      name
+      number
+      progress
+      progressHistory
+      scopeHistory
+      startsAt
+      team {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation CycleShiftAll($input: CycleShiftAllInput!) {
+  cycleShiftAll(input: $input) {
+    cycle {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CycleStartUpcomingCycleToday($id: String!) {
+  cycleStartUpcomingCycleToday(id: $id) {
+    cycle {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation CycleUpdate($id: String!, $input: CycleUpdateInput!) {
+  cycleUpdate(id: $id, input: $input) {
+    cycle {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Document($id: String!) {
+  document(id: $id) {
+    archivedAt
+    color
+    content
+    contentState
+    createdAt
+    creator {
+      id
+      name
+    }
+    cycle {
+      id
+      name
+    }
+    documentContentId
+    hiddenAt
+    icon
+    id
+    initiative {
+      id
+      name
+    }
+    issue {
+      id
+    }
+    lastAppliedTemplate {
+      id
+      name
+    }
+    project {
+      id
+      name
+    }
+    release {
+      id
+      name
+    }
+    slugId
+    sortOrder
+    summary
+    team {
+      id
+      name
+    }
+    title
+    trashed
+    updatedAt
+    updatedBy {
+      id
+      name
+    }
+    url
+  }
+}
+
+query DocumentContentHistory($id: String!) {
+  documentContentHistory(id: $id) {
+    history {
+      id
+    }
+    success
+  }
+}
+
+query DocumentContentHistoryEntries($entryIds: [String!]!) {
+  documentContentHistoryEntries(entryIds: $entryIds) {
+    history {
+      id
+    }
+    success
+  }
+}
+
+mutation DocumentCreate($input: DocumentCreateInput!) {
+  documentCreate(input: $input) {
+    document {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation DocumentDelete($id: String!) {
+  documentDelete(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Documents($after: String, $before: String, $filter: DocumentFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  documents(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      content
+      contentState
+      createdAt
+      creator {
+        id
+        name
+      }
+      cycle {
+        id
+        name
+      }
+      documentContentId
+      hiddenAt
+      icon
+      id
+      initiative {
+        id
+        name
+      }
+      issue {
+        id
+      }
+      lastAppliedTemplate {
+        id
+        name
+      }
+      project {
+        id
+        name
+      }
+      release {
+        id
+        name
+      }
+      slugId
+      sortOrder
+      summary
+      team {
+        id
+        name
+      }
+      title
+      trashed
+      updatedAt
+      updatedBy {
+        id
+        name
+      }
+      url
+    }
+  }
+}
+
+mutation DocumentUnarchive($id: String!) {
+  documentUnarchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation DocumentUpdate($id: String!, $input: DocumentUpdateInput!) {
+  documentUpdate(id: $id, input: $input) {
+    document {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query EmailIntakeAddress($id: String!) {
+  emailIntakeAddress(id: $id) {
+    address
+    archivedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    customerRequestsEnabled
+    enabled
+    forwardingEmailAddress
+    id
+    issueCanceledAutoReply
+    issueCanceledAutoReplyEnabled
+    issueCompletedAutoReply
+    issueCompletedAutoReplyEnabled
+    issueCreatedAutoReply
+    issueCreatedAutoReplyEnabled
+    organization {
+      id
+      name
+    }
+    reopenOnReply
+    repliesEnabled
+    senderName
+    sesDomainIdentity {
+      id
+    }
+    team {
+      id
+      name
+    }
+    template {
+      id
+      name
+    }
+    type
+    updatedAt
+    useUserNamesInReplies
+  }
+}
+
+mutation EmailIntakeAddressCreate($input: EmailIntakeAddressCreateInput!) {
+  emailIntakeAddressCreate(input: $input) {
+    emailIntakeAddress {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation EmailIntakeAddressDelete($id: String!) {
+  emailIntakeAddressDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation EmailIntakeAddressRotate($id: String!) {
+  emailIntakeAddressRotate(id: $id) {
+    emailIntakeAddress {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation EmailIntakeAddressUpdate($id: String!, $input: EmailIntakeAddressUpdateInput!) {
+  emailIntakeAddressUpdate(id: $id, input: $input) {
+    emailIntakeAddress {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation EmailTokenUserAccountAuth($input: TokenUserAccountAuthInput!) {
+  emailTokenUserAccountAuth(input: $input) {
+    allowDomainAccess
+    availableOrganizations {
+      id
+      name
+    }
+    email
+    id
+    lastUsedOrganizationId
+    lockedOrganizations {
+      id
+      name
+    }
+    lockedUsers {
+      id
+      name
+    }
+    service
+    token
+    users {
+      id
+      name
+    }
+  }
+}
+
+mutation EmailUnsubscribe($input: EmailUnsubscribeInput!) {
+  emailUnsubscribe(input: $input) {
+    success
+  }
+}
+
+mutation EmailUserAccountAuthChallenge($input: EmailUserAccountAuthChallengeInput!) {
+  emailUserAccountAuthChallenge(input: $input) {
+    authType
+    success
+  }
+}
+
+query Emoji($id: String!) {
+  emoji(id: $id) {
+    archivedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    id
+    name
+    organization {
+      id
+      name
+    }
+    source
+    updatedAt
+    url
+  }
+}
+
+mutation EmojiCreate($input: EmojiCreateInput!) {
+  emojiCreate(input: $input) {
+    emoji {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation EmojiDelete($id: String!) {
+  emojiDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query Emojis($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  emojis(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      id
+      name
+      organization {
+        id
+        name
+      }
+      source
+      updatedAt
+      url
+    }
+  }
+}
+
+query EntityExternalLink($id: String!) {
+  entityExternalLink(id: $id) {
+    archivedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    id
+    initiative {
+      id
+      name
+    }
+    label
+    sortOrder
+    updatedAt
+    url
+  }
+}
+
+mutation EntityExternalLinkCreate($input: EntityExternalLinkCreateInput!) {
+  entityExternalLinkCreate(input: $input) {
+    entityExternalLink {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation EntityExternalLinkDelete($id: String!) {
+  entityExternalLinkDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation EntityExternalLinkUpdate($id: String!, $input: EntityExternalLinkUpdateInput!) {
+  entityExternalLinkUpdate(id: $id, input: $input) {
+    entityExternalLink {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query ExternalUser($id: String!) {
+  externalUser(id: $id) {
+    archivedAt
+    avatarUrl
+    createdAt
+    displayName
+    email
+    id
+    lastSeen
+    name
+    organization {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+query ExternalUsers($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  externalUsers(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      avatarUrl
+      createdAt
+      displayName
+      email
+      id
+      lastSeen
+      name
+      organization {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+query FailuresForOauthWebhooks($oauthClientId: String!) {
+  failuresForOauthWebhooks(oauthClientId: $oauthClientId) {
+    createdAt
+    executionId
+    httpStatus
+    id
+    responseOrError
+    url
+    webhook {
+      id
+    }
+  }
+}
+
+query Favorite($id: String!) {
+  favorite(id: $id) {
+    archivedAt
+    color
+    createdAt
+    customer {
+      id
+      name
+    }
+    customView {
+      id
+      name
+    }
+    cycle {
+      id
+      name
+    }
+    dashboard {
+      id
+      name
+    }
+    detail
+    document {
+      id
+    }
+    facet {
+      id
+    }
+    folderName
+    icon
+    id
+    initiative {
+      id
+      name
+    }
+    initiativeTab
+    issue {
+      id
+    }
+    label {
+      id
+      name
+    }
+    owner {
+      id
+      name
+    }
+    parent {
+      id
+    }
+    predefinedViewTeam {
+      id
+      name
+    }
+    predefinedViewType
+    project {
+      id
+      name
+    }
+    projectLabel {
+      id
+      name
+    }
+    projectTab
+    projectTeam {
+      id
+      name
+    }
+    pullRequest {
+      id
+    }
+    release {
+      id
+      name
+    }
+    releasePipeline {
+      id
+      name
+    }
+    sortOrder
+    team {
+      id
+      name
+    }
+    title
+    type
+    updatedAt
+    url
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation FavoriteCreate($input: FavoriteCreateInput!) {
+  favoriteCreate(input: $input) {
+    favorite {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation FavoriteDelete($id: String!) {
+  favoriteDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query Favorites($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  favorites(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      customer {
+        id
+        name
+      }
+      customView {
+        id
+        name
+      }
+      cycle {
+        id
+        name
+      }
+      dashboard {
+        id
+        name
+      }
+      detail
+      document {
+        id
+      }
+      facet {
+        id
+      }
+      folderName
+      icon
+      id
+      initiative {
+        id
+        name
+      }
+      initiativeTab
+      issue {
+        id
+      }
+      label {
+        id
+        name
+      }
+      owner {
+        id
+        name
+      }
+      parent {
+        id
+      }
+      predefinedViewTeam {
+        id
+        name
+      }
+      predefinedViewType
+      project {
+        id
+        name
+      }
+      projectLabel {
+        id
+        name
+      }
+      projectTab
+      projectTeam {
+        id
+        name
+      }
+      pullRequest {
+        id
+      }
+      release {
+        id
+        name
+      }
+      releasePipeline {
+        id
+        name
+      }
+      sortOrder
+      team {
+        id
+        name
+      }
+      title
+      type
+      updatedAt
+      url
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation FavoriteUpdate($id: String!, $input: FavoriteUpdateInput!) {
+  favoriteUpdate(id: $id, input: $input) {
+    favorite {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query FetchData($query: String!) {
+  fetchData(query: $query) {
+    data
+    filters
+    query
+    success
+  }
+}
+
+mutation FileUpload($contentType: String!, $filename: String!, $makePublic: Boolean, $metaData: JSON, $size: Int!) {
+  fileUpload(
+    contentType: $contentType
+    filename: $filename
+    makePublic: $makePublic
+    metaData: $metaData
+    size: $size
+  ) {
+    lastSyncId
+    success
+  }
+}
+
+mutation FileUploadDangerouslyDelete($assetUrl: String!) {
+  fileUploadDangerouslyDelete(assetUrl: $assetUrl) {
+    success
+  }
+}
+
+mutation GitAutomationStateCreate($input: GitAutomationStateCreateInput!) {
+  gitAutomationStateCreate(input: $input) {
+    gitAutomationState {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation GitAutomationStateDelete($id: String!) {
+  gitAutomationStateDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation GitAutomationStateUpdate($id: String!, $input: GitAutomationStateUpdateInput!) {
+  gitAutomationStateUpdate(id: $id, input: $input) {
+    gitAutomationState {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation GitAutomationTargetBranchCreate($input: GitAutomationTargetBranchCreateInput!) {
+  gitAutomationTargetBranchCreate(input: $input) {
+    lastSyncId
+    success
+    targetBranch {
+      id
+    }
+  }
+}
+
+mutation GitAutomationTargetBranchDelete($id: String!) {
+  gitAutomationTargetBranchDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation GitAutomationTargetBranchUpdate($id: String!, $input: GitAutomationTargetBranchUpdateInput!) {
+  gitAutomationTargetBranchUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    targetBranch {
+      id
+    }
+  }
+}
+
+mutation GoogleUserAccountAuth($input: GoogleUserAccountAuthInput!) {
+  googleUserAccountAuth(input: $input) {
+    allowDomainAccess
+    availableOrganizations {
+      id
+      name
+    }
+    email
+    id
+    lastUsedOrganizationId
+    lockedOrganizations {
+      id
+      name
+    }
+    lockedUsers {
+      id
+      name
+    }
+    service
+    token
+    users {
+      id
+      name
+    }
+  }
+}
+
+mutation ImageUploadFromUrl($url: String!) {
+  imageUploadFromUrl(url: $url) {
+    lastSyncId
+    success
+    url
+  }
+}
+
+mutation ImportFileUpload($contentType: String!, $filename: String!, $metaData: JSON, $size: Int!) {
+  importFileUpload(
+    contentType: $contentType
+    filename: $filename
+    metaData: $metaData
+    size: $size
+  ) {
+    lastSyncId
+    success
+  }
+}
+
+query Initiative($id: String!) {
+  initiative(id: $id) {
+    archivedAt
+    color
+    completedAt
+    content
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    documentContent {
+      id
+    }
+    facets {
+      id
+    }
+    frequencyResolution
+    health
+    healthUpdatedAt
+    icon
+    id
+    integrationsSettings {
+      id
+    }
+    labelIds
+    lastUpdate {
+      id
+    }
+    name
+    organization {
+      id
+      name
+    }
+    owner {
+      id
+      name
+    }
+    parentInitiative {
+      id
+      name
+    }
+    slugId
+    sortOrder
+    startedAt
+    status
+    targetDate
+    targetDateResolution
+    trashed
+    updatedAt
+    updateReminderFrequency
+    updateReminderFrequencyInWeeks
+    updateRemindersDay
+    updateRemindersHour
+    url
+  }
+}
+
+mutation InitiativeAddLabel($id: String!, $labelId: String!) {
+  initiativeAddLabel(id: $id, labelId: $labelId) {
+    initiative {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeArchive($id: String!) {
+  initiativeArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeCreate($input: InitiativeCreateInput!) {
+  initiativeCreate(input: $input) {
+    initiative {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeDelete($id: String!) {
+  initiativeDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query InitiativeRelation($id: String!) {
+  initiativeRelation(id: $id) {
+    archivedAt
+    createdAt
+    id
+    initiative {
+      id
+      name
+    }
+    relatedInitiative {
+      id
+      name
+    }
+    sortOrder
+    updatedAt
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation InitiativeRelationCreate($input: InitiativeRelationCreateInput!) {
+  initiativeRelationCreate(input: $input) {
+    initiativeRelation {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeRelationDelete($id: String!) {
+  initiativeRelationDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query InitiativeRelations($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  initiativeRelations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      id
+      initiative {
+        id
+        name
+      }
+      relatedInitiative {
+        id
+        name
+      }
+      sortOrder
+      updatedAt
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation InitiativeRelationUpdate($id: String!, $input: InitiativeRelationUpdateInput!) {
+  initiativeRelationUpdate(id: $id, input: $input) {
+    initiativeRelation {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeRemoveLabel($id: String!, $labelId: String!) {
+  initiativeRemoveLabel(id: $id, labelId: $labelId) {
+    initiative {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Initiatives($after: String, $before: String, $filter: InitiativeFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [InitiativeSortInput!]) {
+  initiatives(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      archivedAt
+      color
+      completedAt
+      content
+      createdAt
+      creator {
+        id
+        name
+      }
+      description
+      documentContent {
+        id
+      }
+      facets {
+        id
+      }
+      frequencyResolution
+      health
+      healthUpdatedAt
+      icon
+      id
+      integrationsSettings {
+        id
+      }
+      labelIds
+      lastUpdate {
+        id
+      }
+      name
+      organization {
+        id
+        name
+      }
+      owner {
+        id
+        name
+      }
+      parentInitiative {
+        id
+        name
+      }
+      slugId
+      sortOrder
+      startedAt
+      status
+      targetDate
+      targetDateResolution
+      trashed
+      updatedAt
+      updateReminderFrequency
+      updateReminderFrequencyInWeeks
+      updateRemindersDay
+      updateRemindersHour
+      url
+    }
+  }
+}
+
+query InitiativeToProject($id: String!) {
+  initiativeToProject(id: $id) {
+    archivedAt
+    createdAt
+    id
+    initiative {
+      id
+      name
+    }
+    project {
+      id
+      name
+    }
+    sortOrder
+    updatedAt
+  }
+}
+
+mutation InitiativeToProjectCreate($input: InitiativeToProjectCreateInput!) {
+  initiativeToProjectCreate(input: $input) {
+    initiativeToProject {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeToProjectDelete($id: String!) {
+  initiativeToProjectDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query InitiativeToProjects($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  initiativeToProjects(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      id
+      initiative {
+        id
+        name
+      }
+      project {
+        id
+        name
+      }
+      sortOrder
+      updatedAt
+    }
+  }
+}
+
+mutation InitiativeToProjectUpdate($id: String!, $input: InitiativeToProjectUpdateInput!) {
+  initiativeToProjectUpdate(id: $id, input: $input) {
+    initiativeToProject {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeUnarchive($id: String!) {
+  initiativeUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query InitiativeUpdate($id: String!) {
+  initiativeUpdate(id: $id) {
+    archivedAt
+    body
+    bodyData
+    commentCount
+    createdAt
+    diff
+    diffMarkdown
+    editedAt
+    health
+    id
+    infoSnapshot
+    initiative {
+      id
+      name
+    }
+    isDiffHidden
+    isStale
+    reactionData
+    reactions {
+      id
+    }
+    slugId
+    updatedAt
+    url
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation InitiativeUpdateArchive($id: String!) {
+  initiativeUpdateArchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeUpdateCreate($input: InitiativeUpdateCreateInput!) {
+  initiativeUpdateCreate(input: $input) {
+    initiativeUpdate {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeUpdateMutation($id: String!, $input: InitiativeUpdateInput!) {
+  initiativeUpdate(id: $id, input: $input) {
+    initiative {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query InitiativeUpdates($after: String, $before: String, $filter: InitiativeUpdateFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  initiativeUpdates(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      body
+      bodyData
+      commentCount
+      createdAt
+      diff
+      diffMarkdown
+      editedAt
+      health
+      id
+      infoSnapshot
+      initiative {
+        id
+        name
+      }
+      isDiffHidden
+      isStale
+      reactionData
+      reactions {
+        id
+      }
+      slugId
+      updatedAt
+      url
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation InitiativeUpdateUnarchive($id: String!) {
+  initiativeUpdateUnarchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation InitiativeUpdateUpdate($id: String!, $input: InitiativeUpdateUpdateInput!) {
+  initiativeUpdateUpdate(id: $id, input: $input) {
+    initiativeUpdate {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Integration($id: String!) {
+  integration(id: $id) {
+    archivedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    id
+    organization {
+      id
+      name
+    }
+    service
+    team {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation IntegrationArchive($id: String!) {
+  integrationArchive(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationAsksConnectChannel($code: String!, $redirectUri: String!) {
+  integrationAsksConnectChannel(code: $code, redirectUri: $redirectUri) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    mapping {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation IntegrationCustomerDataAttributesRefresh($input: IntegrationCustomerDataAttributesRefreshInput!) {
+  integrationCustomerDataAttributesRefresh(input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationDelete($id: String!, $skipInstallationDeletion: Boolean) {
+  integrationDelete(id: $id, skipInstallationDeletion: $skipInstallationDeletion) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationDiscord($code: String!, $redirectUri: String!) {
+  integrationDiscord(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationFigma($code: String!, $redirectUri: String!) {
+  integrationFigma(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationFront($code: String!, $redirectUri: String!) {
+  integrationFront(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGithubCommitCreate {
+  integrationGithubCommitCreate {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+    webhookSecret
+  }
+}
+
+mutation IntegrationGithubConnect($code: String!, $codeAccess: Boolean, $githubHost: String, $installationId: String!) {
+  integrationGithubConnect(
+    code: $code
+    codeAccess: $codeAccess
+    githubHost: $githubHost
+    installationId: $installationId
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGitHubEnterpriseServerConnect($githubUrl: String!, $organizationName: String!) {
+  integrationGitHubEnterpriseServerConnect(
+    githubUrl: $githubUrl
+    organizationName: $organizationName
+  ) {
+    installUrl
+    integration {
+      id
+    }
+    lastSyncId
+    setupUrl
+    success
+    webhookSecret
+  }
+}
+
+mutation IntegrationGithubImportConnect($code: String!, $installationId: String!) {
+  integrationGithubImportConnect(code: $code, installationId: $installationId) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGithubImportRefresh($id: String!) {
+  integrationGithubImportRefresh(id: $id) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGitHubPersonal($code: String!, $codeAccess: Boolean, $enterpriseUrl: String) {
+  integrationGitHubPersonal(
+    code: $code
+    codeAccess: $codeAccess
+    enterpriseUrl: $enterpriseUrl
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGithubRemoveCodeAccess($integrationId: String!) {
+  integrationGithubRemoveCodeAccess(integrationId: $integrationId) {
+    action
+    lastSyncId
+  }
+}
+
+mutation IntegrationGitlabConnect($accessToken: String!, $gitlabUrl: String!) {
+  integrationGitlabConnect(accessToken: $accessToken, gitlabUrl: $gitlabUrl) {
+    error
+    errorResponseBody
+    errorResponseHeaders
+    integration {
+      id
+    }
+    lastSyncId
+    success
+    webhookSecret
+  }
+}
+
+mutation IntegrationGitlabTestConnection($integrationId: String!) {
+  integrationGitlabTestConnection(integrationId: $integrationId) {
+    error
+    errorResponseBody
+    errorResponseHeaders
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGong($code: String!, $redirectUri: String!) {
+  integrationGong(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGoogleCalendarPersonalConnect($code: String!) {
+  integrationGoogleCalendarPersonalConnect(code: $code) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationGoogleSheets($code: String!) {
+  integrationGoogleSheets(code: $code) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IntegrationHasScopes($integrationId: String!, $scopes: [String!]!) {
+  integrationHasScopes(integrationId: $integrationId, scopes: $scopes) {
+    hasAllScopes
+    missingScopes
+  }
+}
+
+mutation IntegrationIntercom($code: String!, $domainUrl: String, $redirectUri: String!) {
+  integrationIntercom(
+    code: $code
+    domainUrl: $domainUrl
+    redirectUri: $redirectUri
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationIntercomDelete {
+  integrationIntercomDelete {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationIntercomSettingsUpdate($input: IntercomSettingsInput!) {
+  integrationIntercomSettingsUpdate(input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationJiraFetchProjectStatuses($input: JiraFetchProjectStatusesInput!) {
+  integrationJiraFetchProjectStatuses(input: $input) {
+    integration {
+      id
+    }
+    issueStatuses
+    lastSyncId
+    projectStatuses
+    success
+  }
+}
+
+mutation IntegrationJiraPersonal($accessToken: String, $code: String) {
+  integrationJiraPersonal(accessToken: $accessToken, code: $code) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationJiraUpdate($input: JiraUpdateInput!) {
+  integrationJiraUpdate(input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationLaunchDarklyConnect($code: String!, $environment: String!, $projectKey: String!) {
+  integrationLaunchDarklyConnect(
+    code: $code
+    environment: $environment
+    projectKey: $projectKey
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationLaunchDarklyPersonalConnect($code: String!) {
+  integrationLaunchDarklyPersonalConnect(code: $code) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationLoom {
+  integrationLoom {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationMcpServerConnect($customHeaders: [McpServerCustomHeaderInput!], $serverUrl: String!, $teamId: String, $workflowDefinitionId: String) {
+  integrationMcpServerConnect(
+    customHeaders: $customHeaders
+    serverUrl: $serverUrl
+    teamId: $teamId
+    workflowDefinitionId: $workflowDefinitionId
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationMcpServerPersonalConnect($customHeaders: [McpServerCustomHeaderInput!], $serverUrl: String!) {
+  integrationMcpServerPersonalConnect(
+    customHeaders: $customHeaders
+    serverUrl: $serverUrl
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationMicrosoftPersonalConnect($code: String!, $redirectUri: String!) {
+  integrationMicrosoftPersonalConnect(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationMicrosoftTeams($code: String!, $redirectUri: String!) {
+  integrationMicrosoftTeams(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationMicrosoftTeamsProjectPost($channelId: String!, $channelName: String!, $membershipType: String!, $projectId: String!, $teamId: String!, $teamName: String!) {
+  integrationMicrosoftTeamsProjectPost(
+    channelId: $channelId
+    channelName: $channelName
+    membershipType: $membershipType
+    projectId: $projectId
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationOpsgenieConnect($apiKey: String!) {
+  integrationOpsgenieConnect(apiKey: $apiKey) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationOpsgenieRefreshScheduleMappings {
+  integrationOpsgenieRefreshScheduleMappings {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationPagerDutyConnect($code: String!, $redirectUri: String!) {
+  integrationPagerDutyConnect(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationPagerDutyRefreshScheduleMappings {
+  integrationPagerDutyRefreshScheduleMappings {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationRequest($input: IntegrationRequestInput!) {
+  integrationRequest(input: $input) {
+    success
+  }
+}
+
+query Integrations($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  integrations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      id
+      organization {
+        id
+        name
+      }
+      service
+      team {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation IntegrationSalesforce($code: String!, $redirectUri: String!, $subdomain: String!) {
+  integrationSalesforce(
+    code: $code
+    redirectUri: $redirectUri
+    subdomain: $subdomain
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSalesforceMetadataRefresh($id: String!) {
+  integrationSalesforceMetadataRefresh(id: $id) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSentryConnect($code: String!, $installationId: String!, $organizationSlug: String!) {
+  integrationSentryConnect(
+    code: $code
+    installationId: $installationId
+    organizationSlug: $organizationSlug
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSettingsUpdate($id: String!, $input: IntegrationSettingsInput!) {
+  integrationSettingsUpdate(id: $id, input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSlack($code: String!, $redirectUri: String!, $shouldUseV2Auth: Boolean) {
+  integrationSlack(
+    code: $code
+    redirectUri: $redirectUri
+    shouldUseV2Auth: $shouldUseV2Auth
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSlackAsks($code: String!, $redirectUri: String!) {
+  integrationSlackAsks(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSlackCustomerChannelLink($code: String!, $customerId: String!, $redirectUri: String!) {
+  integrationSlackCustomerChannelLink(
+    code: $code
+    customerId: $customerId
+    redirectUri: $redirectUri
+  ) {
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSlackCustomViewNotifications($code: String!, $customViewId: String!, $redirectUri: String!) {
+  integrationSlackCustomViewNotifications(
+    code: $code
+    customViewId: $customViewId
+    redirectUri: $redirectUri
+  ) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    nudgeToConnectMainSlackIntegration
+    nudgeToUpdateMainSlackIntegration
+    success
+  }
+}
+
+mutation IntegrationSlackImportEmojis($code: String!, $redirectUri: String!) {
+  integrationSlackImportEmojis(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSlackInitiativePost($code: String!, $initiativeId: String!, $redirectUri: String!) {
+  integrationSlackInitiativePost(
+    code: $code
+    initiativeId: $initiativeId
+    redirectUri: $redirectUri
+  ) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    nudgeToConnectMainSlackIntegration
+    nudgeToUpdateMainSlackIntegration
+    success
+  }
+}
+
+mutation IntegrationSlackOrAsksUpdateSlackTeamName($integrationId: String!) {
+  integrationSlackOrAsksUpdateSlackTeamName(integrationId: $integrationId) {
+    name
+    success
+  }
+}
+
+mutation IntegrationSlackOrgInitiativeUpdatesPost($code: String!, $redirectUri: String!) {
+  integrationSlackOrgInitiativeUpdatesPost(code: $code, redirectUri: $redirectUri) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    nudgeToConnectMainSlackIntegration
+    nudgeToUpdateMainSlackIntegration
+    success
+  }
+}
+
+mutation IntegrationSlackOrgProjectUpdatesPost($code: String!, $redirectUri: String!) {
+  integrationSlackOrgProjectUpdatesPost(code: $code, redirectUri: $redirectUri) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    nudgeToConnectMainSlackIntegration
+    nudgeToUpdateMainSlackIntegration
+    success
+  }
+}
+
+mutation IntegrationSlackPersonal($code: String!, $redirectUri: String!) {
+  integrationSlackPersonal(code: $code, redirectUri: $redirectUri) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationSlackPost($code: String!, $redirectUri: String!, $shouldUseV2Auth: Boolean, $teamId: String!) {
+  integrationSlackPost(
+    code: $code
+    redirectUri: $redirectUri
+    shouldUseV2Auth: $shouldUseV2Auth
+    teamId: $teamId
+  ) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    nudgeToConnectMainSlackIntegration
+    nudgeToUpdateMainSlackIntegration
+    success
+  }
+}
+
+mutation IntegrationSlackProjectPost($code: String!, $projectId: String!, $redirectUri: String!, $service: String!) {
+  integrationSlackProjectPost(
+    code: $code
+    projectId: $projectId
+    redirectUri: $redirectUri
+    service: $service
+  ) {
+    addBot
+    integration {
+      id
+    }
+    lastSyncId
+    nudgeToConnectMainSlackIntegration
+    nudgeToUpdateMainSlackIntegration
+    success
+  }
+}
+
+mutation IntegrationSlackWorkflowAccessUpdate($enabled: Boolean!, $integrationId: String!) {
+  integrationSlackWorkflowAccessUpdate(
+    enabled: $enabled
+    integrationId: $integrationId
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IntegrationsSettings($id: String!) {
+  integrationsSettings(id: $id) {
+    archivedAt
+    contextViewType
+    createdAt
+    id
+    initiative {
+      id
+      name
+    }
+    microsoftTeamsProjectUpdateCreated
+    project {
+      id
+      name
+    }
+    slackInitiativeUpdateCreated
+    slackIssueAddedToTriage
+    slackIssueAddedToView
+    slackIssueCreated
+    slackIssueNewComment
+    slackIssueSlaBreached
+    slackIssueSlaHighRisk
+    slackIssueStatusChangedAll
+    slackIssueStatusChangedDone
+    slackProjectUpdateCreated
+    slackProjectUpdateCreatedToTeam
+    slackProjectUpdateCreatedToWorkspace
+    team {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation IntegrationsSettingsCreate($input: IntegrationsSettingsCreateInput!) {
+  integrationsSettingsCreate(input: $input) {
+    integrationsSettings {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationsSettingsUpdate($id: String!, $input: IntegrationsSettingsUpdateInput!) {
+  integrationsSettingsUpdate(id: $id, input: $input) {
+    integrationsSettings {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IntegrationTemplate($id: String!) {
+  integrationTemplate(id: $id) {
+    archivedAt
+    createdAt
+    foreignEntityId
+    id
+    integration {
+      id
+    }
+    template {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation IntegrationTemplateCreate($input: IntegrationTemplateCreateInput!) {
+  integrationTemplateCreate(input: $input) {
+    integrationTemplate {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationTemplateDelete($id: String!) {
+  integrationTemplateDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query IntegrationTemplates($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  integrationTemplates(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      foreignEntityId
+      id
+      integration {
+        id
+      }
+      template {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation IntegrationUpdate($id: String!, $input: IntegrationUpdateInput!) {
+  integrationUpdate(id: $id, input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IntegrationZendesk($code: String!, $redirectUri: String!, $scope: String!, $subdomain: String!) {
+  integrationZendesk(
+    code: $code
+    redirectUri: $redirectUri
+    scope: $scope
+    subdomain: $subdomain
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Issue($id: String!) {
+  issue(id: $id) {
+    activitySummary
+    addedToCycleAt
+    addedToProjectAt
+    addedToTeamAt
+    archivedAt
+    asksExternalUserRequester {
+      id
+      name
+    }
+    asksRequester {
+      id
+      name
+    }
+    assignee {
+      id
+      name
+    }
+    autoArchivedAt
+    autoClosedAt
+    boardOrder
+    botActor {
+      id
+      name
+    }
+    branchName
+    canceledAt
+    completedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    customerTicketCount
+    cycle {
+      id
+      name
+    }
+    delegate {
+      id
+      name
+    }
+    description
+    descriptionState
+    documentContent {
+      id
+    }
+    dueDate
+    estimate
+    externalUserCreator {
+      id
+      name
+    }
+    favorite {
+      id
+    }
+    id
+    identifier
+    inheritsSharedAccess
+    integrationSourceType
+    labelIds
+    lastAppliedTemplate {
+      id
+      name
+    }
+    number
+    parent {
+      id
+    }
+    previousIdentifiers
+    priority
+    priorityLabel
+    prioritySortOrder
+    project {
+      id
+      name
+    }
+    projectMilestone {
+      id
+      name
+    }
+    reactionData
+    reactions {
+      id
+    }
+    recurringIssueTemplate {
+      id
+      name
+    }
+    slaBreachesAt
+    slaHighRiskAt
+    slaMediumRiskAt
+    slaStartedAt
+    slaType
+    snoozedBy {
+      id
+      name
+    }
+    snoozedUntilAt
+    sortOrder
+    sourceComment {
+      id
+    }
+    startedAt
+    startedTriageAt
+    state {
+      id
+      name
+    }
+    subIssueSortOrder
+    suggestionsGeneratedAt
+    summary {
+      id
+    }
+    syncedWith {
+      id
+    }
+    team {
+      id
+      name
+    }
+    title
+    trashed
+    triagedAt
+    updatedAt
+    url
+  }
+}
+
+mutation IssueAddLabel($id: String!, $labelId: String!) {
+  issueAddLabel(id: $id, labelId: $labelId) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueArchive($id: String!, $trash: Boolean) {
+  issueArchive(id: $id, trash: $trash) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueBatchCreate($input: IssueBatchCreateInput!) {
+  issueBatchCreate(input: $input) {
+    issues {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueBatchUpdate($ids: [UUID!]!, $input: IssueUpdateInput!) {
+  issueBatchUpdate(ids: $ids, input: $input) {
+    issues {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueCreate($input: IssueCreateInput!) {
+  issueCreate(input: $input) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueDelete($id: String!, $permanentlyDelete: Boolean) {
+  issueDelete(id: $id, permanentlyDelete: $permanentlyDelete) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueDescriptionUpdateFromFront($description: String!, $id: String!) {
+  issueDescriptionUpdateFromFront(description: $description, id: $id) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueExternalSyncDisable($attachmentId: String!) {
+  issueExternalSyncDisable(attachmentId: $attachmentId) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueFigmaFileKeySearch($after: String, $before: String, $fileKey: String!, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  issueFigmaFileKeySearch(
+    after: $after
+    before: $before
+    fileKey: $fileKey
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      activitySummary
+      addedToCycleAt
+      addedToProjectAt
+      addedToTeamAt
+      archivedAt
+      asksExternalUserRequester {
+        id
+        name
+      }
+      asksRequester {
+        id
+        name
+      }
+      assignee {
+        id
+        name
+      }
+      autoArchivedAt
+      autoClosedAt
+      boardOrder
+      botActor {
+        id
+        name
+      }
+      branchName
+      canceledAt
+      completedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      customerTicketCount
+      cycle {
+        id
+        name
+      }
+      delegate {
+        id
+        name
+      }
+      description
+      descriptionState
+      documentContent {
+        id
+      }
+      dueDate
+      estimate
+      externalUserCreator {
+        id
+        name
+      }
+      favorite {
+        id
+      }
+      id
+      identifier
+      inheritsSharedAccess
+      integrationSourceType
+      labelIds
+      lastAppliedTemplate {
+        id
+        name
+      }
+      number
+      parent {
+        id
+      }
+      previousIdentifiers
+      priority
+      priorityLabel
+      prioritySortOrder
+      project {
+        id
+        name
+      }
+      projectMilestone {
+        id
+        name
+      }
+      reactionData
+      reactions {
+        id
+      }
+      recurringIssueTemplate {
+        id
+        name
+      }
+      slaBreachesAt
+      slaHighRiskAt
+      slaMediumRiskAt
+      slaStartedAt
+      slaType
+      snoozedBy {
+        id
+        name
+      }
+      snoozedUntilAt
+      sortOrder
+      sourceComment {
+        id
+      }
+      startedAt
+      startedTriageAt
+      state {
+        id
+        name
+      }
+      subIssueSortOrder
+      suggestionsGeneratedAt
+      summary {
+        id
+      }
+      syncedWith {
+        id
+      }
+      team {
+        id
+        name
+      }
+      title
+      trashed
+      triagedAt
+      updatedAt
+      url
+    }
+  }
+}
+
+query IssueFilterSuggestion($projectId: String, $prompt: String!, $teamId: String) {
+  issueFilterSuggestion(projectId: $projectId, prompt: $prompt, teamId: $teamId) {
+    filter
+    logId
+  }
+}
+
+query IssueImportCheckCsv($csvUrl: String!, $service: String!) {
+  issueImportCheckCSV(csvUrl: $csvUrl, service: $service) {
+    success
+  }
+}
+
+query IssueImportCheckSync($issueImportId: String!) {
+  issueImportCheckSync(issueImportId: $issueImportId) {
+    canSync
+    error
+  }
+}
+
+mutation IssueImportCreateAsana($asanaTeamName: String!, $asanaToken: String!, $id: String, $includeClosedIssues: Boolean, $instantProcess: Boolean, $teamId: String, $teamName: String) {
+  issueImportCreateAsana(
+    asanaTeamName: $asanaTeamName
+    asanaToken: $asanaToken
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportCreateClubhouse($clubhouseGroupName: String!, $clubhouseToken: String!, $id: String, $includeClosedIssues: Boolean, $instantProcess: Boolean, $teamId: String, $teamName: String) {
+  issueImportCreateClubhouse(
+    clubhouseGroupName: $clubhouseGroupName
+    clubhouseToken: $clubhouseToken
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportCreateCsvJira($csvUrl: String!, $jiraEmail: String, $jiraHostname: String, $jiraToken: String, $teamId: String, $teamName: String) {
+  issueImportCreateCSVJira(
+    csvUrl: $csvUrl
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraToken: $jiraToken
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportCreateGithub($githubLabels: [String!], $githubRepoIds: [Int!], $includeClosedIssues: Boolean, $instantProcess: Boolean, $teamId: String, $teamName: String) {
+  issueImportCreateGithub(
+    githubLabels: $githubLabels
+    githubRepoIds: $githubRepoIds
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportCreateJira($id: String, $includeClosedIssues: Boolean, $instantProcess: Boolean, $jiraEmail: String!, $jiraHostname: String!, $jiraProject: String!, $jiraToken: String!, $jql: String, $teamId: String, $teamName: String) {
+  issueImportCreateJira(
+    id: $id
+    includeClosedIssues: $includeClosedIssues
+    instantProcess: $instantProcess
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraProject: $jiraProject
+    jiraToken: $jiraToken
+    jql: $jql
+    teamId: $teamId
+    teamName: $teamName
+  ) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportCreateLinearV2($id: String, $linearSourceOrganizationId: String!) {
+  issueImportCreateLinearV2(
+    id: $id
+    linearSourceOrganizationId: $linearSourceOrganizationId
+  ) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportDelete($issueImportId: String!) {
+  issueImportDelete(issueImportId: $issueImportId) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueImportJqlCheck($jiraEmail: String!, $jiraHostname: String!, $jiraProject: String!, $jiraToken: String!, $jql: String!) {
+  issueImportJqlCheck(
+    jiraEmail: $jiraEmail
+    jiraHostname: $jiraHostname
+    jiraProject: $jiraProject
+    jiraToken: $jiraToken
+    jql: $jql
+  ) {
+    count
+    error
+    success
+  }
+}
+
+mutation IssueImportProcess($issueImportId: String!, $mapping: JSONObject!) {
+  issueImportProcess(issueImportId: $issueImportId, mapping: $mapping) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueImportUpdate($id: String!, $input: IssueImportUpdateInput!) {
+  issueImportUpdate(id: $id, input: $input) {
+    issueImport {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueLabel($id: String!) {
+  issueLabel(id: $id) {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    id
+    inheritedFrom {
+      id
+      name
+    }
+    isGroup
+    lastAppliedAt
+    name
+    organization {
+      id
+      name
+    }
+    parent {
+      id
+      name
+    }
+    retiredAt
+    retiredBy {
+      id
+      name
+    }
+    team {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation IssueLabelCreate($input: IssueLabelCreateInput!, $replaceTeamLabels: Boolean) {
+  issueLabelCreate(input: $input, replaceTeamLabels: $replaceTeamLabels) {
+    issueLabel {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueLabelDelete($id: String!) {
+  issueLabelDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueLabelRestore($id: String!) {
+  issueLabelRestore(id: $id) {
+    issueLabel {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueLabelRetire($id: String!) {
+  issueLabelRetire(id: $id) {
+    issueLabel {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueLabels($after: String, $before: String, $filter: IssueLabelFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  issueLabels(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      creator {
+        id
+        name
+      }
+      description
+      id
+      inheritedFrom {
+        id
+        name
+      }
+      isGroup
+      lastAppliedAt
+      name
+      organization {
+        id
+        name
+      }
+      parent {
+        id
+        name
+      }
+      retiredAt
+      retiredBy {
+        id
+        name
+      }
+      team {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation IssueLabelUpdate($id: String!, $input: IssueLabelUpdateInput!, $replaceTeamLabels: Boolean) {
+  issueLabelUpdate(id: $id, input: $input, replaceTeamLabels: $replaceTeamLabels) {
+    issueLabel {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssuePriorityValues {
+  issuePriorityValues {
+    label
+    priority
+  }
+}
+
+query IssueRelation($id: String!) {
+  issueRelation(id: $id) {
+    archivedAt
+    createdAt
+    id
+    issue {
+      id
+    }
+    relatedIssue {
+      id
+    }
+    type
+    updatedAt
+  }
+}
+
+mutation IssueRelationCreate($input: IssueRelationCreateInput!, $overrideCreatedAt: DateTime) {
+  issueRelationCreate(input: $input, overrideCreatedAt: $overrideCreatedAt) {
+    issueRelation {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueRelationDelete($id: String!) {
+  issueRelationDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query IssueRelations($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  issueRelations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      id
+      issue {
+        id
+      }
+      relatedIssue {
+        id
+      }
+      type
+      updatedAt
+    }
+  }
+}
+
+mutation IssueRelationUpdate($id: String!, $input: IssueRelationUpdateInput!) {
+  issueRelationUpdate(id: $id, input: $input) {
+    issueRelation {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueReminder($id: String!, $reminderAt: DateTime!) {
+  issueReminder(id: $id, reminderAt: $reminderAt) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueRemoveLabel($id: String!, $labelId: String!) {
+  issueRemoveLabel(id: $id, labelId: $labelId) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueRepositorySuggestions($agentSessionId: String, $candidateRepositories: [CandidateRepository!]!, $issueId: String!) {
+  issueRepositorySuggestions(
+    agentSessionId: $agentSessionId
+    candidateRepositories: $candidateRepositories
+    issueId: $issueId
+  ) {
+    __typename
+  }
+}
+
+query Issues($after: String, $before: String, $filter: IssueFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [IssueSortInput!]) {
+  issues(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      activitySummary
+      addedToCycleAt
+      addedToProjectAt
+      addedToTeamAt
+      archivedAt
+      asksExternalUserRequester {
+        id
+        name
+      }
+      asksRequester {
+        id
+        name
+      }
+      assignee {
+        id
+        name
+      }
+      autoArchivedAt
+      autoClosedAt
+      boardOrder
+      botActor {
+        id
+        name
+      }
+      branchName
+      canceledAt
+      completedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      customerTicketCount
+      cycle {
+        id
+        name
+      }
+      delegate {
+        id
+        name
+      }
+      description
+      descriptionState
+      documentContent {
+        id
+      }
+      dueDate
+      estimate
+      externalUserCreator {
+        id
+        name
+      }
+      favorite {
+        id
+      }
+      id
+      identifier
+      inheritsSharedAccess
+      integrationSourceType
+      labelIds
+      lastAppliedTemplate {
+        id
+        name
+      }
+      number
+      parent {
+        id
+      }
+      previousIdentifiers
+      priority
+      priorityLabel
+      prioritySortOrder
+      project {
+        id
+        name
+      }
+      projectMilestone {
+        id
+        name
+      }
+      reactionData
+      reactions {
+        id
+      }
+      recurringIssueTemplate {
+        id
+        name
+      }
+      slaBreachesAt
+      slaHighRiskAt
+      slaMediumRiskAt
+      slaStartedAt
+      slaType
+      snoozedBy {
+        id
+        name
+      }
+      snoozedUntilAt
+      sortOrder
+      sourceComment {
+        id
+      }
+      startedAt
+      startedTriageAt
+      state {
+        id
+        name
+      }
+      subIssueSortOrder
+      suggestionsGeneratedAt
+      summary {
+        id
+      }
+      syncedWith {
+        id
+      }
+      team {
+        id
+        name
+      }
+      title
+      trashed
+      triagedAt
+      updatedAt
+      url
+    }
+  }
+}
+
+query IssueSearch($after: String, $before: String, $filter: IssueFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $query: String) {
+  issueSearch(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    query: $query
+  ) {
+    nodes {
+      activitySummary
+      addedToCycleAt
+      addedToProjectAt
+      addedToTeamAt
+      archivedAt
+      asksExternalUserRequester {
+        id
+        name
+      }
+      asksRequester {
+        id
+        name
+      }
+      assignee {
+        id
+        name
+      }
+      autoArchivedAt
+      autoClosedAt
+      boardOrder
+      botActor {
+        id
+        name
+      }
+      branchName
+      canceledAt
+      completedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      customerTicketCount
+      cycle {
+        id
+        name
+      }
+      delegate {
+        id
+        name
+      }
+      description
+      descriptionState
+      documentContent {
+        id
+      }
+      dueDate
+      estimate
+      externalUserCreator {
+        id
+        name
+      }
+      favorite {
+        id
+      }
+      id
+      identifier
+      inheritsSharedAccess
+      integrationSourceType
+      labelIds
+      lastAppliedTemplate {
+        id
+        name
+      }
+      number
+      parent {
+        id
+      }
+      previousIdentifiers
+      priority
+      priorityLabel
+      prioritySortOrder
+      project {
+        id
+        name
+      }
+      projectMilestone {
+        id
+        name
+      }
+      reactionData
+      reactions {
+        id
+      }
+      recurringIssueTemplate {
+        id
+        name
+      }
+      slaBreachesAt
+      slaHighRiskAt
+      slaMediumRiskAt
+      slaStartedAt
+      slaType
+      snoozedBy {
+        id
+        name
+      }
+      snoozedUntilAt
+      sortOrder
+      sourceComment {
+        id
+      }
+      startedAt
+      startedTriageAt
+      state {
+        id
+        name
+      }
+      subIssueSortOrder
+      suggestionsGeneratedAt
+      summary {
+        id
+      }
+      syncedWith {
+        id
+      }
+      team {
+        id
+        name
+      }
+      title
+      trashed
+      triagedAt
+      updatedAt
+      url
+    }
+  }
+}
+
+mutation IssueSubscribe($id: String!, $userEmail: String, $userId: String) {
+  issueSubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueTitleSuggestionFromCustomerRequest($request: String!) {
+  issueTitleSuggestionFromCustomerRequest(request: $request) {
+    lastSyncId
+    logId
+    title
+  }
+}
+
+query IssueToRelease($id: String!) {
+  issueToRelease(id: $id) {
+    archivedAt
+    createdAt
+    id
+    issue {
+      id
+    }
+    release {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation IssueToReleaseCreate($input: IssueToReleaseCreateInput!) {
+  issueToReleaseCreate(input: $input) {
+    issueToRelease {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueToReleaseDelete($id: String!) {
+  issueToReleaseDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueToReleaseDeleteByIssueAndRelease($issueId: String!, $releaseId: String!) {
+  issueToReleaseDeleteByIssueAndRelease(issueId: $issueId, releaseId: $releaseId) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query IssueToReleases($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  issueToReleases(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      id
+      issue {
+        id
+      }
+      release {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation IssueUnarchive($id: String!) {
+  issueUnarchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueUnsubscribe($id: String!, $userEmail: String, $userId: String) {
+  issueUnsubscribe(id: $id, userEmail: $userEmail, userId: $userId) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) {
+  issueUpdate(id: $id, input: $input) {
+    issue {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query IssueVcsBranchSearch($branchName: String!) {
+  issueVcsBranchSearch(branchName: $branchName) {
+    activitySummary
+    addedToCycleAt
+    addedToProjectAt
+    addedToTeamAt
+    archivedAt
+    asksExternalUserRequester {
+      id
+      name
+    }
+    asksRequester {
+      id
+      name
+    }
+    assignee {
+      id
+      name
+    }
+    autoArchivedAt
+    autoClosedAt
+    boardOrder
+    botActor {
+      id
+      name
+    }
+    branchName
+    canceledAt
+    completedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    customerTicketCount
+    cycle {
+      id
+      name
+    }
+    delegate {
+      id
+      name
+    }
+    description
+    descriptionState
+    documentContent {
+      id
+    }
+    dueDate
+    estimate
+    externalUserCreator {
+      id
+      name
+    }
+    favorite {
+      id
+    }
+    id
+    identifier
+    inheritsSharedAccess
+    integrationSourceType
+    labelIds
+    lastAppliedTemplate {
+      id
+      name
+    }
+    number
+    parent {
+      id
+    }
+    previousIdentifiers
+    priority
+    priorityLabel
+    prioritySortOrder
+    project {
+      id
+      name
+    }
+    projectMilestone {
+      id
+      name
+    }
+    reactionData
+    reactions {
+      id
+    }
+    recurringIssueTemplate {
+      id
+      name
+    }
+    slaBreachesAt
+    slaHighRiskAt
+    slaMediumRiskAt
+    slaStartedAt
+    slaType
+    snoozedBy {
+      id
+      name
+    }
+    snoozedUntilAt
+    sortOrder
+    sourceComment {
+      id
+    }
+    startedAt
+    startedTriageAt
+    state {
+      id
+      name
+    }
+    subIssueSortOrder
+    suggestionsGeneratedAt
+    summary {
+      id
+    }
+    syncedWith {
+      id
+    }
+    team {
+      id
+      name
+    }
+    title
+    trashed
+    triagedAt
+    updatedAt
+    url
+  }
+}
+
+mutation JiraIntegrationConnect($input: JiraConfigurationInput!) {
+  jiraIntegrationConnect(input: $input) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation JoinOrganizationFromOnboarding($input: JoinOrganizationInput!) {
+  joinOrganizationFromOnboarding(input: $input) {
+    organization {
+      id
+      name
+    }
+    user {
+      id
+      name
+    }
+  }
+}
+
+query LatestReleaseByAccessKey {
+  latestReleaseByAccessKey {
+    archivedAt
+    canceledAt
+    commitSha
+    completedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    currentProgress
+    description
+    id
+    issueCount
+    name
+    pipeline {
+      id
+      name
+    }
+    progressHistory
+    releaseNotes {
+      id
+    }
+    slugId
+    stage {
+      id
+      name
+    }
+    startDate
+    startedAt
+    targetDate
+    trashed
+    updatedAt
+    url
+    version
+  }
+}
+
+mutation LeaveOrganization($organizationId: String!) {
+  leaveOrganization(organizationId: $organizationId) {
+    organization {
+      id
+      name
+    }
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation Logout($reason: String) {
+  logout(reason: $reason) {
+    success
+  }
+}
+
+mutation LogoutAllSessions($reason: String) {
+  logoutAllSessions(reason: $reason) {
+    success
+  }
+}
+
+mutation LogoutOtherSessions($reason: String) {
+  logoutOtherSessions(reason: $reason) {
+    success
+  }
+}
+
+mutation LogoutSession($sessionId: String!) {
+  logoutSession(sessionId: $sessionId) {
+    success
+  }
+}
+
+query MicrosoftTeamsChannels {
+  microsoftTeamsChannels {
+    success
+    teams {
+      id
+    }
+  }
+}
+
+query Notification($id: String!) {
+  notification(id: $id) {
+    __typename
+    ... on CustomerNeedNotification {
+      id
+    }
+    ... on CustomerNotification {
+      id
+    }
+    ... on DocumentNotification {
+      id
+    }
+    ... on InitiativeNotification {
+      id
+    }
+    ... on IssueNotification {
+      id
+    }
+    ... on OauthClientApprovalNotification {
+      id
+    }
+    ... on PostNotification {
+      id
+    }
+    ... on ProjectNotification {
+      id
+    }
+    ... on PullRequestNotification {
+      id
+    }
+    ... on WelcomeMessageNotification {
+      id
+    }
+  }
+}
+
+mutation NotificationArchive($id: String!) {
+  notificationArchive(id: $id) {
+    entity {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation NotificationArchiveAll($input: NotificationEntityInput!) {
+  notificationArchiveAll(input: $input) {
+    lastSyncId
+    notifications {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    success
+  }
+}
+
+mutation NotificationCategoryChannelSubscriptionUpdate($category: NotificationCategory!, $channel: NotificationChannel!, $subscribe: Boolean!) {
+  notificationCategoryChannelSubscriptionUpdate(
+    category: $category
+    channel: $channel
+    subscribe: $subscribe
+  ) {
+    lastSyncId
+    success
+    userSettings {
+      id
+    }
+  }
+}
+
+mutation NotificationMarkReadAll($input: NotificationEntityInput!, $readAt: DateTime!) {
+  notificationMarkReadAll(input: $input, readAt: $readAt) {
+    lastSyncId
+    notifications {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    success
+  }
+}
+
+mutation NotificationMarkUnreadAll($input: NotificationEntityInput!) {
+  notificationMarkUnreadAll(input: $input) {
+    lastSyncId
+    notifications {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    success
+  }
+}
+
+query Notifications($after: String, $before: String, $filter: NotificationFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  notifications(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+  }
+}
+
+mutation NotificationSnoozeAll($input: NotificationEntityInput!, $snoozedUntilAt: DateTime!) {
+  notificationSnoozeAll(input: $input, snoozedUntilAt: $snoozedUntilAt) {
+    lastSyncId
+    notifications {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    success
+  }
+}
+
+query NotificationSubscription($id: String!) {
+  notificationSubscription(id: $id) {
+    __typename
+    ... on CustomerNotificationSubscription {
+      id
+    }
+    ... on CustomViewNotificationSubscription {
+      id
+    }
+    ... on CycleNotificationSubscription {
+      id
+    }
+    ... on InitiativeNotificationSubscription {
+      id
+    }
+    ... on LabelNotificationSubscription {
+      id
+    }
+    ... on ProjectNotificationSubscription {
+      id
+    }
+    ... on TeamNotificationSubscription {
+      id
+    }
+    ... on UserNotificationSubscription {
+      id
+    }
+  }
+}
+
+mutation NotificationSubscriptionCreate($input: NotificationSubscriptionCreateInput!) {
+  notificationSubscriptionCreate(input: $input) {
+    lastSyncId
+    notificationSubscription {
+      __typename
+      ... on CustomerNotificationSubscription {
+        id
+      }
+      ... on CustomViewNotificationSubscription {
+        id
+      }
+      ... on CycleNotificationSubscription {
+        id
+      }
+      ... on InitiativeNotificationSubscription {
+        id
+      }
+      ... on LabelNotificationSubscription {
+        id
+      }
+      ... on ProjectNotificationSubscription {
+        id
+      }
+      ... on TeamNotificationSubscription {
+        id
+      }
+      ... on UserNotificationSubscription {
+        id
+      }
+    }
+    success
+  }
+}
+
+mutation NotificationSubscriptionDelete($id: String!) {
+  notificationSubscriptionDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query NotificationSubscriptions($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  notificationSubscriptions(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      __typename
+      ... on CustomerNotificationSubscription {
+        id
+      }
+      ... on CustomViewNotificationSubscription {
+        id
+      }
+      ... on CycleNotificationSubscription {
+        id
+      }
+      ... on InitiativeNotificationSubscription {
+        id
+      }
+      ... on LabelNotificationSubscription {
+        id
+      }
+      ... on ProjectNotificationSubscription {
+        id
+      }
+      ... on TeamNotificationSubscription {
+        id
+      }
+      ... on UserNotificationSubscription {
+        id
+      }
+    }
+  }
+}
+
+mutation NotificationSubscriptionUpdate($id: String!, $input: NotificationSubscriptionUpdateInput!) {
+  notificationSubscriptionUpdate(id: $id, input: $input) {
+    lastSyncId
+    notificationSubscription {
+      __typename
+      ... on CustomerNotificationSubscription {
+        id
+      }
+      ... on CustomViewNotificationSubscription {
+        id
+      }
+      ... on CycleNotificationSubscription {
+        id
+      }
+      ... on InitiativeNotificationSubscription {
+        id
+      }
+      ... on LabelNotificationSubscription {
+        id
+      }
+      ... on ProjectNotificationSubscription {
+        id
+      }
+      ... on TeamNotificationSubscription {
+        id
+      }
+      ... on UserNotificationSubscription {
+        id
+      }
+    }
+    success
+  }
+}
+
+query NotificationsUnreadCount {
+  notificationsUnreadCount
+}
+
+mutation NotificationUnarchive($id: String!) {
+  notificationUnarchive(id: $id) {
+    entity {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation NotificationUnsnoozeAll($input: NotificationEntityInput!, $unsnoozedAt: DateTime!) {
+  notificationUnsnoozeAll(input: $input, unsnoozedAt: $unsnoozedAt) {
+    lastSyncId
+    notifications {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    success
+  }
+}
+
+mutation NotificationUpdate($id: String!, $input: NotificationUpdateInput!) {
+  notificationUpdate(id: $id, input: $input) {
+    lastSyncId
+    notification {
+      __typename
+      ... on CustomerNeedNotification {
+        id
+      }
+      ... on CustomerNotification {
+        id
+      }
+      ... on DocumentNotification {
+        id
+      }
+      ... on InitiativeNotification {
+        id
+      }
+      ... on IssueNotification {
+        id
+      }
+      ... on OauthClientApprovalNotification {
+        id
+      }
+      ... on PostNotification {
+        id
+      }
+      ... on ProjectNotification {
+        id
+      }
+      ... on PullRequestNotification {
+        id
+      }
+      ... on WelcomeMessageNotification {
+        id
+      }
+    }
+    success
+  }
+}
+
+query Organization {
+  organization {
+    agentAutomationEnabled
+    aiAddonEnabled
+    aiDiscussionSummariesEnabled
+    aiProviderConfiguration
+    aiThreadSummariesEnabled
+    allowedAiProviders
+    allowedAuthServices
+    allowedFileUploadContentTypes
+    allowMembersToInvite
+    archivedAt
+    authSettings
+    codeIntelligenceEnabled
+    codeIntelligenceRepository
+    codingAgentEnabled
+    codingAgentSettings
+    createdAt
+    createdIssueCount
+    customerCount
+    customersConfiguration
+    customersEnabled
+    defaultFeedSummarySchedule
+    deletionRequestedAt
+    facets {
+      id
+    }
+    feedEnabled
+    fiscalYearStartMonth
+    generatedUpdatesEnabled
+    gitBranchFormat
+    gitLinkbackDescriptionsEnabled
+    gitLinkbackMessagesEnabled
+    gitPublicLinkbackMessagesEnabled
+    hideNonPrimaryOrganizations
+    hipaaComplianceEnabled
+    id
+    initiativeUpdateReminderFrequencyInWeeks
+    initiativeUpdateRemindersDay
+    initiativeUpdateRemindersHour
+    linearAgentEnabled
+    linearAgentSettings
+    logoUrl
+    name
+    periodUploadVolume
+    previousUrlKeys
+    projectStatuses {
+      id
+      name
+    }
+    projectUpdateReminderFrequencyInWeeks
+    projectUpdateRemindersDay
+    projectUpdateRemindersHour
+    projectUpdatesReminderFrequency
+    releaseChannel
+    releasesEnabled
+    restrictAgentInvocationToMembers
+    restrictLabelManagementToAdmins
+    restrictTeamCreationToAdmins
+    roadmapEnabled
+    samlEnabled
+    samlSettings
+    scimEnabled
+    scimSettings
+    securitySettings
+    slackAutoCreateProjectChannel
+    slackProjectChannelIntegration {
+      id
+    }
+    slackProjectChannelPrefix
+    slackProjectChannelsEnabled
+    slaDayCount
+    subscription {
+      id
+    }
+    themeSettings
+    trialEndsAt
+    trialStartsAt
+    updatedAt
+    urlKey
+    userCount
+    workingDays
+  }
+}
+
+mutation OrganizationCancelDelete {
+  organizationCancelDelete {
+    success
+  }
+}
+
+mutation OrganizationDelete($input: DeleteOrganizationInput!) {
+  organizationDelete(input: $input) {
+    success
+  }
+}
+
+mutation OrganizationDeleteChallenge {
+  organizationDeleteChallenge {
+    success
+  }
+}
+
+mutation OrganizationDomainClaim($id: String!) {
+  organizationDomainClaim(id: $id) {
+    success
+  }
+}
+
+query OrganizationDomainClaimRequest($id: String!) {
+  organizationDomainClaimRequest(id: $id) {
+    verificationString
+  }
+}
+
+mutation OrganizationDomainCreate($input: OrganizationDomainCreateInput!, $triggerEmailVerification: Boolean) {
+  organizationDomainCreate(
+    input: $input
+    triggerEmailVerification: $triggerEmailVerification
+  ) {
+    lastSyncId
+    organizationDomain {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation OrganizationDomainDelete($id: String!) {
+  organizationDomainDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation OrganizationDomainUpdate($id: String!, $input: OrganizationDomainUpdateInput!) {
+  organizationDomainUpdate(id: $id, input: $input) {
+    lastSyncId
+    organizationDomain {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation OrganizationDomainVerify($input: OrganizationDomainVerificationInput!) {
+  organizationDomainVerify(input: $input) {
+    lastSyncId
+    organizationDomain {
+      id
+      name
+    }
+    success
+  }
+}
+
+query OrganizationExists($urlKey: String!) {
+  organizationExists(urlKey: $urlKey) {
+    exists
+    success
+  }
+}
+
+query OrganizationInvite($id: String!) {
+  organizationInvite(id: $id) {
+    acceptedAt
+    archivedAt
+    createdAt
+    email
+    expiresAt
+    external
+    id
+    invitee {
+      id
+      name
+    }
+    inviter {
+      id
+      name
+    }
+    metadata
+    organization {
+      id
+      name
+    }
+    role
+    updatedAt
+  }
+}
+
+mutation OrganizationInviteCreate($input: OrganizationInviteCreateInput!) {
+  organizationInviteCreate(input: $input) {
+    lastSyncId
+    organizationInvite {
+      id
+    }
+    success
+  }
+}
+
+mutation OrganizationInviteDelete($id: String!) {
+  organizationInviteDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query OrganizationInviteDetails($id: String!) {
+  organizationInviteDetails(id: $id) {
+    __typename
+  }
+}
+
+query OrganizationInvites($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  organizationInvites(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      acceptedAt
+      archivedAt
+      createdAt
+      email
+      expiresAt
+      external
+      id
+      invitee {
+        id
+        name
+      }
+      inviter {
+        id
+        name
+      }
+      metadata
+      organization {
+        id
+        name
+      }
+      role
+      updatedAt
+    }
+  }
+}
+
+mutation OrganizationInviteUpdate($id: String!, $input: OrganizationInviteUpdateInput!) {
+  organizationInviteUpdate(id: $id, input: $input) {
+    lastSyncId
+    organizationInvite {
+      id
+    }
+    success
+  }
+}
+
+query OrganizationMeta($urlKey: String!) {
+  organizationMeta(urlKey: $urlKey) {
+    allowedAuthServices
+    region
+  }
+}
+
+mutation OrganizationStartTrial {
+  organizationStartTrial {
+    success
+  }
+}
+
+mutation OrganizationStartTrialForPlan($input: OrganizationStartTrialInput!) {
+  organizationStartTrialForPlan(input: $input) {
+    success
+  }
+}
+
+mutation OrganizationUpdate($input: OrganizationUpdateInput!) {
+  organizationUpdate(input: $input) {
+    lastSyncId
+    organization {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation PasskeyLoginFinish($authId: String!, $response: JSONObject!) {
+  passkeyLoginFinish(authId: $authId, response: $response) {
+    allowDomainAccess
+    availableOrganizations {
+      id
+      name
+    }
+    email
+    id
+    lastUsedOrganizationId
+    lockedOrganizations {
+      id
+      name
+    }
+    lockedUsers {
+      id
+      name
+    }
+    service
+    token
+    users {
+      id
+      name
+    }
+  }
+}
+
+mutation PasskeyLoginStart($authId: String!) {
+  passkeyLoginStart(authId: $authId) {
+    options
+    success
+  }
+}
+
+query Project($id: String!) {
+  project(id: $id) {
+    archivedAt
+    autoArchivedAt
+    canceledAt
+    color
+    completedAt
+    completedIssueCountHistory
+    completedScopeHistory
+    content
+    contentState
+    convertedFromIssue {
+      id
+    }
+    createdAt
+    creator {
+      id
+      name
+    }
+    currentProgress
+    description
+    documentContent {
+      id
+    }
+    facets {
+      id
+    }
+    favorite {
+      id
+    }
+    frequencyResolution
+    health
+    healthUpdatedAt
+    icon
+    id
+    inProgressScopeHistory
+    integrationsSettings {
+      id
+    }
+    issueCountHistory
+    labelIds
+    lastAppliedTemplate {
+      id
+      name
+    }
+    lastUpdate {
+      id
+    }
+    lead {
+      id
+      name
+    }
+    name
+    priority
+    priorityLabel
+    prioritySortOrder
+    progress
+    progressHistory
+    projectUpdateRemindersPausedUntilAt
+    scope
+    scopeHistory
+    slackIssueComments
+    slackIssueStatuses
+    slackNewIssue
+    slugId
+    sortOrder
+    startDate
+    startDateResolution
+    startedAt
+    state
+    status {
+      id
+      name
+    }
+    syncedWith {
+      id
+    }
+    targetDate
+    targetDateResolution
+    trashed
+    updatedAt
+    updateReminderFrequency
+    updateReminderFrequencyInWeeks
+    updateRemindersDay
+    updateRemindersHour
+    url
+  }
+}
+
+mutation ProjectAddLabel($id: String!, $labelId: String!) {
+  projectAddLabel(id: $id, labelId: $labelId) {
+    lastSyncId
+    project {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectArchive($id: String!, $trash: Boolean) {
+  projectArchive(id: $id, trash: $trash) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectCreate($input: ProjectCreateInput!, $slackChannelName: String) {
+  projectCreate(input: $input, slackChannelName: $slackChannelName) {
+    lastSyncId
+    project {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectCreateSlackChannel($id: String!, $integrationId: String, $slackChannelName: String!) {
+  projectCreateSlackChannel(
+    id: $id
+    integrationId: $integrationId
+    slackChannelName: $slackChannelName
+  ) {
+    lastSyncId
+    project {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectDelete($id: String!) {
+  projectDelete(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectExternalSyncDisable($projectId: String!, $syncSource: ExternalSyncService!) {
+  projectExternalSyncDisable(projectId: $projectId, syncSource: $syncSource) {
+    lastSyncId
+    project {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ProjectFilterSuggestion($prompt: String!, $teamId: String) {
+  projectFilterSuggestion(prompt: $prompt, teamId: $teamId) {
+    filter
+    logId
+  }
+}
+
+query ProjectLabel($id: String!) {
+  projectLabel(id: $id) {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    id
+    isGroup
+    lastAppliedAt
+    name
+    organization {
+      id
+      name
+    }
+    parent {
+      id
+      name
+    }
+    retiredAt
+    retiredBy {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation ProjectLabelCreate($input: ProjectLabelCreateInput!) {
+  projectLabelCreate(input: $input) {
+    lastSyncId
+    projectLabel {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectLabelDelete($id: String!) {
+  projectLabelDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectLabelRestore($id: String!) {
+  projectLabelRestore(id: $id) {
+    lastSyncId
+    projectLabel {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectLabelRetire($id: String!) {
+  projectLabelRetire(id: $id) {
+    lastSyncId
+    projectLabel {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ProjectLabels($after: String, $before: String, $filter: ProjectLabelFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  projectLabels(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      creator {
+        id
+        name
+      }
+      description
+      id
+      isGroup
+      lastAppliedAt
+      name
+      organization {
+        id
+        name
+      }
+      parent {
+        id
+        name
+      }
+      retiredAt
+      retiredBy {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation ProjectLabelUpdate($id: String!, $input: ProjectLabelUpdateInput!) {
+  projectLabelUpdate(id: $id, input: $input) {
+    lastSyncId
+    projectLabel {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ProjectMilestone($id: String!) {
+  projectMilestone(id: $id) {
+    archivedAt
+    createdAt
+    currentProgress
+    description
+    descriptionState
+    documentContent {
+      id
+    }
+    id
+    name
+    progress
+    progressHistory
+    project {
+      id
+      name
+    }
+    sortOrder
+    status
+    targetDate
+    updatedAt
+  }
+}
+
+mutation ProjectMilestoneCreate($input: ProjectMilestoneCreateInput!) {
+  projectMilestoneCreate(input: $input) {
+    lastSyncId
+    projectMilestone {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectMilestoneDelete($id: String!) {
+  projectMilestoneDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectMilestoneMove($id: String!, $input: ProjectMilestoneMoveInput!) {
+  projectMilestoneMove(id: $id, input: $input) {
+    lastSyncId
+    projectMilestone {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ProjectMilestones($after: String, $before: String, $filter: ProjectMilestoneFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  projectMilestones(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      currentProgress
+      description
+      descriptionState
+      documentContent {
+        id
+      }
+      id
+      name
+      progress
+      progressHistory
+      project {
+        id
+        name
+      }
+      sortOrder
+      status
+      targetDate
+      updatedAt
+    }
+  }
+}
+
+mutation ProjectMilestoneUpdate($id: String!, $input: ProjectMilestoneUpdateInput!) {
+  projectMilestoneUpdate(id: $id, input: $input) {
+    lastSyncId
+    projectMilestone {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectReassignStatus($newProjectStatusId: String!, $originalProjectStatusId: String!) {
+  projectReassignStatus(
+    newProjectStatusId: $newProjectStatusId
+    originalProjectStatusId: $originalProjectStatusId
+  ) {
+    lastSyncId
+    success
+  }
+}
+
+query ProjectRelation($id: String!) {
+  projectRelation(id: $id) {
+    anchorType
+    archivedAt
+    createdAt
+    id
+    project {
+      id
+      name
+    }
+    projectMilestone {
+      id
+      name
+    }
+    relatedAnchorType
+    relatedProject {
+      id
+      name
+    }
+    relatedProjectMilestone {
+      id
+      name
+    }
+    type
+    updatedAt
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation ProjectRelationCreate($input: ProjectRelationCreateInput!) {
+  projectRelationCreate(input: $input) {
+    lastSyncId
+    projectRelation {
+      id
+    }
+    success
+  }
+}
+
+mutation ProjectRelationDelete($id: String!) {
+  projectRelationDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query ProjectRelations($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  projectRelations(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      anchorType
+      archivedAt
+      createdAt
+      id
+      project {
+        id
+        name
+      }
+      projectMilestone {
+        id
+        name
+      }
+      relatedAnchorType
+      relatedProject {
+        id
+        name
+      }
+      relatedProjectMilestone {
+        id
+        name
+      }
+      type
+      updatedAt
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation ProjectRelationUpdate($id: String!, $input: ProjectRelationUpdateInput!) {
+  projectRelationUpdate(id: $id, input: $input) {
+    lastSyncId
+    projectRelation {
+      id
+    }
+    success
+  }
+}
+
+mutation ProjectRemoveLabel($id: String!, $labelId: String!) {
+  projectRemoveLabel(id: $id, labelId: $labelId) {
+    lastSyncId
+    project {
+      id
+      name
+    }
+    success
+  }
+}
+
+query Projects($after: String, $before: String, $filter: ProjectFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [ProjectSortInput!]) {
+  projects(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      archivedAt
+      autoArchivedAt
+      canceledAt
+      color
+      completedAt
+      completedIssueCountHistory
+      completedScopeHistory
+      content
+      contentState
+      convertedFromIssue {
+        id
+      }
+      createdAt
+      creator {
+        id
+        name
+      }
+      currentProgress
+      description
+      documentContent {
+        id
+      }
+      facets {
+        id
+      }
+      favorite {
+        id
+      }
+      frequencyResolution
+      health
+      healthUpdatedAt
+      icon
+      id
+      inProgressScopeHistory
+      integrationsSettings {
+        id
+      }
+      issueCountHistory
+      labelIds
+      lastAppliedTemplate {
+        id
+        name
+      }
+      lastUpdate {
+        id
+      }
+      lead {
+        id
+        name
+      }
+      name
+      priority
+      priorityLabel
+      prioritySortOrder
+      progress
+      progressHistory
+      projectUpdateRemindersPausedUntilAt
+      scope
+      scopeHistory
+      slackIssueComments
+      slackIssueStatuses
+      slackNewIssue
+      slugId
+      sortOrder
+      startDate
+      startDateResolution
+      startedAt
+      state
+      status {
+        id
+        name
+      }
+      syncedWith {
+        id
+      }
+      targetDate
+      targetDateResolution
+      trashed
+      updatedAt
+      updateReminderFrequency
+      updateReminderFrequencyInWeeks
+      updateRemindersDay
+      updateRemindersHour
+      url
+    }
+  }
+}
+
+query ProjectStatus($id: String!) {
+  projectStatus(id: $id) {
+    archivedAt
+    color
+    createdAt
+    description
+    id
+    indefinite
+    name
+    position
+    type
+    updatedAt
+  }
+}
+
+mutation ProjectStatusArchive($id: String!) {
+  projectStatusArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectStatusCreate($input: ProjectStatusCreateInput!) {
+  projectStatusCreate(input: $input) {
+    lastSyncId
+    status {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ProjectStatuses($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  projectStatuses(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      description
+      id
+      indefinite
+      name
+      position
+      type
+      updatedAt
+    }
+  }
+}
+
+query ProjectStatusProjectCount($id: String!) {
+  projectStatusProjectCount(id: $id) {
+    archivedTeamCount
+    count
+    privateCount
+  }
+}
+
+mutation ProjectStatusUnarchive($id: String!) {
+  projectStatusUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectStatusUpdate($id: String!, $input: ProjectStatusUpdateInput!) {
+  projectStatusUpdate(id: $id, input: $input) {
+    lastSyncId
+    status {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ProjectUnarchive($id: String!) {
+  projectUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query ProjectUpdate($id: String!) {
+  projectUpdate(id: $id) {
+    archivedAt
+    body
+    bodyData
+    commentCount
+    createdAt
+    diff
+    diffMarkdown
+    editedAt
+    health
+    id
+    infoSnapshot
+    isDiffHidden
+    isStale
+    project {
+      id
+      name
+    }
+    reactionData
+    reactions {
+      id
+    }
+    slugId
+    updatedAt
+    url
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation ProjectUpdateArchive($id: String!) {
+  projectUpdateArchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectUpdateCreate($input: ProjectUpdateCreateInput!) {
+  projectUpdateCreate(input: $input) {
+    lastSyncId
+    projectUpdate {
+      id
+    }
+    success
+  }
+}
+
+mutation ProjectUpdateDelete($id: String!) {
+  projectUpdateDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectUpdateMutation($id: String!, $input: ProjectUpdateInput!) {
+  projectUpdate(id: $id, input: $input) {
+    lastSyncId
+    project {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ProjectUpdates($after: String, $before: String, $filter: ProjectUpdateFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  projectUpdates(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      body
+      bodyData
+      commentCount
+      createdAt
+      diff
+      diffMarkdown
+      editedAt
+      health
+      id
+      infoSnapshot
+      isDiffHidden
+      isStale
+      project {
+        id
+        name
+      }
+      reactionData
+      reactions {
+        id
+      }
+      slugId
+      updatedAt
+      url
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation ProjectUpdateUnarchive($id: String!) {
+  projectUpdateUnarchive(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ProjectUpdateUpdate($id: String!, $input: ProjectUpdateUpdateInput!) {
+  projectUpdateUpdate(id: $id, input: $input) {
+    lastSyncId
+    projectUpdate {
+      id
+    }
+    success
+  }
+}
+
+mutation PushSubscriptionCreate($input: PushSubscriptionCreateInput!) {
+  pushSubscriptionCreate(input: $input) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation PushSubscriptionDelete($id: String!) {
+  pushSubscriptionDelete(id: $id) {
+    entity {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query PushSubscriptionTest($sendStrategy: SendStrategy, $targetMobile: Boolean) {
+  pushSubscriptionTest(sendStrategy: $sendStrategy, targetMobile: $targetMobile) {
+    success
+  }
+}
+
+query RateLimitStatus {
+  rateLimitStatus {
+    identifier
+    kind
+  }
+}
+
+mutation ReactionCreate($input: ReactionCreateInput!) {
+  reactionCreate(input: $input) {
+    lastSyncId
+    reaction {
+      id
+    }
+    success
+  }
+}
+
+mutation ReactionDelete($id: String!) {
+  reactionDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation RefreshGoogleSheetsData($id: String!, $type: String) {
+  refreshGoogleSheetsData(id: $id, type: $type) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query Release($id: String!) {
+  release(id: $id) {
+    archivedAt
+    canceledAt
+    commitSha
+    completedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    currentProgress
+    description
+    id
+    issueCount
+    name
+    pipeline {
+      id
+      name
+    }
+    progressHistory
+    releaseNotes {
+      id
+    }
+    slugId
+    stage {
+      id
+      name
+    }
+    startDate
+    startedAt
+    targetDate
+    trashed
+    updatedAt
+    url
+    version
+  }
+}
+
+mutation ReleaseArchive($id: String!) {
+  releaseArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ReleaseComplete($input: ReleaseCompleteInput!) {
+  releaseComplete(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseCompleteByAccessKey($input: ReleaseCompleteInputBase!) {
+  releaseCompleteByAccessKey(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseCreate($input: ReleaseCreateInput!) {
+  releaseCreate(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseDelete($id: String!) {
+  releaseDelete(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query ReleaseNote($id: String!) {
+  releaseNote(id: $id) {
+    archivedAt
+    createdAt
+    documentContent {
+      id
+    }
+    id
+    lastRelease {
+      id
+      name
+    }
+    releases {
+      id
+      name
+    }
+    slugId
+    title
+    updatedAt
+  }
+}
+
+mutation ReleaseNoteCreate($input: ReleaseNoteCreateInput!) {
+  releaseNoteCreate(input: $input) {
+    lastSyncId
+    releaseNote {
+      id
+    }
+    success
+  }
+}
+
+mutation ReleaseNoteDelete($id: String!) {
+  releaseNoteDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query ReleaseNotes($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  releaseNotes(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      documentContent {
+        id
+      }
+      id
+      lastRelease {
+        id
+        name
+      }
+      releases {
+        id
+        name
+      }
+      slugId
+      title
+      updatedAt
+    }
+  }
+}
+
+mutation ReleaseNoteUpdate($id: String!, $input: ReleaseNoteUpdateInput!) {
+  releaseNoteUpdate(id: $id, input: $input) {
+    lastSyncId
+    releaseNote {
+      id
+    }
+    success
+  }
+}
+
+query ReleasePipeline($id: String!) {
+  releasePipeline(id: $id) {
+    approximateReleaseCount
+    archivedAt
+    createdAt
+    id
+    includePathPatterns
+    isProduction
+    latestReleaseNote {
+      id
+    }
+    name
+    releaseNoteTemplate {
+      id
+      name
+    }
+    slugId
+    type
+    updatedAt
+    url
+  }
+}
+
+mutation ReleasePipelineArchive($id: String!) {
+  releasePipelineArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+query ReleasePipelineByAccessKey {
+  releasePipelineByAccessKey {
+    approximateReleaseCount
+    archivedAt
+    createdAt
+    id
+    includePathPatterns
+    isProduction
+    latestReleaseNote {
+      id
+    }
+    name
+    releaseNoteTemplate {
+      id
+      name
+    }
+    slugId
+    type
+    updatedAt
+    url
+  }
+}
+
+mutation ReleasePipelineCreate($input: ReleasePipelineCreateInput!) {
+  releasePipelineCreate(input: $input) {
+    lastSyncId
+    releasePipeline {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleasePipelineDelete($id: String!) {
+  releasePipelineDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query ReleasePipelines($after: String, $before: String, $filter: ReleasePipelineFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [ReleasePipelineSortInput!]) {
+  releasePipelines(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      approximateReleaseCount
+      archivedAt
+      createdAt
+      id
+      includePathPatterns
+      isProduction
+      latestReleaseNote {
+        id
+      }
+      name
+      releaseNoteTemplate {
+        id
+        name
+      }
+      slugId
+      type
+      updatedAt
+      url
+    }
+  }
+}
+
+mutation ReleasePipelineUnarchive($id: String!) {
+  releasePipelineUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ReleasePipelineUpdate($id: String!, $input: ReleasePipelineUpdateInput!) {
+  releasePipelineUpdate(id: $id, input: $input) {
+    lastSyncId
+    releasePipeline {
+      id
+      name
+    }
+    success
+  }
+}
+
+query Releases($after: String, $before: String, $filter: ReleaseFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [ReleaseSortInput!]) {
+  releases(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      archivedAt
+      canceledAt
+      commitSha
+      completedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      currentProgress
+      description
+      id
+      issueCount
+      name
+      pipeline {
+        id
+        name
+      }
+      progressHistory
+      releaseNotes {
+        id
+      }
+      slugId
+      stage {
+        id
+        name
+      }
+      startDate
+      startedAt
+      targetDate
+      trashed
+      updatedAt
+      url
+      version
+    }
+  }
+}
+
+query ReleaseSearch($filter: ReleaseFilter, $first: Int, $term: String) {
+  releaseSearch(filter: $filter, first: $first, term: $term) {
+    archivedAt
+    canceledAt
+    commitSha
+    completedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    currentProgress
+    description
+    id
+    issueCount
+    name
+    pipeline {
+      id
+      name
+    }
+    progressHistory
+    releaseNotes {
+      id
+    }
+    slugId
+    stage {
+      id
+      name
+    }
+    startDate
+    startedAt
+    targetDate
+    trashed
+    updatedAt
+    url
+    version
+  }
+}
+
+query ReleaseStage($id: String!) {
+  releaseStage(id: $id) {
+    archivedAt
+    color
+    createdAt
+    frozen
+    id
+    name
+    pipeline {
+      id
+      name
+    }
+    position
+    type
+    updatedAt
+  }
+}
+
+mutation ReleaseStageArchive($id: String!) {
+  releaseStageArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ReleaseStageCreate($input: ReleaseStageCreateInput!) {
+  releaseStageCreate(input: $input) {
+    lastSyncId
+    releaseStage {
+      id
+      name
+    }
+    success
+  }
+}
+
+query ReleaseStages($after: String, $before: String, $filter: ReleaseStageFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  releaseStages(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      frozen
+      id
+      name
+      pipeline {
+        id
+        name
+      }
+      position
+      type
+      updatedAt
+    }
+  }
+}
+
+mutation ReleaseStageUnarchive($id: String!) {
+  releaseStageUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ReleaseStageUpdate($id: String!, $input: ReleaseStageUpdateInput!) {
+  releaseStageUpdate(id: $id, input: $input) {
+    lastSyncId
+    releaseStage {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseSync($input: ReleaseSyncInput!) {
+  releaseSync(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseSyncByAccessKey($input: ReleaseSyncInputBase!) {
+  releaseSyncByAccessKey(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseUnarchive($id: String!) {
+  releaseUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation ReleaseUpdate($id: String!, $input: ReleaseUpdateInput!) {
+  releaseUpdate(id: $id, input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseUpdateByPipeline($input: ReleaseUpdateByPipelineInput!) {
+  releaseUpdateByPipeline(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ReleaseUpdateByPipelineByAccessKey($input: ReleaseUpdateByPipelineInputBase!) {
+  releaseUpdateByPipelineByAccessKey(input: $input) {
+    lastSyncId
+    release {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation ResendOrganizationInvite($id: String!) {
+  resendOrganizationInvite(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation ResendOrganizationInviteByEmail($email: String!) {
+  resendOrganizationInviteByEmail(email: $email) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query Roadmap($id: String!) {
+  roadmap(id: $id) {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    id
+    name
+    organization {
+      id
+      name
+    }
+    owner {
+      id
+      name
+    }
+    slugId
+    sortOrder
+    updatedAt
+    url
+  }
+}
+
+mutation RoadmapArchive($id: String!) {
+  roadmapArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation RoadmapCreate($input: RoadmapCreateInput!) {
+  roadmapCreate(input: $input) {
+    lastSyncId
+    roadmap {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation RoadmapDelete($id: String!) {
+  roadmapDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query Roadmaps($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  roadmaps(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      creator {
+        id
+        name
+      }
+      description
+      id
+      name
+      organization {
+        id
+        name
+      }
+      owner {
+        id
+        name
+      }
+      slugId
+      sortOrder
+      updatedAt
+      url
+    }
+  }
+}
+
+query RoadmapToProject($id: String!) {
+  roadmapToProject(id: $id) {
+    archivedAt
+    createdAt
+    id
+    project {
+      id
+      name
+    }
+    roadmap {
+      id
+      name
+    }
+    sortOrder
+    updatedAt
+  }
+}
+
+mutation RoadmapToProjectCreate($input: RoadmapToProjectCreateInput!) {
+  roadmapToProjectCreate(input: $input) {
+    lastSyncId
+    roadmapToProject {
+      id
+    }
+    success
+  }
+}
+
+mutation RoadmapToProjectDelete($id: String!) {
+  roadmapToProjectDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query RoadmapToProjects($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  roadmapToProjects(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      id
+      project {
+        id
+        name
+      }
+      roadmap {
+        id
+        name
+      }
+      sortOrder
+      updatedAt
+    }
+  }
+}
+
+mutation RoadmapToProjectUpdate($id: String!, $input: RoadmapToProjectUpdateInput!) {
+  roadmapToProjectUpdate(id: $id, input: $input) {
+    lastSyncId
+    roadmapToProject {
+      id
+    }
+    success
+  }
+}
+
+mutation RoadmapUnarchive($id: String!) {
+  roadmapUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation RoadmapUpdate($id: String!, $input: RoadmapUpdateInput!) {
+  roadmapUpdate(id: $id, input: $input) {
+    lastSyncId
+    roadmap {
+      id
+      name
+    }
+    success
+  }
+}
+
+mutation SamlTokenUserAccountAuth($input: TokenUserAccountAuthInput!) {
+  samlTokenUserAccountAuth(input: $input) {
+    allowDomainAccess
+    availableOrganizations {
+      id
+      name
+    }
+    email
+    id
+    lastUsedOrganizationId
+    lockedOrganizations {
+      id
+      name
+    }
+    lockedUsers {
+      id
+      name
+    }
+    service
+    token
+    users {
+      id
+      name
+    }
+  }
+}
+
+query SearchDocuments($after: String, $before: String, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
+  searchDocuments(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    includeComments: $includeComments
+    last: $last
+    orderBy: $orderBy
+    teamId: $teamId
+    term: $term
+  ) {
+    nodes {
+      id
+    }
+    totalCount
+  }
+}
+
+query SearchIssues($after: String, $before: String, $filter: IssueFilter, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
+  searchIssues(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    includeComments: $includeComments
+    last: $last
+    orderBy: $orderBy
+    teamId: $teamId
+    term: $term
+  ) {
+    nodes {
+      id
+    }
+    totalCount
+  }
+}
+
+query SearchProjects($after: String, $before: String, $first: Int, $includeArchived: Boolean, $includeComments: Boolean, $last: Int, $orderBy: PaginationOrderBy, $teamId: String, $term: String!) {
+  searchProjects(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    includeComments: $includeComments
+    last: $last
+    orderBy: $orderBy
+    teamId: $teamId
+    term: $term
+  ) {
+    nodes {
+      id
+      name
+    }
+    totalCount
+  }
+}
+
+query SemanticSearch($filters: SemanticSearchFilters, $includeArchived: Boolean, $maxResults: Int, $query: String!, $types: [SemanticSearchResultType!]) {
+  semanticSearch(
+    filters: $filters
+    includeArchived: $includeArchived
+    maxResults: $maxResults
+    query: $query
+    types: $types
+  ) {
+    enabled
+    results {
+      id
+    }
+  }
+}
+
+query SlaConfigurations($teamId: String!) {
+  slaConfigurations(teamId: $teamId) {
+    conditions
+    id
+    name
+    removesSla
+    sla
+    slaType
+  }
+}
+
+query SsoUrlFromEmail($email: String!, $isDesktop: Boolean, $type: IdentityProviderType!) {
+  ssoUrlFromEmail(email: $email, isDesktop: $isDesktop, type: $type) {
+    samlSsoUrl
+    success
+  }
+}
+
+query Team($id: String!) {
+  team(id: $id) {
+    activeCycle {
+      id
+      name
+    }
+    aiDiscussionSummariesEnabled
+    aiThreadSummariesEnabled
+    allMembersCanJoin
+    ancestors {
+      id
+      name
+    }
+    archivedAt
+    autoArchivePeriod
+    autoCloseChildIssues
+    autoCloseParentIssues
+    autoClosePeriod
+    autoCloseStateId
+    children {
+      id
+      name
+    }
+    color
+    createdAt
+    currentProgress
+    cycleCalenderUrl
+    cycleCooldownTime
+    cycleDuration
+    cycleIssueAutoAssignCompleted
+    cycleIssueAutoAssignStarted
+    cycleLockToActive
+    cyclesEnabled
+    cycleStartDay
+    defaultIssueEstimate
+    defaultIssueState {
+      id
+      name
+    }
+    defaultProjectTemplate {
+      id
+      name
+    }
+    defaultTemplateForMembers {
+      id
+      name
+    }
+    defaultTemplateForMembersId
+    defaultTemplateForNonMembers {
+      id
+      name
+    }
+    defaultTemplateForNonMembersId
+    description
+    displayName
+    draftWorkflowState {
+      id
+      name
+    }
+    facets {
+      id
+    }
+    groupIssueHistory
+    icon
+    id
+    inheritIssueEstimation
+    inheritSlackAutoCreateProjectChannel
+    inheritWorkflowStatuses
+    integrationsSettings {
+      id
+    }
+    inviteHash
+    issueCount
+    issueEstimationAllowZero
+    issueEstimationExtended
+    issueEstimationType
+    issueOrderingNoPriorityFirst
+    issueSortOrderDefaultToBottom
+    joinByDefault
+    key
+    markedAsDuplicateWorkflowState {
+      id
+      name
+    }
+    mergeableWorkflowState {
+      id
+      name
+    }
+    mergeWorkflowState {
+      id
+      name
+    }
+    name
+    organization {
+      id
+      name
+    }
+    parent {
+      id
+      name
+    }
+    posts {
+      id
+    }
+    private
+    progressHistory
+    requirePriorityToLeaveTriage
+    retiredAt
+    reviewWorkflowState {
+      id
+      name
+    }
+    scimGroupName
+    scimManaged
+    securitySettings
+    setIssueSortOrderOnStateChange
+    slackAutoCreateProjectChannel
+    slackIssueComments
+    slackIssueStatuses
+    slackNewIssue
+    startWorkflowState {
+      id
+      name
+    }
+    timezone
+    triageEnabled
+    triageIssueState {
+      id
+      name
+    }
+    triageResponsibility {
+      id
+    }
+    upcomingCycleCount
+    updatedAt
+  }
+}
+
+mutation TeamCreate($copySettingsFromTeamId: String, $input: TeamCreateInput!) {
+  teamCreate(copySettingsFromTeamId: $copySettingsFromTeamId, input: $input) {
+    lastSyncId
+    success
+    team {
+      id
+      name
+    }
+  }
+}
+
+mutation TeamCyclesDelete($id: String!) {
+  teamCyclesDelete(id: $id) {
+    lastSyncId
+    success
+    team {
+      id
+      name
+    }
+  }
+}
+
+mutation TeamDelete($id: String!) {
+  teamDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation TeamKeyDelete($id: String!) {
+  teamKeyDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query TeamMembership($id: String!) {
+  teamMembership(id: $id) {
+    archivedAt
+    createdAt
+    id
+    owner
+    sortOrder
+    team {
+      id
+      name
+    }
+    updatedAt
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation TeamMembershipCreate($input: TeamMembershipCreateInput!) {
+  teamMembershipCreate(input: $input) {
+    lastSyncId
+    success
+    teamMembership {
+      id
+    }
+  }
+}
+
+mutation TeamMembershipDelete($alsoLeaveParentTeams: Boolean, $id: String!) {
+  teamMembershipDelete(alsoLeaveParentTeams: $alsoLeaveParentTeams, id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query TeamMemberships($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  teamMemberships(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      id
+      owner
+      sortOrder
+      team {
+        id
+        name
+      }
+      updatedAt
+      user {
+        id
+        name
+      }
+    }
+  }
+}
+
+mutation TeamMembershipUpdate($id: String!, $input: TeamMembershipUpdateInput!) {
+  teamMembershipUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    teamMembership {
+      id
+    }
+  }
+}
+
+query Teams($after: String, $before: String, $filter: TeamFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  teams(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      activeCycle {
+        id
+        name
+      }
+      aiDiscussionSummariesEnabled
+      aiThreadSummariesEnabled
+      allMembersCanJoin
+      ancestors {
+        id
+        name
+      }
+      archivedAt
+      autoArchivePeriod
+      autoCloseChildIssues
+      autoCloseParentIssues
+      autoClosePeriod
+      autoCloseStateId
+      children {
+        id
+        name
+      }
+      color
+      createdAt
+      currentProgress
+      cycleCalenderUrl
+      cycleCooldownTime
+      cycleDuration
+      cycleIssueAutoAssignCompleted
+      cycleIssueAutoAssignStarted
+      cycleLockToActive
+      cyclesEnabled
+      cycleStartDay
+      defaultIssueEstimate
+      defaultIssueState {
+        id
+        name
+      }
+      defaultProjectTemplate {
+        id
+        name
+      }
+      defaultTemplateForMembers {
+        id
+        name
+      }
+      defaultTemplateForMembersId
+      defaultTemplateForNonMembers {
+        id
+        name
+      }
+      defaultTemplateForNonMembersId
+      description
+      displayName
+      draftWorkflowState {
+        id
+        name
+      }
+      facets {
+        id
+      }
+      groupIssueHistory
+      icon
+      id
+      inheritIssueEstimation
+      inheritSlackAutoCreateProjectChannel
+      inheritWorkflowStatuses
+      integrationsSettings {
+        id
+      }
+      inviteHash
+      issueCount
+      issueEstimationAllowZero
+      issueEstimationExtended
+      issueEstimationType
+      issueOrderingNoPriorityFirst
+      issueSortOrderDefaultToBottom
+      joinByDefault
+      key
+      markedAsDuplicateWorkflowState {
+        id
+        name
+      }
+      mergeableWorkflowState {
+        id
+        name
+      }
+      mergeWorkflowState {
+        id
+        name
+      }
+      name
+      organization {
+        id
+        name
+      }
+      parent {
+        id
+        name
+      }
+      posts {
+        id
+      }
+      private
+      progressHistory
+      requirePriorityToLeaveTriage
+      retiredAt
+      reviewWorkflowState {
+        id
+        name
+      }
+      scimGroupName
+      scimManaged
+      securitySettings
+      setIssueSortOrderOnStateChange
+      slackAutoCreateProjectChannel
+      slackIssueComments
+      slackIssueStatuses
+      slackNewIssue
+      startWorkflowState {
+        id
+        name
+      }
+      timezone
+      triageEnabled
+      triageIssueState {
+        id
+        name
+      }
+      triageResponsibility {
+        id
+      }
+      upcomingCycleCount
+      updatedAt
+    }
+  }
+}
+
+mutation TeamUnarchive($id: String!) {
+  teamUnarchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation TeamUpdate($id: String!, $input: TeamUpdateInput!, $mapping: InheritanceEntityMapping) {
+  teamUpdate(id: $id, input: $input, mapping: $mapping) {
+    lastSyncId
+    success
+    team {
+      id
+      name
+    }
+  }
+}
+
+query Template($id: String!) {
+  template(id: $id) {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    hasFormFields
+    icon
+    id
+    inheritedFrom {
+      id
+      name
+    }
+    lastAppliedAt
+    lastUpdatedBy {
+      id
+      name
+    }
+    name
+    organization {
+      id
+      name
+    }
+    pipeline {
+      id
+      name
+    }
+    sortOrder
+    team {
+      id
+      name
+    }
+    templateData
+    type
+    updatedAt
+  }
+}
+
+mutation TemplateCreate($input: TemplateCreateInput!) {
+  templateCreate(input: $input) {
+    lastSyncId
+    success
+    template {
+      id
+      name
+    }
+  }
+}
+
+mutation TemplateDelete($id: String!) {
+  templateDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+query Templates {
+  templates {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    hasFormFields
+    icon
+    id
+    inheritedFrom {
+      id
+      name
+    }
+    lastAppliedAt
+    lastUpdatedBy {
+      id
+      name
+    }
+    name
+    organization {
+      id
+      name
+    }
+    pipeline {
+      id
+      name
+    }
+    sortOrder
+    team {
+      id
+      name
+    }
+    templateData
+    type
+    updatedAt
+  }
+}
+
+query TemplatesForIntegration($integrationType: String!) {
+  templatesForIntegration(integrationType: $integrationType) {
+    archivedAt
+    color
+    createdAt
+    creator {
+      id
+      name
+    }
+    description
+    hasFormFields
+    icon
+    id
+    inheritedFrom {
+      id
+      name
+    }
+    lastAppliedAt
+    lastUpdatedBy {
+      id
+      name
+    }
+    name
+    organization {
+      id
+      name
+    }
+    pipeline {
+      id
+      name
+    }
+    sortOrder
+    team {
+      id
+      name
+    }
+    templateData
+    type
+    updatedAt
+  }
+}
+
+mutation TemplateUpdate($id: String!, $input: TemplateUpdateInput!) {
+  templateUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    template {
+      id
+      name
+    }
+  }
+}
+
+query TimeSchedule($id: String!) {
+  timeSchedule(id: $id) {
+    archivedAt
+    createdAt
+    externalId
+    externalUrl
+    id
+    integration {
+      id
+    }
+    name
+    organization {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation TimeScheduleCreate($input: TimeScheduleCreateInput!) {
+  timeScheduleCreate(input: $input) {
+    lastSyncId
+    success
+    timeSchedule {
+      id
+      name
+    }
+  }
+}
+
+mutation TimeScheduleDelete($id: String!) {
+  timeScheduleDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation TimeScheduleRefreshIntegrationSchedule($id: String!) {
+  timeScheduleRefreshIntegrationSchedule(id: $id) {
+    lastSyncId
+    success
+    timeSchedule {
+      id
+      name
+    }
+  }
+}
+
+query TimeSchedules($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  timeSchedules(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      createdAt
+      externalId
+      externalUrl
+      id
+      integration {
+        id
+      }
+      name
+      organization {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+mutation TimeScheduleUpdate($id: String!, $input: TimeScheduleUpdateInput!) {
+  timeScheduleUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    timeSchedule {
+      id
+      name
+    }
+  }
+}
+
+mutation TimeScheduleUpsertExternal($externalId: String!, $input: TimeScheduleUpdateInput!) {
+  timeScheduleUpsertExternal(externalId: $externalId, input: $input) {
+    lastSyncId
+    success
+    timeSchedule {
+      id
+      name
+    }
+  }
+}
+
+mutation TrackAnonymousEvent($input: EventTrackingInput!) {
+  trackAnonymousEvent(input: $input) {
+    success
+  }
+}
+
+query TriageResponsibilities($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  triageResponsibilities(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      action
+      archivedAt
+      createdAt
+      currentUser {
+        id
+        name
+      }
+      id
+      team {
+        id
+        name
+      }
+      timeSchedule {
+        id
+        name
+      }
+      updatedAt
+    }
+  }
+}
+
+query TriageResponsibility($id: String!) {
+  triageResponsibility(id: $id) {
+    action
+    archivedAt
+    createdAt
+    currentUser {
+      id
+      name
+    }
+    id
+    team {
+      id
+      name
+    }
+    timeSchedule {
+      id
+      name
+    }
+    updatedAt
+  }
+}
+
+mutation TriageResponsibilityCreate($input: TriageResponsibilityCreateInput!) {
+  triageResponsibilityCreate(input: $input) {
+    lastSyncId
+    success
+    triageResponsibility {
+      id
+    }
+  }
+}
+
+mutation TriageResponsibilityDelete($id: String!) {
+  triageResponsibilityDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation TriageResponsibilityUpdate($id: String!, $input: TriageResponsibilityUpdateInput!) {
+  triageResponsibilityUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    triageResponsibility {
+      id
+    }
+  }
+}
+
+mutation UpdateIntegrationSlackScopes($code: String!, $integrationId: String!, $redirectUri: String!) {
+  updateIntegrationSlackScopes(
+    code: $code
+    integrationId: $integrationId
+    redirectUri: $redirectUri
+  ) {
+    integration {
+      id
+    }
+    lastSyncId
+    success
+  }
+}
+
+query User($id: String!) {
+  user(id: $id) {
+    active
+    admin
+    app
+    archivedAt
+    avatarBackgroundColor
+    avatarUrl
+    calendarHash
+    canAccessAnyPublicTeam
+    createdAt
+    createdIssueCount
+    description
+    disableReason
+    displayName
+    email
+    gitHubUserId
+    guest
+    id
+    identityProvider {
+      id
+    }
+    initials
+    inviteHash
+    isAssignable
+    isMe
+    isMentionable
+    lastSeen
+    name
+    organization {
+      id
+      name
+    }
+    owner
+    statusEmoji
+    statusLabel
+    statusUntilAt
+    supportsAgentSessions
+    timezone
+    title
+    updatedAt
+    url
+  }
+}
+
+mutation UserChangeRole($id: String!, $role: UserRoleType!) {
+  userChangeRole(id: $id, role: $role) {
+    success
+  }
+}
+
+mutation UserDiscordConnect($code: String!, $redirectUri: String!) {
+  userDiscordConnect(code: $code, redirectUri: $redirectUri) {
+    lastSyncId
+    success
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation UserExternalUserDisconnect($service: String!) {
+  userExternalUserDisconnect(service: $service) {
+    lastSyncId
+    success
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation UserFlagUpdate($flag: UserFlagType!, $operation: UserFlagUpdateOperation!) {
+  userFlagUpdate(flag: $flag, operation: $operation) {
+    flag
+    lastSyncId
+    success
+    value
+  }
+}
+
+mutation UserRevokeAllSessions($id: String!) {
+  userRevokeAllSessions(id: $id) {
+    success
+  }
+}
+
+mutation UserRevokeSession($id: String!, $sessionId: String!) {
+  userRevokeSession(id: $id, sessionId: $sessionId) {
+    success
+  }
+}
+
+query Users($after: String, $before: String, $filter: UserFilter, $first: Int, $includeArchived: Boolean, $includeDisabled: Boolean, $last: Int, $orderBy: PaginationOrderBy, $sort: [UserSortInput!]) {
+  users(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    includeDisabled: $includeDisabled
+    last: $last
+    orderBy: $orderBy
+    sort: $sort
+  ) {
+    nodes {
+      active
+      admin
+      app
+      archivedAt
+      avatarBackgroundColor
+      avatarUrl
+      calendarHash
+      canAccessAnyPublicTeam
+      createdAt
+      createdIssueCount
+      description
+      disableReason
+      displayName
+      email
+      gitHubUserId
+      guest
+      id
+      identityProvider {
+        id
+      }
+      initials
+      inviteHash
+      isAssignable
+      isMe
+      isMentionable
+      lastSeen
+      name
+      organization {
+        id
+        name
+      }
+      owner
+      statusEmoji
+      statusLabel
+      statusUntilAt
+      supportsAgentSessions
+      timezone
+      title
+      updatedAt
+      url
+    }
+  }
+}
+
+query UserSessions($id: String!) {
+  userSessions(id: $id) {
+    browserType
+    client
+    countryCodes
+    createdAt
+    detailedName
+    id
+    ip
+    isCurrentSession
+    lastActiveAt
+    location
+    locationCity
+    locationCountry
+    locationCountryCode
+    locationRegionCode
+    name
+    operatingSystem
+    service
+    type
+    updatedAt
+    userAgent
+  }
+}
+
+query UserSettings {
+  userSettings {
+    archivedAt
+    autoAssignToSelf
+    calendarHash
+    createdAt
+    feedLastSeenTime
+    feedSummarySchedule
+    id
+    showFullUserNames
+    subscribedToChangelog
+    subscribedToDPA
+    subscribedToInviteAccepted
+    subscribedToPrivacyLegalUpdates
+    unsubscribedFrom
+    updatedAt
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation UserSettingsFlagsReset($flags: [UserFlagType!]) {
+  userSettingsFlagsReset(flags: $flags) {
+    lastSyncId
+    success
+  }
+}
+
+mutation UserSettingsUpdate($id: String!, $input: UserSettingsUpdateInput!) {
+  userSettingsUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    userSettings {
+      id
+    }
+  }
+}
+
+mutation UserSuspend($forceBypassScimRestrictions: Boolean, $id: String!) {
+  userSuspend(forceBypassScimRestrictions: $forceBypassScimRestrictions, id: $id) {
+    success
+  }
+}
+
+mutation UserUnlinkFromIdentityProvider($id: String!) {
+  userUnlinkFromIdentityProvider(id: $id) {
+    success
+  }
+}
+
+mutation UserUnsuspend($forceBypassScimRestrictions: Boolean, $id: String!) {
+  userUnsuspend(
+    forceBypassScimRestrictions: $forceBypassScimRestrictions
+    id: $id
+  ) {
+    success
+  }
+}
+
+mutation UserUpdate($id: String!, $input: UserUpdateInput!) {
+  userUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    user {
+      id
+      name
+    }
+  }
+}
+
+query VerifyGitHubEnterpriseServerInstallation($integrationId: String!) {
+  verifyGitHubEnterpriseServerInstallation(integrationId: $integrationId) {
+    success
+  }
+}
+
+query Viewer {
+  viewer {
+    active
+    admin
+    app
+    archivedAt
+    avatarBackgroundColor
+    avatarUrl
+    calendarHash
+    canAccessAnyPublicTeam
+    createdAt
+    createdIssueCount
+    description
+    disableReason
+    displayName
+    email
+    gitHubUserId
+    guest
+    id
+    identityProvider {
+      id
+    }
+    initials
+    inviteHash
+    isAssignable
+    isMe
+    isMentionable
+    lastSeen
+    name
+    organization {
+      id
+      name
+    }
+    owner
+    statusEmoji
+    statusLabel
+    statusUntilAt
+    supportsAgentSessions
+    timezone
+    title
+    updatedAt
+    url
+  }
+}
+
+mutation ViewPreferencesCreate($input: ViewPreferencesCreateInput!) {
+  viewPreferencesCreate(input: $input) {
+    lastSyncId
+    success
+    viewPreferences {
+      id
+    }
+  }
+}
+
+mutation ViewPreferencesDelete($id: String!) {
+  viewPreferencesDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation ViewPreferencesUpdate($id: String!, $input: ViewPreferencesUpdateInput!) {
+  viewPreferencesUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    viewPreferences {
+      id
+    }
+  }
+}
+
+query Webhook($id: String!) {
+  webhook(id: $id) {
+    allPublicTeams
+    archivedAt
+    createdAt
+    creator {
+      id
+      name
+    }
+    enabled
+    failures {
+      id
+    }
+    id
+    label
+    resourceTypes
+    secret
+    team {
+      id
+      name
+    }
+    teamIds
+    updatedAt
+    url
+  }
+}
+
+mutation WebhookCreate($input: WebhookCreateInput!) {
+  webhookCreate(input: $input) {
+    lastSyncId
+    success
+    webhook {
+      id
+    }
+  }
+}
+
+mutation WebhookDelete($id: String!) {
+  webhookDelete(id: $id) {
+    entityId
+    lastSyncId
+    success
+  }
+}
+
+mutation WebhookRotateSecret($id: String!) {
+  webhookRotateSecret(id: $id) {
+    lastSyncId
+    secret
+    success
+  }
+}
+
+query Webhooks($after: String, $before: String, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  webhooks(
+    after: $after
+    before: $before
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      allPublicTeams
+      archivedAt
+      createdAt
+      creator {
+        id
+        name
+      }
+      enabled
+      failures {
+        id
+      }
+      id
+      label
+      resourceTypes
+      secret
+      team {
+        id
+        name
+      }
+      teamIds
+      updatedAt
+      url
+    }
+  }
+}
+
+mutation WebhookUpdate($id: String!, $input: WebhookUpdateInput!) {
+  webhookUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    webhook {
+      id
+    }
+  }
+}
+
+query WorkflowState($id: String!) {
+  workflowState(id: $id) {
+    archivedAt
+    color
+    createdAt
+    description
+    id
+    inheritedFrom {
+      id
+      name
+    }
+    name
+    position
+    team {
+      id
+      name
+    }
+    type
+    updatedAt
+  }
+}
+
+mutation WorkflowStateArchive($id: String!) {
+  workflowStateArchive(id: $id) {
+    entity {
+      id
+      name
+    }
+    lastSyncId
+    success
+  }
+}
+
+mutation WorkflowStateCreate($input: WorkflowStateCreateInput!) {
+  workflowStateCreate(input: $input) {
+    lastSyncId
+    success
+    workflowState {
+      id
+      name
+    }
+  }
+}
+
+query WorkflowStates($after: String, $before: String, $filter: WorkflowStateFilter, $first: Int, $includeArchived: Boolean, $last: Int, $orderBy: PaginationOrderBy) {
+  workflowStates(
+    after: $after
+    before: $before
+    filter: $filter
+    first: $first
+    includeArchived: $includeArchived
+    last: $last
+    orderBy: $orderBy
+  ) {
+    nodes {
+      archivedAt
+      color
+      createdAt
+      description
+      id
+      inheritedFrom {
+        id
+        name
+      }
+      name
+      position
+      team {
+        id
+        name
+      }
+      type
+      updatedAt
+    }
+  }
+}
+
+mutation WorkflowStateUpdate($id: String!, $input: WorkflowStateUpdateInput!) {
+  workflowStateUpdate(id: $id, input: $input) {
+    lastSyncId
+    success
+    workflowState {
+      id
+      name
+    }
+  }
+}

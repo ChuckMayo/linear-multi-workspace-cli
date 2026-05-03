@@ -1,0 +1,21 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`OPERATION_REGISTRY > Test 1 (RED→GREEN) — registry-shape snapshot 1`] = `
+{
+  "count": 501,
+  "first3": [
+    "AdministrableTeams",
+    "AgentActivities",
+    "AgentActivity",
+  ],
+  "kinds": {
+    "mutation": 351,
+    "query": 150,
+  },
+  "last3": [
+    "WorkflowStateCreate",
+    "WorkflowStateUpdate",
+    "WorkflowStates",
+  ],
+}
+`;

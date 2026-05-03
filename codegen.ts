@@ -5,10 +5,11 @@
  * - preset: client (2026-recommended client-preset; emits TypedDocumentNode-aware types)
  * - output: ./src/generated/ (committed to git for offline-reproducible builds)
  *
- * Phase 0 has zero `.graphql` operation documents in `src/operations/`, so
- * `ignoreNoDocuments: true` is required — without it, codegen exits non-zero
- * the first time. Phase 3 PLAN 03-01 Task 2 flips this to `false` once
- * `codegen/build-operations.ts` populates `src/operations/_registry.graphql`.
+ * Phase 3 PLAN 03-01 Task 2 populates `src/operations/_registry.graphql`
+ * via `npm run build-operations`, so `ignoreNoDocuments` is now `false` —
+ * if the builder ever fails to emit documents, codegen exits non-zero and
+ * CI catches the regression instead of silently producing an empty
+ * `src/generated/gql.ts`.
  */
 
 import type { CodegenConfig } from '@graphql-codegen/cli'
@@ -16,7 +17,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli'
 const config: CodegenConfig = {
   schema: './schema.graphql',
   documents: ['src/operations/**/*.graphql', 'src/operations/**/*.ts'],
-  ignoreNoDocuments: true,
+  ignoreNoDocuments: false,
   generates: {
     './src/generated/': {
       preset: 'client',
