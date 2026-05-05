@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CURATED_REGISTRY, getRawRegistryView } from '../../src/lib/introspection-registry.js'
 
-const EXPECTED_REGISTRY_SIZE = 36
+const EXPECTED_REGISTRY_SIZE = 39
 
 describe('CURATED_REGISTRY', () => {
   it(`has exactly ${EXPECTED_REGISTRY_SIZE} entries matching the curated command files`, () => {

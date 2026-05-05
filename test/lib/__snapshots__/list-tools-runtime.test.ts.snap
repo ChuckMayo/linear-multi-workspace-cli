@@ -3,7 +3,7 @@
 exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 1`] = `
 {
   "counts": {
-    "curated": 36,
+    "curated": 39,
     "raw": 501,
   },
   "curated": [
@@ -80,6 +80,13 @@ exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 
       ],
       "id": "cycle move",
       "summary": "Move an issue into a specific cycle number for a team.",
+    },
+    {
+      "flags": [
+        "pretty",
+      ],
+      "id": "describe",
+      "summary": "Return input/output JSON Schema and examples for a curated or raw command.",
     },
     {
       "flags": [
@@ -234,6 +241,13 @@ exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 
     },
     {
       "flags": [
+        "pretty",
+      ],
+      "id": "list-tools",
+      "summary": "Enumerate every curated and raw command with curated→raw mappings.",
+    },
+    {
+      "flags": [
         "workspace",
         "fields",
       ],
@@ -320,6 +334,15 @@ exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 
       ],
       "id": "raw batch",
       "summary": "Execute a batch of raw Linear GraphQL operations from a plan file.",
+    },
+    {
+      "flags": [
+        "pretty",
+        "full",
+        "json",
+      ],
+      "id": "schema",
+      "summary": "Return the Linear GraphQL schema as compact SDL or introspection JSON.",
     },
     {
       "flags": [

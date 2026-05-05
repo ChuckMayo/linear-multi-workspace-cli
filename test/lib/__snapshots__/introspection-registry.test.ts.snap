@@ -73,6 +73,13 @@ exports[`CURATED_REGISTRY > structural snapshot of ids, flags, and raw_equivalen
   },
   {
     "flags": [
+      "pretty",
+    ],
+    "id": "describe",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
       "workspace",
       "allow-active-workspace-write",
       "allow-mutations",
@@ -215,6 +222,13 @@ exports[`CURATED_REGISTRY > structural snapshot of ids, flags, and raw_equivalen
   },
   {
     "flags": [
+      "pretty",
+    ],
+    "id": "list-tools",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
       "workspace",
       "fields",
     ],
@@ -295,6 +309,15 @@ exports[`CURATED_REGISTRY > structural snapshot of ids, flags, and raw_equivalen
       "yes",
     ],
     "id": "raw batch",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "pretty",
+      "full",
+      "json",
+    ],
+    "id": "schema",
     "raw_equivalent": undefined,
   },
   {

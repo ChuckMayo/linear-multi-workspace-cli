@@ -37,7 +37,7 @@ export interface RawCommandEntry {
   kind: 'query' | 'mutation'
 }
 
-// Total: 36 entries — update this comment when adding commands
+// Total: 39 entries — update this comment when adding commands
 export const CURATED_REGISTRY: CuratedEntry[] = [
   {
     id: 'comment create',
@@ -90,6 +90,13 @@ export const CURATED_REGISTRY: CuratedEntry[] = [
     id: 'cycle move',
     summary: 'Move an issue into a specific cycle number for a team.',
     flags: ['workspace', 'allow-active-workspace-write', 'fields', 'to'],
+    inputSchema: z.object({}),
+    examples: [],
+  },
+  {
+    id: 'describe',
+    summary: 'Return input/output JSON Schema and examples for a curated or raw command.',
+    flags: ['pretty'],
     inputSchema: z.object({}),
     examples: [],
   },
@@ -237,6 +244,13 @@ export const CURATED_REGISTRY: CuratedEntry[] = [
     examples: [],
   },
   {
+    id: 'list-tools',
+    summary: 'Enumerate every curated and raw command with curated→raw mappings.',
+    flags: ['pretty'],
+    inputSchema: z.object({}),
+    examples: [],
+  },
+  {
     id: 'me',
     summary: 'Return the authenticated user and organization details.',
     flags: ['workspace', 'fields'],
@@ -313,6 +327,13 @@ export const CURATED_REGISTRY: CuratedEntry[] = [
       'dry-run',
       'yes',
     ],
+    inputSchema: z.object({}),
+    examples: [],
+  },
+  {
+    id: 'schema',
+    summary: 'Return the Linear GraphQL schema as compact SDL or introspection JSON.',
+    flags: ['pretty', 'full', 'json'],
     inputSchema: z.object({}),
     examples: [],
   },
