@@ -87,12 +87,16 @@ export async function runRaw(input: RunRawInput): Promise<RunRawOutput> {
   const resolveFlags = input.flags.workspace ? { workspace: input.flags.workspace } : {}
   const resolved = resolveWorkspace({ flags: resolveFlags, env: envForResolver, config })
 
-  // Step 2: Registry lookup (RAW_OPERATION_NOT_FOUND with closest-match suggestions on miss)
+  // Step 2: Registry lookup (RAW_OPERATION_NOT_FOUND with closest-match suggestions on miss).
+  // Use Object.hasOwn to harden against prototype-chain hits — `registry['toString']`
+  // would otherwise return Object.prototype.toString and crash later on `entry.kind`.
   const registry = OPERATION_REGISTRY as Record<
     string,
     (typeof OPERATION_REGISTRY)[keyof typeof OPERATION_REGISTRY]
   >
-  const entry = registry[input.args.operation]
+  const entry = Object.hasOwn(registry, input.args.operation)
+    ? registry[input.args.operation]
+    : undefined
   if (!entry) {
     const suggestions = suggestClosest(input.args.operation, Object.keys(registry))
     throw new LinearAgentError({

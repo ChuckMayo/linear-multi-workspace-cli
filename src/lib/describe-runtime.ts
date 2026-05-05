@@ -198,8 +198,13 @@ export async function describeRuntime(args: DescribeRuntimeArgs): Promise<Descri
     }
     // Not found in curated → fall through to not-found error
   } else {
-    // Raw path: PascalCase single token
-    const entry = OPERATION_REGISTRY[target as OperationName]
+    // Raw path: PascalCase single token. Guard with `Object.hasOwn` rather
+    // than relying on the `/^[a-z]/.test(target)` disambiguation alone — a
+    // stray prototype-chain hit would otherwise sneak through as a "found"
+    // entry and crash later on `entry.varsSchema`.
+    const entry = Object.hasOwn(OPERATION_REGISTRY, target)
+      ? OPERATION_REGISTRY[target as OperationName]
+      : undefined
     if (entry) {
       const inputJsonSchema = z.toJSONSchema(entry.varsSchema, JSON_SCHEMA_OPTS) as Record<
         string,
