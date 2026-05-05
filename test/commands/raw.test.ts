@@ -66,8 +66,7 @@ vi.mock('@linear/sdk', () => {
         this.apiKey = opts.apiKey
         this.client = {
           rawRequest: async (q: string, vars: unknown) => {
-            if (!mockRawRequestFn)
-              throw new Error('mockRawRequestFn not configured')
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
             return mockRawRequestFn(q, vars)
           },
         }
@@ -95,8 +94,8 @@ vi.mock('@/generated/operations.js', () => ({
 
 let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | undefined
 
-import type { Config } from '@/core/config/index.js'
 import RawCommand, { runRaw } from '@/commands/raw/index.js'
+import type { Config } from '@/core/config/index.js'
 
 const STUB_CONFIG: Config = {
   active: 'acme',

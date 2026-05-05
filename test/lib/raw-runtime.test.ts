@@ -106,8 +106,7 @@ vi.mock('@linear/sdk', () => {
         this.apiKey = opts.apiKey
         this.client = {
           rawRequest: async (q: string, vars: unknown) => {
-            if (!mockRawRequestFn)
-              throw new Error('mockRawRequestFn not configured')
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
             return mockRawRequestFn(q, vars)
           },
         }
@@ -422,7 +421,9 @@ describe('rawRuntime — OPERATION_SUBSCRIPTIONS_UNSUPPORTED', () => {
       expect(err.code).toBe('OPERATION_SUBSCRIPTIONS_UNSUPPORTED')
       expect(exitCodeFor(err.code)).toBe(2)
       expect(rawRequestSpy).not.toHaveBeenCalled()
-      expect(snapshotFailureEnvelope(err)).toMatchSnapshot('failure-OPERATION_SUBSCRIPTIONS_UNSUPPORTED')
+      expect(snapshotFailureEnvelope(err)).toMatchSnapshot(
+        'failure-OPERATION_SUBSCRIPTIONS_UNSUPPORTED',
+      )
     }
   })
 })

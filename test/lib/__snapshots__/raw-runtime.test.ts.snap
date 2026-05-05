@@ -1,0 +1,142 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`rawRuntime — OPERATION_SUBSCRIPTIONS_UNSUPPORTED > Test 8b: subscription op → OPERATION_SUBSCRIPTIONS_UNSUPPORTED; zero rawRequest calls > failure-OPERATION_SUBSCRIPTIONS_UNSUPPORTED 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "OPERATION_SUBSCRIPTIONS_UNSUPPORTED",
+    "details": {
+      "kind": "subscription",
+      "operation": "MySub",
+    },
+    "message": "subscription operations are not supported: MySub",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawRuntime — RAW_MUTATION_REQUIRES_FLAG > Test 2: mutation without --allow-mutations → RAW_MUTATION_REQUIRES_FLAG > failure-RAW_MUTATION_REQUIRES_FLAG 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "RAW_MUTATION_REQUIRES_FLAG",
+    "details": {
+      "kind": "mutation",
+      "operation": "IssueCreate",
+    },
+    "message": "mutation 'IssueCreate' requires --allow-mutations",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawRuntime — RAW_OPERATION_NOT_FOUND > Test 1: unknown operation → RAW_OPERATION_NOT_FOUND with closest-match suggestions > failure-RAW_OPERATION_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "RAW_OPERATION_NOT_FOUND",
+    "details": {
+      "operation": "NotARealOp",
+      "suggestions": [
+        "Issues",
+        "IssueCreate",
+        "IssueDelete",
+      ],
+    },
+    "message": "unknown operation: NotARealOp. Did you mean: Issues, IssueCreate, IssueDelete?",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawRuntime — RAW_VARS_INVALID (Zod) > Test 4: --vars with wrong type fails Zod → RAW_VARS_INVALID with details.issues > failure-RAW_VARS_INVALID 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "RAW_VARS_INVALID",
+    "details": {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected number, received string",
+          "path": [
+            "first",
+          ],
+        },
+      ],
+      "operation": "Issues",
+    },
+    "message": "vars failed validation for operation 'Issues'",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawRuntime — WSP-06 gate ordering > Test 3: WSP-06 fires BEFORE --allow-mutations; no explicit workspace + allow-mutations:true → WORKSPACE_REQUIRED_FOR_WRITE > failure-WORKSPACE_REQUIRED_FOR_WRITE 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawRuntime — success path (mutation) > Test 7: IssueCreate mutation with explicit workspace + allow-mutations returns success envelope > success-mutation-issueCreate 1`] = `
+{
+  "data": {
+    "issueCreate": {
+      "success": true,
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
+exports[`rawRuntime — success path (query) > Test 6: Issues query returns success envelope; rawRequest called once with correct args > success-query-issues 1`] = `
+{
+  "data": {
+    "issues": {
+      "nodes": [
+        {
+          "id": "a",
+          "title": "T",
+        },
+      ],
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;

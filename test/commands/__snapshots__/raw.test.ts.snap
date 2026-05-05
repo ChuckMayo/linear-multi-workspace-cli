@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RawCommand — command-level success > Test 11: runRaw with Issues query returns success envelope > cmd-success-query 1`] = `
+{
+  "data": {
+    "issues": {
+      "nodes": [
+        {
+          "id": "cmd-a",
+          "title": "Command Test",
+        },
+      ],
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
