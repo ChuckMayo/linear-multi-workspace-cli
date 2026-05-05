@@ -40,6 +40,7 @@
 import type { LinearClient } from '@linear/sdk'
 import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
+import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { parsePagination } from '@/core/pagination/index.js'
 import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
@@ -51,6 +52,7 @@ import {
 } from '@/core/transport/index.js'
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
 import { buildIssueFilter, type IssueFilterShape } from '@/lib/filter-heuristics.js'
+import { validateAndMergeIncludes } from '@/lib/include-fragments.js'
 
 export interface IssueListFlags {
   workspace?: string
@@ -60,6 +62,8 @@ export interface IssueListFlags {
   state?: string
   assignee?: string
   team?: string
+  /** Phase 3: hydrate related entities in a single rawRequest round-trip */
+  include?: string[]
 }
 
 export interface IssueListInput {
@@ -104,31 +108,90 @@ export async function issueListRuntime(input: IssueListInput): Promise<IssueList
 
   const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
 
-  return withFetchInterception(async () => {
-    const issuesArgs: { first: number; after?: string; filter?: IssueFilterShape } = { first }
-    if (after !== undefined) issuesArgs.after = after
-    if (filter !== undefined) issuesArgs.filter = filter
-    const connection = (await withRateLimitRetry(
-      () => client.issues(issuesArgs as unknown as Parameters<LinearClient['issues']>[0]),
-      input.retryOptsOverride,
-    )) as unknown as SdkIssueConnection
+  // Phase 3: branch on --include. Empty → unchanged Phase 2 typed-SDK call.
+  const includes = input.flags.include ?? []
+  if (includes.length === 0) {
+    // PHASE 2 BEHAVIOR — UNCHANGED
+    return withFetchInterception(async () => {
+      const issuesArgs: { first: number; after?: string; filter?: IssueFilterShape } = { first }
+      if (after !== undefined) issuesArgs.after = after
+      if (filter !== undefined) issuesArgs.filter = filter
+      const connection = (await withRateLimitRetry(
+        () => client.issues(issuesArgs as unknown as Parameters<LinearClient['issues']>[0]),
+        input.retryOptsOverride,
+      )) as unknown as SdkIssueConnection
 
-    const projected = await Promise.all(
-      connection.nodes.map(async (issue) => {
-        const hydrated = await hydrateForProjection(issue, fields)
-        return project(hydrated, fields)
-      }),
-    )
+      const projected = await Promise.all(
+        connection.nodes.map(async (issue) => {
+          const hydrated = await hydrateForProjection(issue, fields)
+          return project(hydrated, fields)
+        }),
+      )
+
+      const complexity = getLastComplexity()
+      const meta: Omit<Meta, 'command'> = {
+        workspace: resolved.name,
+        workspaceSource: resolved.source,
+        pageInfo: {
+          hasNextPage: Boolean(connection.pageInfo?.hasNextPage),
+          endCursor: connection.pageInfo?.endCursor ?? null,
+          hasPreviousPage: Boolean(connection.pageInfo?.hasPreviousPage),
+          startCursor: connection.pageInfo?.startCursor ?? null,
+        },
+        ...(complexity !== undefined ? { complexity } : {}),
+      }
+
+      return { data: projected, meta }
+    })
+  }
+
+  // PHASE 3 INCLUDE PATH — single rawRequest with inlined fragments
+  const fragmentText = validateAndMergeIncludes('issue list', includes)
+  const query = composeIssueListWithIncludes(fragmentText)
+
+  return withFetchInterception(async () => {
+    const vars: { filter?: IssueFilterShape; first: number; after?: string } = { first }
+    if (after !== undefined) vars.after = after
+    if (filter !== undefined) vars.filter = filter
+
+    const response = (await withRateLimitRetry(
+      () =>
+        (
+          client as unknown as {
+            client: {
+              rawRequest: (q: string, v: unknown) => Promise<{ data?: unknown; error?: string }>
+            }
+          }
+        ).client.rawRequest(query, vars),
+      input.retryOptsOverride,
+    )) as { data?: unknown; error?: string }
+
+    if (response.error ?? !response.data) {
+      throw LinearAgentError.linear.apiError({
+        message: response.error ?? 'no data returned from Linear API',
+        details: { command: 'issue list', cause: response.error },
+      })
+    }
+
+    const root = (response.data as { issues?: SdkIssueConnection }).issues
+    if (!root) {
+      throw LinearAgentError.linear.apiError({
+        message: 'unexpected response shape: missing issues field',
+        details: { command: 'issue list' },
+      })
+    }
+
+    const projected = root.nodes.map((issue) => project(issue, fields))
 
     const complexity = getLastComplexity()
     const meta: Omit<Meta, 'command'> = {
       workspace: resolved.name,
       workspaceSource: resolved.source,
       pageInfo: {
-        hasNextPage: Boolean(connection.pageInfo?.hasNextPage),
-        endCursor: connection.pageInfo?.endCursor ?? null,
-        hasPreviousPage: Boolean(connection.pageInfo?.hasPreviousPage),
-        startCursor: connection.pageInfo?.startCursor ?? null,
+        hasNextPage: Boolean(root.pageInfo?.hasNextPage),
+        endCursor: root.pageInfo?.endCursor ?? null,
+        hasPreviousPage: Boolean(root.pageInfo?.hasPreviousPage),
+        startCursor: root.pageInfo?.startCursor ?? null,
       },
       ...(complexity !== undefined ? { complexity } : {}),
     }
@@ -201,6 +264,27 @@ async function resolveLazy(value: unknown): Promise<unknown> {
     return await (value as Promise<unknown>)
   }
   return value
+}
+
+// -----------------------------------------------------------------------------
+// Phase 3: compose query for --include path (Approach A — single rawRequest)
+// -----------------------------------------------------------------------------
+
+function composeIssueListWithIncludes(fragmentText: string): string {
+  return `
+    query IssuesWithIncludes($filter: IssueFilter, $first: Int, $after: String) {
+      issues(filter: $filter, first: $first, after: $after) {
+        nodes {
+          id identifier title number priority url createdAt updatedAt
+          state { id name }
+          assignee { id name }
+          team { id name }
+          ${fragmentText}
+        }
+        pageInfo { hasNextPage endCursor hasPreviousPage startCursor }
+      }
+    }
+  `.trim()
 }
 
 // -----------------------------------------------------------------------------

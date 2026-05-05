@@ -36,6 +36,11 @@ export default class IssueList extends Command {
     state: Flags.string({ description: 'Filter by workflow state name or ID' }),
     assignee: Flags.string({ description: 'Filter by assignee email, ID, or "me"' }),
     team: Flags.string({ description: 'Filter by team key, ID, or name' }),
+    include: Flags.string({
+      description:
+        'Hydrate related entities in a single GraphQL round-trip (e.g. comments, labels). Available: comments, labels, attachments, subscribers, history.',
+      multiple: true,
+    }),
   }
 
   async run(): Promise<unknown> {
@@ -53,6 +58,7 @@ export default class IssueList extends Command {
         if (flags.state !== undefined) runtimeFlags.state = flags.state
         if (flags.assignee !== undefined) runtimeFlags.assignee = flags.assignee
         if (flags.team !== undefined) runtimeFlags.team = flags.team
+        if (flags.include !== undefined) runtimeFlags.include = flags.include
 
         const result = await issueListRuntime({
           flags: runtimeFlags,

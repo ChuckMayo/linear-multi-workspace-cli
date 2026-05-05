@@ -33,6 +33,39 @@ exports[`issueListRuntime -- --include (Phase 3 RAW-04) > Test 6a: empty --inclu
 }
 `;
 
+exports[`issueListRuntime -- --include (Phase 3 RAW-04) > Test 7a: flags.include=["comments"] -> rawRequest called ONCE; issues() NOT called > include-comments-success 1`] = `
+{
+  "data": [
+    {
+      "assignee": {
+        "email": null,
+      },
+      "id": "iss_with_include",
+      "identifier": "ENG-99",
+      "priority": 0,
+      "state": {
+        "name": "Todo",
+      },
+      "team": {
+        "key": null,
+      },
+      "title": "with-include",
+      "updatedAt": "2026-01-01T00:00:00Z",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
 exports[`issueListRuntime — failure envelopes (KRN-09) > Test 9: WORKSPACE_NOT_RESOLVED (exit 10) — empty config, no env keys > failure-WORKSPACE_NOT_RESOLVED 1`] = `
 {
   "$apiVersion": "1",
