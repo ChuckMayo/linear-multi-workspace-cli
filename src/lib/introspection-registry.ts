@@ -186,7 +186,8 @@ export const CURATED_REGISTRY: CuratedEntry[] = [
     id: 'issue trash',
     summary: 'Move a Linear issue to the trash (soft-delete; recoverable from UI).',
     flags: ['workspace', 'allow-active-workspace-write'],
-    raw_equivalent: 'IssueTrash',
+    // No 1:1 raw equivalent — IssueArchive(trash: true) is the underlying call
+    // but is not a standalone operation. raw_equivalent omitted per spec.
     inputSchema: z.object({}),
     examples: [],
   },

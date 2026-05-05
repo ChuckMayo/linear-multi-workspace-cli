@@ -14,8 +14,8 @@
  *   10. INT-04 snapshot: data field snapshotted in full
  */
 import { describe, expect, it } from 'vitest'
-import { CURATED_REGISTRY, getRawRegistryView } from '../../src/lib/introspection-registry.js'
 import { OPERATION_REGISTRY } from '../../src/generated/operations.js'
+import { CURATED_REGISTRY, getRawRegistryView } from '../../src/lib/introspection-registry.js'
 import { listToolsRuntime } from '../../src/lib/list-tools-runtime.js'
 
 describe('listToolsRuntime', () => {
@@ -63,7 +63,7 @@ describe('listToolsRuntime', () => {
     for (const entry of result.data.curated) {
       if (entry.raw_equivalent !== undefined) {
         expect(
-          Object.prototype.hasOwnProperty.call(OPERATION_REGISTRY, entry.raw_equivalent),
+          Object.hasOwn(OPERATION_REGISTRY, entry.raw_equivalent),
           `raw_equivalent "${entry.raw_equivalent}" (entry: ${entry.id}) is not in OPERATION_REGISTRY`,
         ).toBe(true)
       }
@@ -73,10 +73,7 @@ describe('listToolsRuntime', () => {
   it('no curated entry has raw_equivalent: null — field is string or omitted', async () => {
     const result = await listToolsRuntime({ flags: {} })
     for (const entry of result.data.curated) {
-      expect(
-        entry.raw_equivalent,
-        `entry "${entry.id}" has raw_equivalent: null`,
-      ).not.toBeNull()
+      expect(entry.raw_equivalent, `entry "${entry.id}" has raw_equivalent: null`).not.toBeNull()
     }
   })
 

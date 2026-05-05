@@ -1,0 +1,2397 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 1`] = `
+{
+  "counts": {
+    "curated": 36,
+    "raw": 501,
+  },
+  "curated": [
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "issue",
+        "body",
+        "parent",
+      ],
+      "id": "comment create",
+      "raw_equivalent": "CommentCreate",
+      "summary": "Create a new comment on a Linear issue.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+      ],
+      "id": "comment delete",
+      "raw_equivalent": "CommentDelete",
+      "summary": "Delete a comment from a Linear issue.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "issue",
+        "include",
+      ],
+      "id": "comment list",
+      "raw_equivalent": "Comments",
+      "summary": "List comments on a Linear issue, with optional related-entity hydration.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "body",
+      ],
+      "id": "comment update",
+      "raw_equivalent": "CommentUpdate",
+      "summary": "Update the body of an existing Linear comment.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "team",
+      ],
+      "id": "cycle current",
+      "summary": "Retrieve the currently active cycle for a team.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "team",
+        "include",
+      ],
+      "id": "cycle list",
+      "raw_equivalent": "Cycles",
+      "summary": "List all cycles for a team, with optional issue hydration.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "to",
+      ],
+      "id": "cycle move",
+      "summary": "Move an issue into a specific cycle number for a team.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "allow-mutations",
+        "query",
+        "vars",
+      ],
+      "id": "graphql",
+      "summary": "Execute an arbitrary GraphQL query or mutation against Linear.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+      ],
+      "id": "issue archive",
+      "raw_equivalent": "IssueArchive",
+      "summary": "Archive a Linear issue (soft-delete; issue remains searchable).",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "title",
+        "description",
+        "team",
+        "state",
+        "assignee",
+        "priority",
+        "labels",
+        "project",
+        "cycle",
+        "parent",
+      ],
+      "id": "issue create",
+      "raw_equivalent": "IssueCreate",
+      "summary": "Create a new Linear issue with optional title, description, assignee, team, and more.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "include",
+      ],
+      "id": "issue get",
+      "raw_equivalent": "Issue",
+      "summary": "Fetch a single Linear issue by identifier or UUID.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "limit",
+        "cursor",
+        "state",
+        "assignee",
+        "team",
+        "include",
+      ],
+      "id": "issue list",
+      "raw_equivalent": "Issues",
+      "summary": "List Linear issues with --fields, --limit, --cursor, and Phase 1 filters.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "yes",
+      ],
+      "id": "issue purge",
+      "raw_equivalent": "IssueDelete",
+      "summary": "Permanently delete a Linear issue (irreversible; requires --yes confirmation).",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "state",
+        "assignee",
+        "team",
+        "label",
+        "project",
+        "cycle",
+        "no-snippet",
+        "include-archived",
+      ],
+      "id": "issue search",
+      "raw_equivalent": "IssueSearch",
+      "summary": "Full-text search Linear issues with optional filters for state, team, assignee, label, project, and cycle.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+      ],
+      "id": "issue transition",
+      "summary": "Transition a Linear issue to a new workflow state by name or ID.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+      ],
+      "id": "issue trash",
+      "summary": "Move a Linear issue to the trash (soft-delete; recoverable from UI).",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "title",
+        "description",
+        "state",
+        "assignee",
+        "priority",
+        "labels",
+        "project",
+        "cycle",
+      ],
+      "id": "issue update",
+      "raw_equivalent": "IssueUpdate",
+      "summary": "Update fields on an existing Linear issue (title, description, assignee, state, etc.).",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "name",
+        "team",
+        "color",
+        "description",
+      ],
+      "id": "label create",
+      "raw_equivalent": "IssueLabelCreate",
+      "summary": "Create a new issue label in a Linear team.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "team",
+      ],
+      "id": "label list",
+      "raw_equivalent": "IssueLabels",
+      "summary": "List issue labels for a Linear team or the entire workspace.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+      ],
+      "id": "me",
+      "summary": "Return the authenticated user and organization details.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "name",
+        "teams",
+        "description",
+        "state",
+        "lead",
+        "start-date",
+        "target-date",
+      ],
+      "id": "project create",
+      "raw_equivalent": "ProjectCreate",
+      "summary": "Create a new Linear project with optional name, description, teams, state, and dates.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "include",
+      ],
+      "id": "project get",
+      "raw_equivalent": "Project",
+      "summary": "Fetch a single Linear project by ID or name.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+      ],
+      "id": "project list",
+      "raw_equivalent": "Projects",
+      "summary": "List all Linear projects in the workspace.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+        "name",
+        "description",
+        "state",
+      ],
+      "id": "project update",
+      "raw_equivalent": "ProjectUpdate",
+      "summary": "Update fields on an existing Linear project (name, description, state).",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "fields",
+      ],
+      "id": "project update-status",
+      "raw_equivalent": "ProjectUpdate",
+      "summary": "Set a Linear project's current status (e.g. 'On Track' -> 'At Risk').",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "allow-mutations",
+        "vars",
+      ],
+      "id": "raw",
+      "summary": "Execute any operation from the full Linear GraphQL registry by PascalCase name.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "allow-active-workspace-write",
+        "allow-mutations",
+        "plan",
+        "dry-run",
+        "yes",
+      ],
+      "id": "raw batch",
+      "summary": "Execute a batch of raw Linear GraphQL operations from a plan file.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+        "team",
+      ],
+      "id": "state list",
+      "raw_equivalent": "WorkflowStates",
+      "summary": "List workflow states for a Linear team.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+      ],
+      "id": "team get",
+      "raw_equivalent": "Team",
+      "summary": "Fetch details for a single Linear team by key, name, or ID.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+      ],
+      "id": "team list",
+      "raw_equivalent": "Teams",
+      "summary": "List all Linear teams in the workspace.",
+    },
+    {
+      "flags": [
+        "workspace",
+        "fields",
+      ],
+      "id": "whoami",
+      "summary": "Alias for \`me\` — return the authenticated user and organization details.",
+    },
+    {
+      "flags": [
+        "token",
+      ],
+      "id": "workspace add",
+      "summary": "Add a new Linear workspace to the local config with a personal API token.",
+    },
+    {
+      "flags": [],
+      "id": "workspace list",
+      "summary": "List all configured Linear workspaces in the local config.",
+    },
+    {
+      "flags": [],
+      "id": "workspace remove",
+      "summary": "Remove a Linear workspace from the local config.",
+    },
+    {
+      "flags": [
+        "token",
+      ],
+      "id": "workspace replace-token",
+      "summary": "Replace the API token for an existing workspace in the local config.",
+    },
+    {
+      "flags": [],
+      "id": "workspace use",
+      "summary": "Set the active default workspace used when no --workspace flag is provided.",
+    },
+  ],
+  "raw": [
+    {
+      "kind": "query",
+      "name": "AdministrableTeams",
+    },
+    {
+      "kind": "query",
+      "name": "AgentActivities",
+    },
+    {
+      "kind": "query",
+      "name": "AgentActivity",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentActivityCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentActivityCreatePrompt",
+    },
+    {
+      "kind": "query",
+      "name": "AgentSession",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentSessionCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentSessionCreateOnComment",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentSessionCreateOnIssue",
+    },
+    {
+      "kind": "query",
+      "name": "AgentSessions",
+    },
+    {
+      "kind": "query",
+      "name": "AgentSessionSandbox",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentSessionUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "AgentSessionUpdateExternalUrl",
+    },
+    {
+      "kind": "mutation",
+      "name": "AirbyteIntegrationConnect",
+    },
+    {
+      "kind": "query",
+      "name": "ApplicationInfo",
+    },
+    {
+      "kind": "query",
+      "name": "ArchivedTeams",
+    },
+    {
+      "kind": "query",
+      "name": "Attachment",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentDelete",
+    },
+    {
+      "kind": "query",
+      "name": "AttachmentIssue",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkDiscord",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkFront",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkGitHubIssue",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkGitHubPr",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkGitLabMr",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkIntercom",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkJiraIssue",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkSalesforce",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkSlack",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkUrl",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentLinkZendesk",
+    },
+    {
+      "kind": "query",
+      "name": "Attachments",
+    },
+    {
+      "kind": "query",
+      "name": "AttachmentsForUrl",
+    },
+    {
+      "kind": "query",
+      "name": "AttachmentSources",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentSyncToSlack",
+    },
+    {
+      "kind": "mutation",
+      "name": "AttachmentUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "AuditEntries",
+    },
+    {
+      "kind": "query",
+      "name": "AuditEntryTypes",
+    },
+    {
+      "kind": "query",
+      "name": "AuthenticationSessions",
+    },
+    {
+      "kind": "query",
+      "name": "AvailableUsers",
+    },
+    {
+      "kind": "query",
+      "name": "Comment",
+    },
+    {
+      "kind": "mutation",
+      "name": "CommentCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CommentDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "CommentResolve",
+    },
+    {
+      "kind": "query",
+      "name": "Comments",
+    },
+    {
+      "kind": "mutation",
+      "name": "CommentUnresolve",
+    },
+    {
+      "kind": "mutation",
+      "name": "CommentUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ContactCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ContactSalesCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CreateCsvExportReport",
+    },
+    {
+      "kind": "mutation",
+      "name": "CreateInitiativeUpdateReminder",
+    },
+    {
+      "kind": "mutation",
+      "name": "CreateOrganizationFromOnboarding",
+    },
+    {
+      "kind": "mutation",
+      "name": "CreateProjectUpdateReminder",
+    },
+    {
+      "kind": "query",
+      "name": "Customer",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerMerge",
+    },
+    {
+      "kind": "query",
+      "name": "CustomerNeed",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerNeedArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerNeedCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerNeedCreateFromAttachment",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerNeedDelete",
+    },
+    {
+      "kind": "query",
+      "name": "CustomerNeeds",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerNeedUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerNeedUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Customers",
+    },
+    {
+      "kind": "query",
+      "name": "CustomerStatus",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerStatusCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerStatusDelete",
+    },
+    {
+      "kind": "query",
+      "name": "CustomerStatuses",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerStatusUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "CustomerTier",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerTierCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerTierDelete",
+    },
+    {
+      "kind": "query",
+      "name": "CustomerTiers",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerTierUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerUnsync",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomerUpsert",
+    },
+    {
+      "kind": "query",
+      "name": "CustomView",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomViewCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomViewDelete",
+    },
+    {
+      "kind": "query",
+      "name": "CustomViewDetailsSuggestion",
+    },
+    {
+      "kind": "query",
+      "name": "CustomViewHasSubscribers",
+    },
+    {
+      "kind": "query",
+      "name": "CustomViews",
+    },
+    {
+      "kind": "mutation",
+      "name": "CustomViewUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Cycle",
+    },
+    {
+      "kind": "mutation",
+      "name": "CycleArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "CycleCreate",
+    },
+    {
+      "kind": "query",
+      "name": "Cycles",
+    },
+    {
+      "kind": "mutation",
+      "name": "CycleShiftAll",
+    },
+    {
+      "kind": "mutation",
+      "name": "CycleStartUpcomingCycleToday",
+    },
+    {
+      "kind": "mutation",
+      "name": "CycleUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Document",
+    },
+    {
+      "kind": "query",
+      "name": "DocumentContentHistory",
+    },
+    {
+      "kind": "query",
+      "name": "DocumentContentHistoryEntries",
+    },
+    {
+      "kind": "mutation",
+      "name": "DocumentCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "DocumentDelete",
+    },
+    {
+      "kind": "query",
+      "name": "Documents",
+    },
+    {
+      "kind": "mutation",
+      "name": "DocumentUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "DocumentUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "EmailIntakeAddress",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailIntakeAddressCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailIntakeAddressDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailIntakeAddressRotate",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailIntakeAddressUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailTokenUserAccountAuth",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailUnsubscribe",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmailUserAccountAuthChallenge",
+    },
+    {
+      "kind": "query",
+      "name": "Emoji",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmojiCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "EmojiDelete",
+    },
+    {
+      "kind": "query",
+      "name": "Emojis",
+    },
+    {
+      "kind": "query",
+      "name": "EntityExternalLink",
+    },
+    {
+      "kind": "mutation",
+      "name": "EntityExternalLinkCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "EntityExternalLinkDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "EntityExternalLinkUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "ExternalUser",
+    },
+    {
+      "kind": "query",
+      "name": "ExternalUsers",
+    },
+    {
+      "kind": "query",
+      "name": "FailuresForOauthWebhooks",
+    },
+    {
+      "kind": "query",
+      "name": "Favorite",
+    },
+    {
+      "kind": "mutation",
+      "name": "FavoriteCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "FavoriteDelete",
+    },
+    {
+      "kind": "query",
+      "name": "Favorites",
+    },
+    {
+      "kind": "mutation",
+      "name": "FavoriteUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "FetchData",
+    },
+    {
+      "kind": "mutation",
+      "name": "FileUpload",
+    },
+    {
+      "kind": "mutation",
+      "name": "FileUploadDangerouslyDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "GitAutomationStateCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "GitAutomationStateDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "GitAutomationStateUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "GitAutomationTargetBranchCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "GitAutomationTargetBranchDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "GitAutomationTargetBranchUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "GoogleUserAccountAuth",
+    },
+    {
+      "kind": "mutation",
+      "name": "ImageUploadFromUrl",
+    },
+    {
+      "kind": "mutation",
+      "name": "ImportFileUpload",
+    },
+    {
+      "kind": "query",
+      "name": "Initiative",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeAddLabel",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeDelete",
+    },
+    {
+      "kind": "query",
+      "name": "InitiativeRelation",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeRelationCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeRelationDelete",
+    },
+    {
+      "kind": "query",
+      "name": "InitiativeRelations",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeRelationUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeRemoveLabel",
+    },
+    {
+      "kind": "query",
+      "name": "Initiatives",
+    },
+    {
+      "kind": "query",
+      "name": "InitiativeToProject",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeToProjectCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeToProjectDelete",
+    },
+    {
+      "kind": "query",
+      "name": "InitiativeToProjects",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeToProjectUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeUnarchive",
+    },
+    {
+      "kind": "query",
+      "name": "InitiativeUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeUpdateArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeUpdateCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeUpdateMutation",
+    },
+    {
+      "kind": "query",
+      "name": "InitiativeUpdates",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeUpdateUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "InitiativeUpdateUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Integration",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationAsksConnectChannel",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationCustomerDataAttributesRefresh",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationDiscord",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationFigma",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationFront",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGithubCommitCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGithubConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGitHubEnterpriseServerConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGithubImportConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGithubImportRefresh",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGitHubPersonal",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGithubRemoveCodeAccess",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGitlabConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGitlabTestConnection",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGong",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGoogleCalendarPersonalConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationGoogleSheets",
+    },
+    {
+      "kind": "query",
+      "name": "IntegrationHasScopes",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationIntercom",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationIntercomDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationIntercomSettingsUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationJiraFetchProjectStatuses",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationJiraPersonal",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationJiraUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationLaunchDarklyConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationLaunchDarklyPersonalConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationLoom",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationMcpServerConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationMcpServerPersonalConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationMicrosoftPersonalConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationMicrosoftTeams",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationMicrosoftTeamsProjectPost",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationOpsgenieConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationOpsgenieRefreshScheduleMappings",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationPagerDutyConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationPagerDutyRefreshScheduleMappings",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationRequest",
+    },
+    {
+      "kind": "query",
+      "name": "Integrations",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSalesforce",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSalesforceMetadataRefresh",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSentryConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSettingsUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlack",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackAsks",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackCustomerChannelLink",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackCustomViewNotifications",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackImportEmojis",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackInitiativePost",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackOrAsksUpdateSlackTeamName",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackOrgInitiativeUpdatesPost",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackOrgProjectUpdatesPost",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackPersonal",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackPost",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackProjectPost",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationSlackWorkflowAccessUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "IntegrationsSettings",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationsSettingsCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationsSettingsUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "IntegrationTemplate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationTemplateCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationTemplateDelete",
+    },
+    {
+      "kind": "query",
+      "name": "IntegrationTemplates",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IntegrationZendesk",
+    },
+    {
+      "kind": "query",
+      "name": "Issue",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueAddLabel",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueBatchCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueBatchUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueDescriptionUpdateFromFront",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueExternalSyncDisable",
+    },
+    {
+      "kind": "query",
+      "name": "IssueFigmaFileKeySearch",
+    },
+    {
+      "kind": "query",
+      "name": "IssueFilterSuggestion",
+    },
+    {
+      "kind": "query",
+      "name": "IssueImportCheckCsv",
+    },
+    {
+      "kind": "query",
+      "name": "IssueImportCheckSync",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportCreateAsana",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportCreateClubhouse",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportCreateCsvJira",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportCreateGithub",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportCreateJira",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportCreateLinearV2",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportDelete",
+    },
+    {
+      "kind": "query",
+      "name": "IssueImportJqlCheck",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportProcess",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueImportUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "IssueLabel",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueLabelCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueLabelDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueLabelRestore",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueLabelRetire",
+    },
+    {
+      "kind": "query",
+      "name": "IssueLabels",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueLabelUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "IssuePriorityValues",
+    },
+    {
+      "kind": "query",
+      "name": "IssueRelation",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueRelationCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueRelationDelete",
+    },
+    {
+      "kind": "query",
+      "name": "IssueRelations",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueRelationUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueReminder",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueRemoveLabel",
+    },
+    {
+      "kind": "query",
+      "name": "IssueRepositorySuggestions",
+    },
+    {
+      "kind": "query",
+      "name": "Issues",
+    },
+    {
+      "kind": "query",
+      "name": "IssueSearch",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueSubscribe",
+    },
+    {
+      "kind": "query",
+      "name": "IssueTitleSuggestionFromCustomerRequest",
+    },
+    {
+      "kind": "query",
+      "name": "IssueToRelease",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueToReleaseCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueToReleaseDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueToReleaseDeleteByIssueAndRelease",
+    },
+    {
+      "kind": "query",
+      "name": "IssueToReleases",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueUnsubscribe",
+    },
+    {
+      "kind": "mutation",
+      "name": "IssueUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "IssueVcsBranchSearch",
+    },
+    {
+      "kind": "mutation",
+      "name": "JiraIntegrationConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "JoinOrganizationFromOnboarding",
+    },
+    {
+      "kind": "query",
+      "name": "LatestReleaseByAccessKey",
+    },
+    {
+      "kind": "mutation",
+      "name": "LeaveOrganization",
+    },
+    {
+      "kind": "mutation",
+      "name": "Logout",
+    },
+    {
+      "kind": "mutation",
+      "name": "LogoutAllSessions",
+    },
+    {
+      "kind": "mutation",
+      "name": "LogoutOtherSessions",
+    },
+    {
+      "kind": "mutation",
+      "name": "LogoutSession",
+    },
+    {
+      "kind": "query",
+      "name": "MicrosoftTeamsChannels",
+    },
+    {
+      "kind": "query",
+      "name": "Notification",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationArchiveAll",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationCategoryChannelSubscriptionUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationMarkReadAll",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationMarkUnreadAll",
+    },
+    {
+      "kind": "query",
+      "name": "Notifications",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationSnoozeAll",
+    },
+    {
+      "kind": "query",
+      "name": "NotificationSubscription",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationSubscriptionCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationSubscriptionDelete",
+    },
+    {
+      "kind": "query",
+      "name": "NotificationSubscriptions",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationSubscriptionUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "NotificationsUnreadCount",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationUnsnoozeAll",
+    },
+    {
+      "kind": "mutation",
+      "name": "NotificationUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Organization",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationCancelDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDeleteChallenge",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDomainClaim",
+    },
+    {
+      "kind": "query",
+      "name": "OrganizationDomainClaimRequest",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDomainCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDomainDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDomainUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationDomainVerify",
+    },
+    {
+      "kind": "query",
+      "name": "OrganizationExists",
+    },
+    {
+      "kind": "query",
+      "name": "OrganizationInvite",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationInviteCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationInviteDelete",
+    },
+    {
+      "kind": "query",
+      "name": "OrganizationInviteDetails",
+    },
+    {
+      "kind": "query",
+      "name": "OrganizationInvites",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationInviteUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "OrganizationMeta",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationStartTrial",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationStartTrialForPlan",
+    },
+    {
+      "kind": "mutation",
+      "name": "OrganizationUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "PasskeyLoginFinish",
+    },
+    {
+      "kind": "mutation",
+      "name": "PasskeyLoginStart",
+    },
+    {
+      "kind": "query",
+      "name": "Project",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectAddLabel",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectCreateSlackChannel",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectExternalSyncDisable",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectFilterSuggestion",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectLabel",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectLabelCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectLabelDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectLabelRestore",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectLabelRetire",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectLabels",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectLabelUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectMilestone",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectMilestoneCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectMilestoneDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectMilestoneMove",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectMilestones",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectMilestoneUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectReassignStatus",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectRelation",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectRelationCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectRelationDelete",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectRelations",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectRelationUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectRemoveLabel",
+    },
+    {
+      "kind": "query",
+      "name": "Projects",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectStatus",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectStatusArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectStatusCreate",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectStatuses",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectStatusProjectCount",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectStatusUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectStatusUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUnarchive",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUpdateArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUpdateCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUpdateDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUpdateMutation",
+    },
+    {
+      "kind": "query",
+      "name": "ProjectUpdates",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUpdateUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ProjectUpdateUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "PushSubscriptionCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "PushSubscriptionDelete",
+    },
+    {
+      "kind": "query",
+      "name": "PushSubscriptionTest",
+    },
+    {
+      "kind": "query",
+      "name": "RateLimitStatus",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReactionCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReactionDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "RefreshGoogleSheetsData",
+    },
+    {
+      "kind": "query",
+      "name": "Release",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseComplete",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseCompleteByAccessKey",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseDelete",
+    },
+    {
+      "kind": "query",
+      "name": "ReleaseNote",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseNoteCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseNoteDelete",
+    },
+    {
+      "kind": "query",
+      "name": "ReleaseNotes",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseNoteUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "ReleasePipeline",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleasePipelineArchive",
+    },
+    {
+      "kind": "query",
+      "name": "ReleasePipelineByAccessKey",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleasePipelineCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleasePipelineDelete",
+    },
+    {
+      "kind": "query",
+      "name": "ReleasePipelines",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleasePipelineUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleasePipelineUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Releases",
+    },
+    {
+      "kind": "query",
+      "name": "ReleaseSearch",
+    },
+    {
+      "kind": "query",
+      "name": "ReleaseStage",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseStageArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseStageCreate",
+    },
+    {
+      "kind": "query",
+      "name": "ReleaseStages",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseStageUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseStageUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseSync",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseSyncByAccessKey",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseUpdateByPipeline",
+    },
+    {
+      "kind": "mutation",
+      "name": "ReleaseUpdateByPipelineByAccessKey",
+    },
+    {
+      "kind": "mutation",
+      "name": "ResendOrganizationInvite",
+    },
+    {
+      "kind": "mutation",
+      "name": "ResendOrganizationInviteByEmail",
+    },
+    {
+      "kind": "query",
+      "name": "Roadmap",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapDelete",
+    },
+    {
+      "kind": "query",
+      "name": "Roadmaps",
+    },
+    {
+      "kind": "query",
+      "name": "RoadmapToProject",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapToProjectCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapToProjectDelete",
+    },
+    {
+      "kind": "query",
+      "name": "RoadmapToProjects",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapToProjectUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "RoadmapUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "SamlTokenUserAccountAuth",
+    },
+    {
+      "kind": "query",
+      "name": "SearchDocuments",
+    },
+    {
+      "kind": "query",
+      "name": "SearchIssues",
+    },
+    {
+      "kind": "query",
+      "name": "SearchProjects",
+    },
+    {
+      "kind": "query",
+      "name": "SemanticSearch",
+    },
+    {
+      "kind": "query",
+      "name": "SlaConfigurations",
+    },
+    {
+      "kind": "query",
+      "name": "SsoUrlFromEmail",
+    },
+    {
+      "kind": "query",
+      "name": "Team",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamCyclesDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamKeyDelete",
+    },
+    {
+      "kind": "query",
+      "name": "TeamMembership",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamMembershipCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamMembershipDelete",
+    },
+    {
+      "kind": "query",
+      "name": "TeamMemberships",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamMembershipUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Teams",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamUnarchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "TeamUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Template",
+    },
+    {
+      "kind": "mutation",
+      "name": "TemplateCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "TemplateDelete",
+    },
+    {
+      "kind": "query",
+      "name": "Templates",
+    },
+    {
+      "kind": "query",
+      "name": "TemplatesForIntegration",
+    },
+    {
+      "kind": "mutation",
+      "name": "TemplateUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "TimeSchedule",
+    },
+    {
+      "kind": "mutation",
+      "name": "TimeScheduleCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "TimeScheduleDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "TimeScheduleRefreshIntegrationSchedule",
+    },
+    {
+      "kind": "query",
+      "name": "TimeSchedules",
+    },
+    {
+      "kind": "mutation",
+      "name": "TimeScheduleUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "TimeScheduleUpsertExternal",
+    },
+    {
+      "kind": "mutation",
+      "name": "TrackAnonymousEvent",
+    },
+    {
+      "kind": "query",
+      "name": "TriageResponsibilities",
+    },
+    {
+      "kind": "query",
+      "name": "TriageResponsibility",
+    },
+    {
+      "kind": "mutation",
+      "name": "TriageResponsibilityCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "TriageResponsibilityDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "TriageResponsibilityUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "UpdateIntegrationSlackScopes",
+    },
+    {
+      "kind": "query",
+      "name": "User",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserChangeRole",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserDiscordConnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserExternalUserDisconnect",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserFlagUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserRevokeAllSessions",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserRevokeSession",
+    },
+    {
+      "kind": "query",
+      "name": "Users",
+    },
+    {
+      "kind": "query",
+      "name": "UserSessions",
+    },
+    {
+      "kind": "query",
+      "name": "UserSettings",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserSettingsFlagsReset",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserSettingsUpdate",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserSuspend",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserUnlinkFromIdentityProvider",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserUnsuspend",
+    },
+    {
+      "kind": "mutation",
+      "name": "UserUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "VerifyGitHubEnterpriseServerInstallation",
+    },
+    {
+      "kind": "query",
+      "name": "Viewer",
+    },
+    {
+      "kind": "mutation",
+      "name": "ViewPreferencesCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "ViewPreferencesDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "ViewPreferencesUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "Webhook",
+    },
+    {
+      "kind": "mutation",
+      "name": "WebhookCreate",
+    },
+    {
+      "kind": "mutation",
+      "name": "WebhookDelete",
+    },
+    {
+      "kind": "mutation",
+      "name": "WebhookRotateSecret",
+    },
+    {
+      "kind": "query",
+      "name": "Webhooks",
+    },
+    {
+      "kind": "mutation",
+      "name": "WebhookUpdate",
+    },
+    {
+      "kind": "query",
+      "name": "WorkflowState",
+    },
+    {
+      "kind": "mutation",
+      "name": "WorkflowStateArchive",
+    },
+    {
+      "kind": "mutation",
+      "name": "WorkflowStateCreate",
+    },
+    {
+      "kind": "query",
+      "name": "WorkflowStates",
+    },
+    {
+      "kind": "mutation",
+      "name": "WorkflowStateUpdate",
+    },
+  ],
+}
+`;

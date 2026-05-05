@@ -172,7 +172,7 @@ exports[`CURATED_REGISTRY > structural snapshot of ids, flags, and raw_equivalen
       "allow-active-workspace-write",
     ],
     "id": "issue trash",
-    "raw_equivalent": "IssueTrash",
+    "raw_equivalent": undefined,
   },
   {
     "flags": [
