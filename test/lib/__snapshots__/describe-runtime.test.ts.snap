@@ -408,9 +408,9 @@ exports[`describeRuntime — snapshots (INT-04) > failure envelope for DESCRIBE_
   "code": "DESCRIBE_COMMAND_NOT_FOUND",
   "details": {
     "suggestions": [
+      "install-skill",
       "LogoutAllSessions",
       "Attachment",
-      "Attachments",
     ],
     "target": "zzz-totally-unknown",
   },

@@ -3,7 +3,7 @@
 exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 1`] = `
 {
   "counts": {
-    "curated": 39,
+    "curated": 40,
     "raw": 501,
   },
   "curated": [
@@ -98,6 +98,13 @@ exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 
       ],
       "id": "graphql",
       "summary": "Execute an arbitrary GraphQL query or mutation against Linear.",
+    },
+    {
+      "flags": [
+        "pretty",
+      ],
+      "id": "install-skill",
+      "summary": "Copy the bundled Claude Code skill to ~/.claude/skills/linear-agent/SKILL.md.",
     },
     {
       "flags": [

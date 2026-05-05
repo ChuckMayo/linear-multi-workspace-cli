@@ -91,6 +91,13 @@ exports[`CURATED_REGISTRY > structural snapshot of ids, flags, and raw_equivalen
   },
   {
     "flags": [
+      "pretty",
+    ],
+    "id": "install-skill",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
       "workspace",
       "allow-active-workspace-write",
     ],

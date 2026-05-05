@@ -37,7 +37,7 @@ export interface RawCommandEntry {
   kind: 'query' | 'mutation'
 }
 
-// Total: 39 entries — update this comment when adding commands
+// Total: 40 entries — update this comment when adding commands
 export const CURATED_REGISTRY: CuratedEntry[] = [
   {
     id: 'comment create',
@@ -104,6 +104,13 @@ export const CURATED_REGISTRY: CuratedEntry[] = [
     id: 'graphql',
     summary: 'Execute an arbitrary GraphQL query or mutation against Linear.',
     flags: ['workspace', 'allow-active-workspace-write', 'allow-mutations', 'query', 'vars'],
+    inputSchema: z.object({}),
+    examples: [],
+  },
+  {
+    id: 'install-skill',
+    summary: 'Copy the bundled Claude Code skill to ~/.claude/skills/linear-agent/SKILL.md.',
+    flags: ['pretty'],
     inputSchema: z.object({}),
     examples: [],
   },
