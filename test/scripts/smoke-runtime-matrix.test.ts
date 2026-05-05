@@ -21,9 +21,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   LANES,
+  parseArgs,
+  parseEnvelopeFromStdout,
   RUNTIME_PINS,
   redact,
-  parseArgs,
   runLane,
 } from '../../scripts/smoke-runtime-matrix.mjs'
 
@@ -107,6 +108,43 @@ describe('redact()', () => {
   })
 })
 
+// ───────────────────────── parseEnvelopeFromStdout() ─────────────────────────
+
+describe('parseEnvelopeFromStdout()', () => {
+  it('parses a single JSON envelope', () => {
+    const envelope = { $apiVersion: '1', ok: true, data: { user: { id: 'u1' } } }
+    expect(parseEnvelopeFromStdout(JSON.stringify(envelope))).toEqual(envelope)
+  })
+
+  it('returns null for empty input', () => {
+    expect(parseEnvelopeFromStdout('')).toBeNull()
+  })
+
+  it('extracts the envelope when followed by an oclif EEXIT wrapper', () => {
+    const envelope = {
+      $apiVersion: '1',
+      ok: false,
+      error: { code: 'WORKSPACE_NOT_RESOLVED', message: 'no key' },
+    }
+    const oclifWrapper = '\n{\n  "error": {\n    "code": "EEXIT",\n    "oclif": { "exit": 10 }\n  }\n}'
+    const stdout = JSON.stringify(envelope) + oclifWrapper
+    expect(parseEnvelopeFromStdout(stdout)).toEqual(envelope)
+  })
+
+  it('returns null when stdout has no envelope-shaped JSON object', () => {
+    expect(parseEnvelopeFromStdout('{"random":"object"}')).toBeNull()
+  })
+
+  it('returns null for non-JSON stdout', () => {
+    expect(parseEnvelopeFromStdout('definitely not json')).toBeNull()
+  })
+
+  it('handles JSON containing escaped braces in strings', () => {
+    const envelope = { $apiVersion: '1', ok: true, data: { msg: 'a {literal} brace' } }
+    expect(parseEnvelopeFromStdout(JSON.stringify(envelope))).toEqual(envelope)
+  })
+})
+
 // ───────────────────────── parseArgs() ─────────────────────────
 
 describe('parseArgs()', () => {
@@ -187,10 +225,13 @@ describe('runLane() — plain-bash', () => {
     const result = await runLane(plainBashInputs(spawn))
     expect(result.ok).toBe(true)
     expect(result.lane).toBe('plain-bash')
-    expect(result.output?.data?.user?.id).toBe('u-123')
+    const output = result.output as { data?: { user?: { id?: string } } } | undefined
+    expect(output?.data?.user?.id).toBe('u-123')
     expect(spawn).toHaveBeenCalledTimes(1)
     // Asserts: spawnSync called with 'npx' and arg array (NOT a shell string)
-    const [cmd, args] = spawn.mock.calls[0]!
+    const firstCall = spawn.mock.calls[0]
+    expect(firstCall).toBeDefined()
+    const [cmd, args] = firstCall as [string, string[]]
     expect(cmd).toBe('npx')
     expect(Array.isArray(args)).toBe(true)
     expect(args).toContain('--yes')
@@ -206,6 +247,25 @@ describe('runLane() — plain-bash', () => {
         ok: false,
         error: { code: 'WORKSPACE_NOT_RESOLVED', message: 'no key set' },
       }),
+      stderr: '',
+      signal: null,
+    })
+    const result = await runLane(plainBashInputs(spawn))
+    expect(result.ok).toBe(true)
+    expect(result.lane).toBe('plain-bash')
+  })
+
+  it('passes when stdout has the envelope followed by an oclif EEXIT wrapper', async () => {
+    // Real CLI on non-zero exit emits two JSON objects: our envelope, then oclif's wrapper.
+    const envelope = JSON.stringify({
+      $apiVersion: '1',
+      ok: false,
+      error: { code: 'WORKSPACE_NOT_RESOLVED', message: 'no key' },
+    })
+    const wrapper = '\n{\n  "error": {\n    "code": "EEXIT",\n    "oclif": { "exit": 10 }\n  }\n}\n'
+    const spawn = vi.fn().mockReturnValue({
+      status: 1,
+      stdout: envelope + wrapper,
       stderr: '',
       signal: null,
     })
@@ -399,7 +459,9 @@ describe('runLane() — codex-cli-via-exec', () => {
     expect(result.lane).toBe('codex-cli-via-exec')
     expect(spawn).toHaveBeenCalledTimes(1)
     // assert spawn called with arg array (no shell string)
-    const [cmd, args] = spawn.mock.calls[0]!
+    const firstCall = spawn.mock.calls[0]
+    expect(firstCall).toBeDefined()
+    const [cmd, args] = firstCall as [string, string[]]
     expect(cmd).toBe('npx')
     expect(Array.isArray(args)).toBe(true)
     expect(args).toContain('exec')
@@ -442,7 +504,9 @@ describe('runLane() — gemini-cli-via-exec', () => {
       env: { GEMINI_TEST_API_KEY: 'gemini_secret_value_xyz' },
     })
     expect(result.ok).toBe(true)
-    const [cmd, args] = spawn.mock.calls[0]!
+    const firstCall = spawn.mock.calls[0]
+    expect(firstCall).toBeDefined()
+    const [cmd, args] = firstCall as [string, string[]]
     expect(cmd).toBe('npx')
     expect(args).toContain('-p')
     expect(args).toContain('--output-format')
@@ -489,9 +553,9 @@ describe('runLane() — lane=all aggregation', () => {
     expect(Array.isArray(result.lanes)).toBe(true)
     expect(result.lanes).toHaveLength(4)
     // codex + gemini should be skipped
-    const codex = result.lanes!.find((l) => l.lane === 'codex-cli-via-exec')
+    const codex = result.lanes?.find((l: { lane: string }) => l.lane === 'codex-cli-via-exec')
     expect(codex?.skipped).toBe(true)
-    const gemini = result.lanes!.find((l) => l.lane === 'gemini-cli-via-exec')
+    const gemini = result.lanes?.find((l: { lane: string }) => l.lane === 'gemini-cli-via-exec')
     expect(gemini?.skipped).toBe(true)
   })
 
@@ -512,7 +576,7 @@ describe('runLane() — lane=all aggregation', () => {
       env: {},
     })
     expect(result.ok).toBe(false)
-    const plainBash = result.lanes!.find((l) => l.lane === 'plain-bash')
+    const plainBash = result.lanes?.find((l) => l.lane === 'plain-bash')
     expect(plainBash?.ok).toBe(false)
   })
 
@@ -548,7 +612,7 @@ describe('runLane() — lane=all aggregation', () => {
     })
     // Aggregate should still be ok=true: advisory failure doesn't poison
     expect(result.ok).toBe(true)
-    const codex = result.lanes!.find((l) => l.lane === 'codex-cli-via-exec')
+    const codex = result.lanes?.find((l) => l.lane === 'codex-cli-via-exec')
     expect(codex?.ok).toBe(false) // codex itself failed, but advisory
   })
 })
