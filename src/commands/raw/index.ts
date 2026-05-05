@@ -56,9 +56,14 @@ export default class RawCommand extends Command {
     vars: Flags.string({
       description: 'Variables as inline JSON or @file.json path (file takes precedence)',
     }),
-    fields: Flags.string({
-      description: 'Comma-separated post-execution field projection (e.g. id,title)',
-    }),
+    // WR-01 fix: --fields was declared, parsed, and never applied. The
+    // raw escape hatch dispatches arbitrary GraphQL operations (501 of
+    // them) — each has its own response shape, so the per-entity
+    // parseFields / project machinery does not generalize. Drop the
+    // flag rather than ship documented-but-unimplemented behavior.
+    // Agents that need post-execution projection should pipe through
+    // jq, or use the typed entity commands (issue list, comment list,
+    // etc.) which do honor --fields.
   }
 
   async run(): Promise<unknown> {
@@ -72,7 +77,6 @@ export default class RawCommand extends Command {
       rawFlags['allow-active-workspace-write'] = flags['allow-active-workspace-write']
     if (flags['allow-mutations']) rawFlags['allow-mutations'] = flags['allow-mutations']
     if (flags.vars !== undefined) rawFlags.vars = flags.vars
-    if (flags.fields !== undefined) rawFlags.fields = flags.fields
 
     const out = await runCommand({
       commandPath: 'raw',

@@ -162,7 +162,10 @@ describe('RawCommand — oclif metadata', () => {
     expect(flagNames).toContain('allow-active-workspace-write')
     expect(flagNames).toContain('allow-mutations')
     expect(flagNames).toContain('vars')
-    expect(flagNames).toContain('fields')
+    // WR-01: --fields was declared but never applied. Removed; raw is
+    // an escape hatch for arbitrary GraphQL — projection lives on the
+    // typed entity commands. Agents should pipe through jq for raw.
+    expect(flagNames).not.toContain('fields')
     expect(typeof runRaw).toBe('function')
   })
 })

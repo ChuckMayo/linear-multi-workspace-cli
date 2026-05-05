@@ -57,8 +57,6 @@ export interface RunRawFlags {
   'allow-mutations'?: boolean
   /** Variables as inline JSON or @file.json (file takes precedence). */
   vars?: string
-  /** Optional comma-separated field projection applied post-execution. */
-  fields?: string
   pretty?: boolean
 }
 
