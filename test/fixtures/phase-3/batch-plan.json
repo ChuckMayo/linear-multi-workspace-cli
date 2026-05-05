@@ -1,0 +1,4 @@
+[
+  { "operation": "IssueUpdate", "vars": { "id": "issue-a", "input": { "stateId": "state-x" } } },
+  { "operation": "IssueDelete", "vars": { "id": "issue-b" } }
+]

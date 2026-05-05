@@ -1,0 +1,10 @@
+[
+  {
+    "operation": "Issues",
+    "vars": { "first": 1 }
+  },
+  {
+    "operation": "IssueUpdate",
+    "vars": { "id": "__SMOKE_ISSUE_ID__", "input": { "title": "__SMOKE_UPDATED_TITLE__" } }
+  }
+]
