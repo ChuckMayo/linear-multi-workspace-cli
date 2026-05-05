@@ -1,11 +1,36 @@
+import { readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { CURATED_REGISTRY, getRawRegistryView } from '../../src/lib/introspection-registry.js'
 
-const EXPECTED_REGISTRY_SIZE = 39
+/**
+ * Recursively count `.ts` command files under `src/commands/`.
+ *
+ * This drives the registry-parity assertion below: CURATED_REGISTRY.length
+ * must match the number of command files on disk, otherwise a new command
+ * file (or a deletion) will silently desync `list-tools` from reality —
+ * the exact failure mode that produced BL-01 in the Phase 4 review.
+ */
+function countCommandFiles(dir: string): number {
+  let count = 0
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry)
+    const stat = statSync(full)
+    if (stat.isDirectory()) {
+      count += countCommandFiles(full)
+    } else if (entry.endsWith('.ts')) {
+      count += 1
+    }
+  }
+  return count
+}
+
+const COMMANDS_DIR = join(import.meta.dirname, '..', '..', 'src', 'commands')
 
 describe('CURATED_REGISTRY', () => {
-  it(`has exactly ${EXPECTED_REGISTRY_SIZE} entries matching the curated command files`, () => {
-    expect(CURATED_REGISTRY.length).toBe(EXPECTED_REGISTRY_SIZE)
+  it('has exactly one entry per command file under src/commands/', () => {
+    const fileCount = countCommandFiles(COMMANDS_DIR)
+    expect(CURATED_REGISTRY.length).toBe(fileCount)
   })
 
   it('has all unique ids', () => {
