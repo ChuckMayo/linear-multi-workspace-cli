@@ -1,0 +1,363 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CURATED_REGISTRY > structural snapshot of ids, flags, and raw_equivalent > curated-registry-structure 1`] = `
+[
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "issue",
+      "body",
+      "parent",
+    ],
+    "id": "comment create",
+    "raw_equivalent": "CommentCreate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+    ],
+    "id": "comment delete",
+    "raw_equivalent": "CommentDelete",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "issue",
+      "include",
+    ],
+    "id": "comment list",
+    "raw_equivalent": "Comments",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "body",
+    ],
+    "id": "comment update",
+    "raw_equivalent": "CommentUpdate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "team",
+    ],
+    "id": "cycle current",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "team",
+      "include",
+    ],
+    "id": "cycle list",
+    "raw_equivalent": "Cycles",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "to",
+    ],
+    "id": "cycle move",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "allow-mutations",
+      "query",
+      "vars",
+    ],
+    "id": "graphql",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+    ],
+    "id": "issue archive",
+    "raw_equivalent": "IssueArchive",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "title",
+      "description",
+      "team",
+      "state",
+      "assignee",
+      "priority",
+      "labels",
+      "project",
+      "cycle",
+      "parent",
+    ],
+    "id": "issue create",
+    "raw_equivalent": "IssueCreate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "include",
+    ],
+    "id": "issue get",
+    "raw_equivalent": "Issue",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "limit",
+      "cursor",
+      "state",
+      "assignee",
+      "team",
+      "include",
+    ],
+    "id": "issue list",
+    "raw_equivalent": "Issues",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "yes",
+    ],
+    "id": "issue purge",
+    "raw_equivalent": "IssueDelete",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "state",
+      "assignee",
+      "team",
+      "label",
+      "project",
+      "cycle",
+      "no-snippet",
+      "include-archived",
+    ],
+    "id": "issue search",
+    "raw_equivalent": "IssueSearch",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+    ],
+    "id": "issue transition",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+    ],
+    "id": "issue trash",
+    "raw_equivalent": "IssueTrash",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "title",
+      "description",
+      "state",
+      "assignee",
+      "priority",
+      "labels",
+      "project",
+      "cycle",
+    ],
+    "id": "issue update",
+    "raw_equivalent": "IssueUpdate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "name",
+      "team",
+      "color",
+      "description",
+    ],
+    "id": "label create",
+    "raw_equivalent": "IssueLabelCreate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "team",
+    ],
+    "id": "label list",
+    "raw_equivalent": "IssueLabels",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+    ],
+    "id": "me",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "name",
+      "teams",
+      "description",
+      "state",
+      "lead",
+      "start-date",
+      "target-date",
+    ],
+    "id": "project create",
+    "raw_equivalent": "ProjectCreate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "include",
+    ],
+    "id": "project get",
+    "raw_equivalent": "Project",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+    ],
+    "id": "project list",
+    "raw_equivalent": "Projects",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+      "name",
+      "description",
+      "state",
+    ],
+    "id": "project update",
+    "raw_equivalent": "ProjectUpdate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "fields",
+    ],
+    "id": "project update-status",
+    "raw_equivalent": "ProjectUpdate",
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "allow-mutations",
+      "vars",
+    ],
+    "id": "raw",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "allow-active-workspace-write",
+      "allow-mutations",
+      "plan",
+      "dry-run",
+      "yes",
+    ],
+    "id": "raw batch",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+      "team",
+    ],
+    "id": "state list",
+    "raw_equivalent": "WorkflowStates",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+    ],
+    "id": "team get",
+    "raw_equivalent": "Team",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+    ],
+    "id": "team list",
+    "raw_equivalent": "Teams",
+  },
+  {
+    "flags": [
+      "workspace",
+      "fields",
+    ],
+    "id": "whoami",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "token",
+    ],
+    "id": "workspace add",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [],
+    "id": "workspace list",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [],
+    "id": "workspace remove",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [
+      "token",
+    ],
+    "id": "workspace replace-token",
+    "raw_equivalent": undefined,
+  },
+  {
+    "flags": [],
+    "id": "workspace use",
+    "raw_equivalent": undefined,
+  },
+]
+`;

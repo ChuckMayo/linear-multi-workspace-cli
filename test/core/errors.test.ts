@@ -143,6 +143,8 @@ describe('ERROR_CODES tuple', () => {
       'RAW_VARS_INVALID',
       'GRAPHQL_VALIDATION_FAILED',
       'BATCH_PLAN_INVALID',
+      // Phase 4 PLAN 04-01 additions
+      'DESCRIBE_COMMAND_NOT_FOUND',
     ] as const
     for (const c of expected) {
       expect(ERROR_CODES).toContain(c)

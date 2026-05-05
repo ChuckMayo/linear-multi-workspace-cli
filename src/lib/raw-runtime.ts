@@ -255,4 +255,3 @@ async function loadVars(varsArg: string | undefined): Promise<unknown> {
     })
   }
 }
-
