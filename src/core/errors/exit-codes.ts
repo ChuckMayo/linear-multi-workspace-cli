@@ -78,6 +78,12 @@ export function exitCodeFor(code: ErrorCode): number {
     case 'CYCLE_NOT_FOUND':
       return EXIT_CODES.LINEAR_API
     case 'GENERIC_ERROR':
+    // Phase 5 PLAN 05-02: install-skill failures share exit 1 (GENERIC).
+    // Project caps numeric exit codes at 15; new error codes that don't fit
+    // the existing 10–15 families default to GENERIC. Agent-side branching
+    // happens via `error.code` in the envelope.
+    case 'INSTALL_SKILL_BUNDLE_NOT_FOUND':
+    case 'INSTALL_SKILL_WRITE_FAILED':
       return EXIT_CODES.GENERIC
     default: {
       // Exhaustiveness guard: TS will complain at this line if any

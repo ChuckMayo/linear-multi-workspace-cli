@@ -145,6 +145,9 @@ describe('ERROR_CODES tuple', () => {
       'BATCH_PLAN_INVALID',
       // Phase 4 PLAN 04-01 additions
       'DESCRIBE_COMMAND_NOT_FOUND',
+      // Phase 5 PLAN 05-02 additions
+      'INSTALL_SKILL_BUNDLE_NOT_FOUND',
+      'INSTALL_SKILL_WRITE_FAILED',
     ] as const
     for (const c of expected) {
       expect(ERROR_CODES).toContain(c)
@@ -201,13 +204,19 @@ describe('exitCodeFor', () => {
     expect(exitCodeFor('GENERIC_ERROR')).toBe(1)
   })
 
-  it('returns 1 only for GENERIC_ERROR (no implicit fallback)', () => {
-    // Sanity — every defined code has a dedicated branch; the only one that returns 1 is GENERIC.
-    let ones = 0
+  it('returns 1 only for the GENERIC family (no implicit fallback)', () => {
+    // Sanity — every defined code has a dedicated branch. As of Phase 5
+    // PLAN 05-02, three codes share exit 1: GENERIC_ERROR plus the two
+    // install-skill failure codes (RESEARCH §11 Option A).
+    const onesCodes: ErrorCode[] = []
     for (const c of ERROR_CODES) {
-      if (exitCodeFor(c) === 1) ones++
+      if (exitCodeFor(c) === 1) onesCodes.push(c)
     }
-    expect(ones).toBe(1)
+    expect(onesCodes.sort()).toEqual([
+      'GENERIC_ERROR',
+      'INSTALL_SKILL_BUNDLE_NOT_FOUND',
+      'INSTALL_SKILL_WRITE_FAILED',
+    ])
     expect(exitCodeFor('GENERIC_ERROR')).toBe(1)
   })
 
@@ -253,6 +262,23 @@ describe('exitCodeFor', () => {
         expect(exitCodeFor(code)).toBe(expected)
       })
     }
+  })
+
+  // ─── Phase 5 PLAN 05-02 — install-skill failure mapping ──────────────
+  // Per RESEARCH §11 Option A: project caps numeric exit codes at 15;
+  // install-skill failures join EXIT_CODES.GENERIC (1). Agents branch on
+  // `error.code` in the envelope (the documented contract).
+  describe('Phase 5 PLAN 05-02: install-skill codes map to GENERIC (exit 1)', () => {
+    it('INSTALL_SKILL_BUNDLE_NOT_FOUND -> exit 1', () => {
+      expect(exitCodeFor('INSTALL_SKILL_BUNDLE_NOT_FOUND')).toBe(1)
+    })
+    it('INSTALL_SKILL_WRITE_FAILED -> exit 1', () => {
+      expect(exitCodeFor('INSTALL_SKILL_WRITE_FAILED')).toBe(1)
+    })
+    it('ERROR_CODES tuple includes both new codes', () => {
+      expect(ERROR_CODES).toContain('INSTALL_SKILL_BUNDLE_NOT_FOUND')
+      expect(ERROR_CODES).toContain('INSTALL_SKILL_WRITE_FAILED')
+    })
   })
 })
 

@@ -66,6 +66,12 @@ export const ERROR_CODES = [
   // ─── Phase 4 additions ──────────────────────────────────────
   // Usage family — exit 2 (joins USAGE_ERROR)
   'DESCRIBE_COMMAND_NOT_FOUND',
+  // ─── Phase 5 PLAN 05-02 additions ──────────────────────────────────────
+  // Generic family — exit 1 (per RESEARCH §11 Option A; project caps numeric
+  // exit codes at 15, so install-skill failures default to GENERIC. Agents
+  // branch on `error.code` in the envelope, not on exit code.)
+  'INSTALL_SKILL_BUNDLE_NOT_FOUND',
+  'INSTALL_SKILL_WRITE_FAILED',
 ] as const
 
 export type ErrorCode = (typeof ERROR_CODES)[number]
