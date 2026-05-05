@@ -17,6 +17,14 @@
 import { describe, expect, it } from 'vitest'
 import { schemaRuntime } from '../../src/lib/schema-runtime.js'
 
+/** Minimal shape of the introspection __schema object we rely on in tests. */
+interface IntrospectionSchemaShape {
+  __schema: {
+    queryType: { name: string }
+    types: Array<{ name: string; description: string | null }>
+  }
+}
+
 describe('schemaRuntime (compact SDL — default)', () => {
   it('returns ok: true', async () => {
     const result = await schemaRuntime({ flags: {} })
@@ -30,9 +38,9 @@ describe('schemaRuntime (compact SDL — default)', () => {
     expect(result.data.schema).not.toContain('"""')
   })
 
-  it('data.schema contains core Linear type "type Issue {"', async () => {
+  it('data.schema contains core Linear type "type Issue implements Node {"', async () => {
     const result = await schemaRuntime({ flags: {} })
-    expect(result.data.schema).toContain('type Issue {')
+    expect(result.data.schema).toContain('type Issue implements Node {')
   })
 
   it('data.types_count is 1081', async () => {
@@ -70,9 +78,7 @@ describe('schemaRuntime (--full flag)', () => {
   it('compact SDL length < full SDL length', async () => {
     const compact = await schemaRuntime({ flags: {} })
     const full = await schemaRuntime({ flags: { full: true } })
-    expect((compact.data.schema as string).length).toBeLessThan(
-      (full.data.schema as string).length,
-    )
+    expect((compact.data.schema as string).length).toBeLessThan((full.data.schema as string).length)
   })
 })
 
@@ -85,25 +91,19 @@ describe('schemaRuntime (--json flag)', () => {
 
   it('data.schema.__schema.queryType.name is "Query"', async () => {
     const result = await schemaRuntime({ flags: { json: true } })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((result.data.schema as any).__schema.queryType.name).toBe('Query')
+    expect((result.data.schema as IntrospectionSchemaShape).__schema.queryType.name).toBe('Query')
   })
 
   it('data.schema.__schema.types is a non-empty array', async () => {
     const result = await schemaRuntime({ flags: { json: true } })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const types = (result.data.schema as any).__schema.types
+    const types = (result.data.schema as IntrospectionSchemaShape).__schema.types
     expect(Array.isArray(types)).toBe(true)
     expect(types.length).toBeGreaterThan(0)
   })
 
   it('descriptions are NOT present by default (descriptions: false)', async () => {
     const result = await schemaRuntime({ flags: { json: true } })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const types = (result.data.schema as any).__schema.types as Array<{
-      name: string
-      description: string | null
-    }>
+    const types = (result.data.schema as IntrospectionSchemaShape).__schema.types
     // All type descriptions should be null or empty when descriptions: false
     const withDescriptions = types.filter((t) => t.description && t.description.length > 0)
     expect(withDescriptions).toHaveLength(0)
@@ -126,12 +126,11 @@ describe('INT-04 snapshots', () => {
 
   it('schema --json — counts + first 3 type names', async () => {
     const result = await schemaRuntime({ flags: { json: true } })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const schema = (result.data.schema as any).__schema
+    const introspection = (result.data.schema as IntrospectionSchemaShape).__schema
     expect({
       types_count: result.data.types_count,
-      queryType: schema.queryType.name,
-      first3Types: schema.types.slice(0, 3).map((t: { name: string }) => t.name),
+      queryType: introspection.queryType.name,
+      first3Types: introspection.types.slice(0, 3).map((t) => t.name),
     }).toMatchSnapshot('schema-json-counts-first3')
   })
 })

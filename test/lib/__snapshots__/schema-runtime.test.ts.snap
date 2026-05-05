@@ -1,0 +1,46 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`INT-04 snapshots > schema --json — counts + first 3 type names > schema-json-counts-first3 1`] = `
+{
+  "first3Types": [
+    "AgentActivitySignal",
+    "AgentActivityType",
+    "AgentSessionStatus",
+  ],
+  "queryType": "Query",
+  "types_count": 1081,
+}
+`;
+
+exports[`INT-04 snapshots > schema — head + tail + counts > schema-compact-head-tail-counts 1`] = `
+{
+  "head": [
+    "enum AgentActivitySignal {",
+    "  auth",
+    "  continue",
+    "  select",
+    "  stop",
+    "}",
+    "enum AgentActivityType {",
+    "  action",
+    "  elicitation",
+    "  error",
+  ],
+  "mutations_count": 351,
+  "queries_count": 151,
+  "subscriptions_count": 75,
+  "tail": [
+    "union AgentActivityContent = AgentActivityActionContent | AgentActivityElicitationContent | AgentActivityErrorContent | AgentActivityPromptContent | AgentActivityResponseContent | AgentActivityThoughtContent",
+    "union AiConversationPart = AiConversationEventPart | AiConversationPromptPart | AiConversationReasoningPart | AiConversationTextPart | AiConversationToolCallPart | AiConversationWidgetPart",
+    "union AiConversationToolCall = AiConversationCodeIntelligenceToolCall | AiConversationCreateEntityToolCall | AiConversationDeleteEntityToolCall | AiConversationGetMicrosoftTeamsConversationHistoryToolCall | AiConversationGetPullRequestCheckLogsToolCall | AiConversationGetPullRequestDiffToolCall | AiConversationGetPullRequestFileToolCall | AiConversationGetSlackConversationHistoryToolCall | AiConversationHandoffToCodingSessionToolCall | AiConversationInvokeMcpToolToolCall | AiConversationNavigateToPageToolCall | AiConversationQueryActivityToolCall | AiConversationQueryUpdatesToolCall | AiConversationQueryViewToolCall | AiConversationResearchToolCall | AiConversationRestoreEntityToolCall | AiConversationRetrieveEntitiesToolCall | AiConversationRetryPullRequestCheckToolCall | AiConversationSearchDocumentationToolCall | AiConversationSearchEntitiesToolCall | AiConversationSubscribeToEventToolCall | AiConversationSuggestValuesToolCall | AiConversationTranscribeMediaToolCall | AiConversationTranscribeVideoToolCall | AiConversationUnsubscribeFromEventToolCall | AiConversationUpdateEntityToolCall | AiConversationWebSearchToolCall",
+    "union AiConversationWidget = AiConversationEntityCardWidget | AiConversationEntityListWidget",
+    "union DataWebhookPayload = AgentActivityWebhookPayload | AgentSessionWebhookPayload | AttachmentWebhookPayload | AuditEntryWebhookPayload | CommentWebhookPayload | CustomerNeedWebhookPayload | CustomerWebhookPayload | CycleWebhookPayload | DocumentWebhookPayload | InitiativeUpdateWebhookPayload | InitiativeWebhookPayload | IssueLabelWebhookPayload | IssueWebhookPayload | ProjectLabelWebhookPayload | ProjectUpdateWebhookPayload | ProjectWebhookPayload | ReactionWebhookPayload | ReleaseWebhookPayload | UserWebhookPayload",
+    "union EntityActorWebhookPayload = IntegrationActorWebhookPayload | OauthClientActorWebhookPayload | UserActorWebhookPayload",
+    "union ExternalEntityInfoMetadata = ExternalEntityInfoGithubMetadata | ExternalEntityInfoJiraMetadata | ExternalEntitySlackMetadata",
+    "union GuidanceRuleOriginWebhookPayload = OrganizationOriginWebhookPayload | TeamOriginWebhookPayload",
+    "union NotificationWebhookPayload = IssueAssignedToYouNotificationWebhookPayload | IssueCommentMentionNotificationWebhookPayload | IssueCommentReactionNotificationWebhookPayload | IssueEmojiReactionNotificationWebhookPayload | IssueMentionNotificationWebhookPayload | IssueNewCommentNotificationWebhookPayload | IssueStatusChangedNotificationWebhookPayload | IssueUnassignedFromYouNotificationWebhookPayload | OtherNotificationWebhookPayload",
+    "union OrganizationInviteDetailsPayload = OrganizationAcceptedOrExpiredInviteDetailsPayload | OrganizationInviteFullDetailsPayload",
+  ],
+  "types_count": 1081,
+}
+`;

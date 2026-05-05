@@ -25,13 +25,13 @@ describe('Schema command', () => {
   it('defines a --full boolean flag', () => {
     const flags = Schema.flags ?? {}
     expect(flags).toHaveProperty('full')
-    expect(flags['full']?.type).toBe('boolean')
+    expect(flags.full?.type).toBe('boolean')
   })
 
   it('defines a --json boolean flag', () => {
     const flags = Schema.flags ?? {}
     expect(flags).toHaveProperty('json')
-    expect(flags['json']?.type).toBe('boolean')
+    expect(flags.json?.type).toBe('boolean')
   })
 
   it('does not have a --workspace flag (zero network calls)', () => {
