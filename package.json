@@ -34,6 +34,8 @@
     "build-operations": "tsx codegen/build-operations.ts",
     "fetch-schema": "tsx codegen/fetch-schema.ts",
     "verify-pack": "node scripts/verify-pack.mjs",
+    "cold-start": "node scripts/measure-cold-start.mjs",
+    "release:dry-run": "npm run lint && npm run typecheck && npm run test && npm run build && node scripts/stamp-skill.mjs && node scripts/verify-pack.mjs && npm pack && node scripts/measure-cold-start.mjs",
     "smoke:phase-2": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs",
     "smoke:phase-2:burst": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs --burst",
     "smoke:phase-2:keep": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs --keep",
