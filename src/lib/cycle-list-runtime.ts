@@ -103,8 +103,25 @@ export async function cycleListRuntime(input: CycleListInput): Promise<CycleList
     const query = composeCycleListWithIncludes(fragmentText)
 
     return withFetchInterception(async () => {
-      const vars: { first: number; after?: string } = { first }
+      // BL-02 fix: resolve --team ref and thread it through as `filter`
+      // on the rawRequest path. Without this, `cycle list --team ENG
+      // --include issues` silently returned cycles from EVERY team the
+      // viewer can see, not just ENG.
+      let filter: CycleFilter | undefined
+      if (input.flags.team !== undefined) {
+        const workspaceKey = resolved.name ?? '_api-key-env_'
+        const teamId = await resolveTeamId(
+          client,
+          workspaceKey,
+          input.flags.team,
+          input.retryOptsOverride,
+        )
+        filter = { team: { id: { eq: teamId } } }
+      }
+
+      const vars: { first: number; after?: string; filter?: CycleFilter } = { first }
       if (after !== undefined) vars.after = after
+      if (filter !== undefined) vars.filter = filter
 
       const response = (await withRateLimitRetry(
         () =>
@@ -260,10 +277,12 @@ async function resolveLazy(value: unknown): Promise<unknown> {
 
 function composeCycleListWithIncludes(fragmentText: string): string {
   return `
-    query CyclesWithIncludes($first: Int!, $after: String) {
-      cycles(first: $first, after: $after) {
+    query CyclesWithIncludes($filter: CycleFilter, $first: Int!, $after: String) {
+      cycles(filter: $filter, first: $first, after: $after) {
         nodes {
-          id number name startsAt endsAt completedAt
+          id number name description startsAt endsAt completedAt progress
+          isActive isPast isFuture isNext isPrevious
+          createdAt updatedAt archivedAt
           team { id name key }
           ${fragmentText}
         }

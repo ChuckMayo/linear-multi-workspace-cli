@@ -450,4 +450,80 @@ describe('cycleListRuntime -- --include (Phase 3 RAW-04)', () => {
       expect(handle.cyclesFn).not.toHaveBeenCalled()
     }
   })
+
+  // Regression: REVIEW BL-02 — `cycle list --team X --include Y` must
+  // thread `--team` through to the rawRequest path. Before the fix, the
+  // --include branch composed `cycles(first, after)` with no `filter`
+  // argument and silently returned cycles from EVERY team.
+  it('Test 9e (BL-02): --team ENG + --include issues threads filter on rawRequest path', async () => {
+    let capturedQuery = ''
+    let capturedVars: unknown
+    mockRawRequestFn = async (q, vars) => {
+      capturedQuery = q
+      capturedVars = vars
+      return {
+        data: {
+          cycles: {
+            nodes: [],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      }
+    }
+
+    const handle = makeMockClient({
+      teams: async () => ({ nodes: [{ id: TEAM_UUID, key: 'ENG', name: 'Engineering' }] }),
+    })
+
+    await cycleListRuntime({
+      flags: { workspace: 'acme', team: 'ENG', include: ['issues'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // teams() lookup happened to resolve ENG -> UUID
+    expect(handle.teamsFn).toHaveBeenCalledTimes(1)
+    // rawRequest path used (not typed cycles())
+    expect(rawRequestCallCount).toBe(1)
+    expect(handle.cyclesFn).not.toHaveBeenCalled()
+    // Composed query declares the $filter variable AND passes it to cycles()
+    expect(capturedQuery).toContain('$filter: CycleFilter')
+    expect(capturedQuery).toContain('cycles(filter: $filter')
+    // Filter actually shipped to Linear with the resolved UUID
+    expect(capturedVars).toMatchObject({
+      filter: { team: { id: { eq: TEAM_UUID } } },
+    })
+  })
+
+  it('Test 10e (BL-02): --team <uuid> + --include skips teams() lookup but still threads filter', async () => {
+    let capturedVars: unknown
+    mockRawRequestFn = async (_q, vars) => {
+      capturedVars = vars
+      return {
+        data: {
+          cycles: {
+            nodes: [],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      }
+    }
+
+    const handle = makeMockClient({})
+
+    await cycleListRuntime({
+      flags: { workspace: 'acme', team: TEAM_UUID, include: ['issues'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // UUID passthrough: no teams() lookup
+    expect(handle.teamsFn).not.toHaveBeenCalled()
+    expect(rawRequestCallCount).toBe(1)
+    expect(capturedVars).toMatchObject({
+      filter: { team: { id: { eq: TEAM_UUID } } },
+    })
+  })
 })
