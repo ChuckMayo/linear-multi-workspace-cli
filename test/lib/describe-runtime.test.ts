@@ -16,8 +16,8 @@
  *   12. Snapshot (INT-04): failure envelope for DESCRIBE_COMMAND_NOT_FOUND
  */
 import { describe, expect, it } from 'vitest'
-import { describeRuntime } from '../../src/lib/describe-runtime.js'
 import { LinearAgentError } from '../../src/core/errors/error.js'
+import { describeRuntime } from '../../src/lib/describe-runtime.js'
 
 const DRAFT_2020_12_URI = 'https://json-schema.org/draft/2020-12/schema'
 

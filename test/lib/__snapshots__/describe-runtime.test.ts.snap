@@ -1,0 +1,252 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`describeRuntime — snapshots (INT-04) > describe IssueCreate — full output snapshot > describe-IssueCreate 1`] = `
+{
+  "command": "IssueCreate",
+  "examples": [],
+  "input": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "input": {
+        "additionalProperties": false,
+        "properties": {
+          "assigneeId": {
+            "type": "string",
+          },
+          "completedAt": {
+            "type": "string",
+          },
+          "createAsUser": {
+            "type": "string",
+          },
+          "createdAt": {
+            "type": "string",
+          },
+          "cycleId": {
+            "type": "string",
+          },
+          "delegateId": {
+            "type": "string",
+          },
+          "description": {
+            "type": "string",
+          },
+          "descriptionData": {},
+          "displayIconUrl": {
+            "type": "string",
+          },
+          "dueDate": {
+            "type": "string",
+          },
+          "estimate": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+          },
+          "id": {
+            "type": "string",
+          },
+          "inheritsSharedAccess": {
+            "type": "boolean",
+          },
+          "labelIds": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "lastAppliedTemplateId": {
+            "type": "string",
+          },
+          "parentId": {
+            "type": "string",
+          },
+          "preserveSortOrderOnCreate": {
+            "type": "boolean",
+          },
+          "priority": {
+            "maximum": 9007199254740991,
+            "minimum": -9007199254740991,
+            "type": "integer",
+          },
+          "prioritySortOrder": {
+            "type": "number",
+          },
+          "projectId": {
+            "type": "string",
+          },
+          "projectMilestoneId": {
+            "type": "string",
+          },
+          "referenceCommentId": {
+            "type": "string",
+          },
+          "releaseIds": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "slaBreachesAt": {
+            "type": "string",
+          },
+          "slaStartedAt": {
+            "type": "string",
+          },
+          "slaType": {
+            "enum": [
+              "all",
+              "onlyBusinessDays",
+            ],
+            "type": "string",
+          },
+          "sortOrder": {
+            "type": "number",
+          },
+          "sourceCommentId": {
+            "type": "string",
+          },
+          "sourcePullRequestCommentId": {
+            "type": "string",
+          },
+          "stateId": {
+            "type": "string",
+          },
+          "subIssueSortOrder": {
+            "type": "number",
+          },
+          "subscriberIds": {
+            "items": {
+              "type": "string",
+            },
+            "type": "array",
+          },
+          "teamId": {
+            "type": "string",
+          },
+          "templateId": {
+            "type": "string",
+          },
+          "title": {
+            "type": "string",
+          },
+          "useDefaultTemplate": {
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "teamId",
+        ],
+        "type": "object",
+      },
+    },
+    "required": [
+      "input",
+    ],
+    "type": "object",
+  },
+  "kind": "raw",
+  "output": """"
+The result of an issue mutation, containing the created or updated issue and a success indicator.
+"""
+type IssuePayload {
+  """The issue that was created or updated."""
+  issue: Issue
+
+  """The identifier of the last sync operation."""
+  lastSyncId: Float!
+
+  """Whether the operation was successful."""
+  success: Boolean!
+}",
+}
+`;
+
+exports[`describeRuntime — snapshots (INT-04) > describe issue list — full output snapshot > describe-issue-list 1`] = `
+{
+  "command": "issue list",
+  "examples": [],
+  "input": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {},
+    "type": "object",
+  },
+  "kind": "curated",
+  "output": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false,
+    "properties": {
+      "$apiVersion": {
+        "const": "1",
+        "type": "string",
+      },
+      "data": {},
+      "meta": {
+        "additionalProperties": false,
+        "properties": {
+          "command": {
+            "type": "string",
+          },
+          "pageInfo": {
+            "additionalProperties": false,
+            "properties": {
+              "endCursor": {
+                "type": "string",
+              },
+              "hasNextPage": {
+                "type": "boolean",
+              },
+            },
+            "required": [
+              "hasNextPage",
+            ],
+            "type": "object",
+          },
+          "totalCount": {
+            "type": "number",
+          },
+          "workspace": {
+            "type": "string",
+          },
+          "workspaceSource": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "workspace",
+          "workspaceSource",
+          "command",
+        ],
+        "type": "object",
+      },
+      "ok": {
+        "const": true,
+        "type": "boolean",
+      },
+    },
+    "required": [
+      "$apiVersion",
+      "ok",
+      "data",
+      "meta",
+    ],
+    "type": "object",
+  },
+}
+`;
+
+exports[`describeRuntime — snapshots (INT-04) > failure envelope for DESCRIBE_COMMAND_NOT_FOUND snapshot > failure-DESCRIBE_COMMAND_NOT_FOUND 1`] = `
+{
+  "code": "DESCRIBE_COMMAND_NOT_FOUND",
+  "details": {
+    "suggestions": [
+      "LogoutAllSessions",
+      "Attachment",
+      "Attachments",
+    ],
+    "target": "zzz-totally-unknown",
+  },
+}
+`;
