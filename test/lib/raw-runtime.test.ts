@@ -374,6 +374,38 @@ describe('rawRuntime — success path (mutation)', () => {
 // rawRequest does NOT throw on GraphQL errors — populates response.error as STRING
 // -----------------------------------------------------------------------------
 
+// Regression: REVIEW WR-05 — if Linear ever echoes a token-shaped
+// substring back in a GraphQL error string, the LinearAgentError
+// constructor would throw a plain Error (defense-in-depth check),
+// breaking the typed-envelope contract. Runtime must redact before
+// constructing the error.
+describe('rawRuntime — WR-05 token redaction in LINEAR_API_ERROR', () => {
+  it('Test 8c (WR-05): response.error containing lin_api_* is redacted before throw', async () => {
+    mockRawRequestFn = async () => ({
+      // Simulate Linear echoing a token in an auth-error message
+      error: 'unauthorized: token lin_api_aaaaaaaaaaaaaaaaaaaaaaaaaaaa rejected',
+    })
+
+    expect.assertions(4)
+    try {
+      await runRaw({
+        args: { operation: 'Issues' },
+        flags: {},
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+      })
+    } catch (e) {
+      // Critically: must remain a LinearAgentError, not a raw Error from
+      // the constructor's token-substring check.
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('LINEAR_API_ERROR')
+      expect(err.message).not.toMatch(/lin_api_/)
+      expect(err.message).toContain('[REDACTED]')
+    }
+  })
+})
+
 describe('rawRuntime — LINEAR_API_ERROR (Pitfall 2)', () => {
   it('Test 8: response.error string → LINEAR_API_ERROR with details.cause', async () => {
     mockRawRequestFn = vi.fn().mockResolvedValue({

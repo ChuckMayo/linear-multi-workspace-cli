@@ -34,6 +34,7 @@ import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
+import { redact } from '@/core/redact/index.js'
 import {
   getLastComplexity,
   type RetryOpts,
@@ -167,12 +168,21 @@ export async function runRaw(input: RunRawInput): Promise<RunRawOutput> {
     // Step 9: Pitfall 2 — response.error is a STRING, not a LinearError instance.
     // withRateLimitRetry handles HTTP-layer rate-limits; this checks GraphQL-layer errors.
     if (response.error !== undefined || response.data === undefined) {
+      // WR-05: scrub token-shaped substrings before constructing the
+      // LinearAgentError. The error constructor THROWS a plain Error
+      // if `message` contains `lin_api_*` / `lin_oauth_*` (defense in
+      // depth on top of the redactor). If Linear's API ever echoes a
+      // token back in an error string, an unredacted message would
+      // bypass the typed-envelope contract via that throw.
+      const safeMessage = redact(
+        response.error ?? `rawRequest returned no data for operation '${input.args.operation}'`,
+      )
+      const safeCause = response.error !== undefined ? redact(response.error) : undefined
       throw new LinearAgentError({
         code: 'LINEAR_API_ERROR',
-        message:
-          response.error ?? `rawRequest returned no data for operation '${input.args.operation}'`,
+        message: safeMessage,
         details: {
-          cause: response.error,
+          cause: safeCause,
           operation: input.args.operation,
           status: response.status,
         },

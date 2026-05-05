@@ -36,6 +36,7 @@ import type { Config } from '@/core/config/index.js'
 import { loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
+import { redact } from '@/core/redact/index.js'
 import {
   getLastComplexity,
   withFetchInterception,
@@ -160,10 +161,15 @@ export async function runGraphql(input: RunGraphqlInput): Promise<RunGraphqlOutp
       error?: string
     }
     if (response.error !== undefined || response.data === undefined) {
+      // WR-05: scrub token-shaped substrings before constructing the
+      // LinearAgentError — its constructor throws on `lin_api_*` /
+      // `lin_oauth_*` substrings (defense in depth).
+      const safeMessage = redact(response.error ?? 'graphql request returned no data')
+      const safeCause = response.error !== undefined ? redact(response.error) : undefined
       throw new LinearAgentError({
         code: 'LINEAR_API_ERROR',
-        message: response.error ?? 'graphql request returned no data',
-        details: { kind: 'graphql-runtime', cause: response.error },
+        message: safeMessage,
+        details: { kind: 'graphql-runtime', cause: safeCause },
       })
     }
     const complexity = getLastComplexity()
@@ -183,10 +189,14 @@ export async function runGraphql(input: RunGraphqlInput): Promise<RunGraphqlOutp
       client.client.rawRequest(queryText, vars as Record<string, unknown>),
     )) as { data?: unknown; error?: string }
     if (response.error !== undefined || response.data === undefined) {
+      // WR-05: scrub token-shaped substrings before constructing the
+      // LinearAgentError (see comment above).
+      const safeMessage = redact(response.error ?? 'graphql request returned no data')
+      const safeCause = response.error !== undefined ? redact(response.error) : undefined
       throw new LinearAgentError({
         code: 'LINEAR_API_ERROR',
-        message: response.error ?? 'graphql request returned no data',
-        details: { kind: 'graphql-runtime', cause: response.error },
+        message: safeMessage,
+        details: { kind: 'graphql-runtime', cause: safeCause },
       })
     }
     const complexity = getLastComplexity()

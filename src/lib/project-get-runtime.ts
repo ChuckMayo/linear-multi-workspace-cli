@@ -27,6 +27,7 @@ import { type Config, loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
+import { redact } from '@/core/redact/index.js'
 import { resolveProjectId } from '@/core/resolvers/index.js'
 import {
   getLastComplexity,
@@ -112,9 +113,14 @@ export async function projectGetRuntime(input: ProjectGetInput): Promise<Project
       )) as { data?: unknown; error?: string }
 
       if (response.error ?? !response.data) {
+        // WR-05: scrub token-shaped substrings before constructing the
+        // LinearAgentError — its constructor throws on `lin_api_*` /
+        // `lin_oauth_*` substrings (defense in depth).
+        const safeMessage = redact(response.error ?? 'no data returned from Linear API')
+        const safeCause = response.error !== undefined ? redact(response.error) : undefined
         throw LinearAgentError.linear.apiError({
-          message: response.error ?? 'no data returned from Linear API',
-          details: { command: 'project get', cause: response.error },
+          message: safeMessage,
+          details: { command: 'project get', cause: safeCause },
         })
       }
 
