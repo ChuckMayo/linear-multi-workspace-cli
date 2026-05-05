@@ -26,9 +26,10 @@ interface IntrospectionSchemaShape {
 }
 
 describe('schemaRuntime (compact SDL — default)', () => {
-  it('returns ok: true', async () => {
+  it('returns a `data` object (envelope wrapping is the kernel’s job)', async () => {
     const result = await schemaRuntime({ flags: {} })
-    expect(result.ok).toBe(true)
+    expect(result.data).toBeDefined()
+    expect(typeof result.data).toBe('object')
   })
 
   it('data.schema is a non-empty string without triple-quoted descriptions', async () => {
@@ -63,9 +64,10 @@ describe('schemaRuntime (compact SDL — default)', () => {
     expect(result.data.subscriptions_count).toBe(75)
   })
 
-  it('meta.command is "schema"', async () => {
+  it('returns only `data` — meta.command is injected by runCommand', async () => {
     const result = await schemaRuntime({ flags: {} })
-    expect(result.meta.command).toBe('schema')
+    expect(result).not.toHaveProperty('meta')
+    expect(result).toHaveProperty('data')
   })
 })
 

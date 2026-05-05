@@ -29,7 +29,7 @@ export async function runSchema(args: {
           json: args.json,
         },
       })
-      return { data: result.data, meta: result.meta }
+      return { data: result.data, meta: {} }
     },
   })
 }

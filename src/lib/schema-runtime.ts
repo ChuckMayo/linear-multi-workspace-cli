@@ -16,7 +16,6 @@
  *   subscriptions_count = 75
  */
 import { type GraphQLSchema, introspectionFromSchema, printSchema } from 'graphql'
-import { success } from '@/core/output/index.js'
 import { getLinearSchema } from '@/lib/schema-loader.js'
 
 export interface SchemaDataSdl {
@@ -41,6 +40,10 @@ export interface SchemaRuntimeArgs {
     json?: boolean
     pretty?: boolean
   }
+}
+
+export interface SchemaRuntimeResult {
+  data: SchemaDataSdl | SchemaDataJson
 }
 
 /**
@@ -68,10 +71,13 @@ function getTypeCounts(schema: GraphQLSchema): {
  * or as standard introspection JSON.
  *
  * This is the named runtime export used by tests and the oclif command shim.
+ *
+ * Returns `{ data }` only — the command shim wraps the result in the Phase 1
+ * envelope via `runCommand`, which sets `meta.command` from the commandPath.
+ * No `meta` is returned here on purpose: the runtime owns the data shape and
+ * the kernel owns the envelope.
  */
-export async function schemaRuntime(
-  args: SchemaRuntimeArgs,
-): Promise<ReturnType<typeof success<SchemaDataSdl>> | ReturnType<typeof success<SchemaDataJson>>> {
+export async function schemaRuntime(args: SchemaRuntimeArgs): Promise<SchemaRuntimeResult> {
   const { flags } = args
   const schema = getLinearSchema()
   const counts = getTypeCounts(schema)
@@ -88,7 +94,7 @@ export async function schemaRuntime(
       schema: introspectionResult as unknown as { __schema: object },
       ...counts,
     }
-    return success(data, { command: 'schema' })
+    return { data }
   }
 
   // SDL path (default)
@@ -97,5 +103,5 @@ export async function schemaRuntime(
   // The non-greedy [\s\S]*? handles both forms; \n? handles trailing newlines.
   const sdl = flags.full ? printed : printed.replace(/"""[\s\S]*?"""\n?/g, '')
   const data: SchemaDataSdl = { schema: sdl, ...counts }
-  return success(data, { command: 'schema' })
+  return { data }
 }

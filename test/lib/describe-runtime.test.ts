@@ -51,9 +51,9 @@ describe('describeRuntime — curated path', () => {
     expect(result.data.output).not.toBeNull()
   })
 
-  it('meta.command is "describe"', async () => {
+  it('data.command echoes the requested target', async () => {
     const result = await describeRuntime({ args: { command: 'issue list' }, flags: {} })
-    expect(result.meta.command).toBe('describe')
+    expect(result.data.command).toBe('issue list')
   })
 })
 

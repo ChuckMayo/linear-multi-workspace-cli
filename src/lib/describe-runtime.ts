@@ -161,7 +161,6 @@ export interface DescribeRawData {
 
 export interface DescribeResult {
   data: DescribeCuratedData | DescribeRawData
-  meta: { command: string }
 }
 
 /**
@@ -195,7 +194,6 @@ export async function describeRuntime(args: DescribeRuntimeArgs): Promise<Descri
           output: outputJsonSchema,
           examples: entry.examples,
         },
-        meta: { command: 'describe' },
       }
     }
     // Not found in curated → fall through to not-found error
@@ -216,7 +214,6 @@ export async function describeRuntime(args: DescribeRuntimeArgs): Promise<Descri
           output: outputFragment,
           examples: [],
         },
-        meta: { command: 'describe' },
       }
     }
     // Not found in raw → fall through to not-found error
