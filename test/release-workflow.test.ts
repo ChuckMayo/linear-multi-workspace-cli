@@ -48,8 +48,7 @@ function loadRelease(): ReleaseWorkflow {
 /** YAML parses unquoted top-level `on:` to JS boolean `true`. Be tolerant of either key. */
 function getTriggers(wf: ReleaseWorkflow): Record<string, unknown> {
   const trig =
-    (wf as unknown as Record<string, unknown>).on ??
-    (wf as unknown as Record<string, unknown>).true
+    (wf as unknown as Record<string, unknown>).on ?? (wf as unknown as Record<string, unknown>).true
   return (trig ?? {}) as Record<string, unknown>
 }
 
@@ -99,9 +98,10 @@ describe('.github/workflows/release.yml is a valid GitHub Actions workflow', () 
   it('contains a YAML comment about the post-milestone repo-public flip', () => {
     const text = readFileSync(RELEASE, 'utf8')
     const hasFlipComment = text.includes('flip repo public') || text.includes('post-milestone')
-    expect(hasFlipComment, 'release.yml must reference the post-milestone flip-public follow-up').toBe(
-      true,
-    )
+    expect(
+      hasFlipComment,
+      'release.yml must reference the post-milestone flip-public follow-up',
+    ).toBe(true)
   })
 })
 
@@ -136,9 +136,7 @@ describe('release.yml jobs: every job uses the same Node 22 + checkout@v4 setup'
     const wf = loadRelease()
     for (const [name, job] of Object.entries(wf.jobs ?? {})) {
       const checkout = job?.steps?.find((s) => s.uses?.startsWith('actions/checkout@'))
-      expect(checkout?.uses, `job ${name}: actions/checkout@v4 missing`).toBe(
-        'actions/checkout@v4',
-      )
+      expect(checkout?.uses, `job ${name}: actions/checkout@v4 missing`).toBe('actions/checkout@v4')
     }
   })
 
@@ -149,10 +147,7 @@ describe('release.yml jobs: every job uses the same Node 22 + checkout@v4 setup'
       expect(setupNode?.uses, `job ${name}: actions/setup-node@v4 missing`).toBe(
         'actions/setup-node@v4',
       )
-      expect(
-        String(setupNode?.with?.['node-version']),
-        `job ${name}: node-version`,
-      ).toBe('22')
+      expect(String(setupNode?.with?.['node-version']), `job ${name}: node-version`).toBe('22')
       expect(setupNode?.with?.cache, `job ${name}: cache`).toBe('npm')
     }
   })
@@ -200,9 +195,7 @@ describe('release.yml cold-start job runs measure-cold-start.mjs after npm pack'
   it('runs npm pack BEFORE measure-cold-start.mjs', () => {
     const wf = loadRelease()
     const steps = wf.jobs?.['cold-start']?.steps ?? []
-    const packIdx = steps.findIndex(
-      (s) => typeof s.run === 'string' && /\bnpm pack\b/.test(s.run),
-    )
+    const packIdx = steps.findIndex((s) => typeof s.run === 'string' && /\bnpm pack\b/.test(s.run))
     const coldIdx = steps.findIndex(
       (s) => typeof s.run === 'string' && s.run.includes('scripts/measure-cold-start.mjs'),
     )

@@ -1,0 +1,186 @@
+name: Release
+
+# Triggered ONLY by `git push` of a `v*` tag — this is the milestone release
+# ceremony. v1 deliberately omits any manual-dispatch trigger so the firing
+# surface is one event: a tag push by a maintainer. The structural test in
+# `test/release-workflow.test.ts` asserts the absence of any other trigger.
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Do NOT cancel in-flight runs: a tag-pushed release MUST complete. Distinct
+# tags get distinct concurrency groups; identical tags queue rather than
+# pre-empt each other (RESEARCH §10 P13).
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    name: lint + typecheck + test + build + verify-pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      # `verify-pack.mjs` does NOT trigger `prepack`, so the stamped SKILL.md
+      # would be missing without an explicit stamp step. (The publish job gets
+      # the stamp via `npm publish` -> prepack automatically.)
+      - name: Stamp skill manifest
+        run: node scripts/stamp-skill.mjs
+
+      - name: Verify pack
+        run: node scripts/verify-pack.mjs
+
+  cold-start:
+    name: cold-start budget (<500ms median)
+    runs-on: ubuntu-latest
+    needs: ci
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Stamp skill manifest
+        run: node scripts/stamp-skill.mjs
+
+      # Pack the tarball that `measure-cold-start.mjs` will time. The script
+      # pre-installs the tarball once (post-install timing) and then times
+      # `node bin/run.js --version` repeatedly to compute a median.
+      - name: Pack tarball
+        run: npm pack
+
+      - name: Measure cold start
+        run: node scripts/measure-cold-start.mjs
+
+  smoke-matrix:
+    name: smoke-${{ matrix.lane }}
+    runs-on: ubuntu-latest
+    needs: ci
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      # Don't let one failing lane abort the others — we want the full picture
+      # before deciding whether to block publish (only release-blocking lanes
+      # — plain-bash, claude-code-via-skill — can fail the job).
+      fail-fast: false
+      matrix:
+        lane:
+          - plain-bash               # release-blocking
+          - claude-code-via-skill    # release-blocking
+          - codex-cli-via-exec       # advisory (skip if no CODEX_TEST_API_KEY)
+          - gemini-cli-via-exec      # advisory (skip if no GEMINI_TEST_API_KEY)
+    env:
+      LINEAR_TEST_API_KEY: ${{ secrets.LINEAR_TEST_API_KEY }}
+      CODEX_TEST_API_KEY: ${{ secrets.CODEX_TEST_API_KEY }}
+      GEMINI_TEST_API_KEY: ${{ secrets.GEMINI_TEST_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Stamp skill manifest
+        run: node scripts/stamp-skill.mjs
+
+      - name: Pack tarball
+        run: npm pack
+
+      # `linear-agent-*.tgz` is a controlled glob (no user input), so the
+      # shell expansion is safe. The smoke script enforces SAFE-API
+      # (spawnSync with arg arrays — no shell strings) inside.
+      - name: Run lane ${{ matrix.lane }}
+        run: |
+          TARBALL=$(ls linear-agent-*.tgz | head -1)
+          node scripts/smoke-runtime-matrix.mjs --lane=${{ matrix.lane }} --tarball="./$TARBALL"
+
+  # ─────────────────────────────────────────────────────────────────────
+  # TODO (post-milestone): once the repo is flipped public, `--provenance`
+  # will actually generate an OIDC-signed attestation. Until then, the flag
+  # is passed but silently skipped per RESEARCH §1 / GitHub Community
+  # Discussion #127011 — `npm publish` exits 0 either way.
+  # Plan to publish a patch version (e.g. v0.1.1) after the flip-public flip
+  # so consumers get a real attestation.
+  # ─────────────────────────────────────────────────────────────────────
+  publish:
+    name: npm publish --provenance
+    runs-on: ubuntu-latest
+    needs: [ci, cold-start, smoke-matrix]
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write          # MANDATORY for OIDC provenance (RESEARCH §1).
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # `registry-url:` is what writes the auth-aware `.npmrc` line that
+      # reads `${NODE_AUTH_TOKEN}` from env. Do NOT add `npm config set`
+      # steps — they conflict with this (RESEARCH §10 P4).
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `npm publish` triggers `prepack` (build + oclif manifest + stamp)
+      # automatically, then uploads, then `postpack` cleans the stamped
+      # artifacts. No explicit stamp step needed here.
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
