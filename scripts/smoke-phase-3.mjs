@@ -27,8 +27,9 @@
  * Operator-only — DO NOT run in CI. Requires a real LINEAR_API_KEY.
  */
 
-import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdirSync, writeFileSync, readFileSync, unlinkSync, existsSync } from 'node:fs'
+// REVIEW WR-07: execFileSync and mkdirSync were imported but never used.
+import { spawnSync } from 'node:child_process'
+import { writeFileSync, readFileSync, unlinkSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -283,11 +284,18 @@ assert(
   'data.results should be an array',
 )
 const results = getData(executeResult, 'data.results')
-const allOk = results.every((r) => r.ok === true)
-if (!allOk) {
-  const failures = results.filter((r) => !r.ok)
-  log(`  WARN: ${failures.length} batch entries failed: ${JSON.stringify(failures.map((f) => f.error?.code))}`)
+// REVIEW WR-07: previously this only logged a WARN on failed entries
+// and the script continued to exit 0 — a smoke script that silently
+// passes when its assertions fail is worse than no smoke script.
+// Now: if any entry failed, surface the failure codes and FAIL the
+// step with assert(), matching the assertion style used elsewhere.
+const failures = results.filter((r) => !r.ok)
+if (failures.length > 0) {
+  log(
+    `  FAIL: ${failures.length} batch entries failed: ${JSON.stringify(failures.map((f) => ({ op: f.operation, code: f.error?.code, message: f.error?.message })))}`,
+  )
 }
+assert(failures.length === 0, 'all batch entries should succeed')
 log(
   `  ✓ execute returned ${results.length} results; ok=${results.filter((r) => r.ok).length}/${results.length}`,
 )
