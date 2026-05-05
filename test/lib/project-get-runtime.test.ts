@@ -374,4 +374,49 @@ describe('projectGetRuntime -- --include (Phase 3 RAW-04)', () => {
       expect(handle.projectFn).not.toHaveBeenCalled()
     }
   })
+
+  // Regression: REVIEW BL-03 — composed --include query must request every
+  // scalar in the project ALLOWED_FIELDS registry. Before the fix,
+  // --fields=full --include members silently dropped progress, sortOrder,
+  // startedAt, completedAt, color, icon, etc.
+  it('Test 9d (BL-03): composed --include query asks for all ALLOWED_FIELDS scalars', async () => {
+    let capturedQuery = ''
+    mockRawRequestFn = async (q) => {
+      capturedQuery = q
+      return {
+        data: {
+          project: {
+            id: PROJECT_UUID,
+            name: 'p',
+            members: { nodes: [] },
+          },
+        },
+      }
+    }
+
+    const handle = makeMockClient({})
+
+    await projectGetRuntime({
+      args: { ref: PROJECT_UUID },
+      flags: { workspace: 'acme', include: ['members'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // Previously-missing scalars from project ALLOWED_FIELDS must now appear
+    expect(capturedQuery).toMatch(/\bprogress\b/)
+    expect(capturedQuery).toMatch(/\bsortOrder\b/)
+    expect(capturedQuery).toMatch(/\bstartedAt\b/)
+    expect(capturedQuery).toMatch(/\bcompletedAt\b/)
+    expect(capturedQuery).toMatch(/\bcanceledAt\b/)
+    expect(capturedQuery).toMatch(/\barchivedAt\b/)
+    expect(capturedQuery).toMatch(/\bcolor\b/)
+    expect(capturedQuery).toMatch(/\bicon\b/)
+    expect(capturedQuery).toMatch(/\bcreatedAt\b/)
+    expect(capturedQuery).toMatch(/\bupdatedAt\b/)
+    // Relations whose paths appear in ALLOWED_FIELDS
+    expect(capturedQuery).toMatch(/lead\s*\{[^}]*\bemail\b/)
+    expect(capturedQuery).toMatch(/creator\s*\{[^}]*\bemail\b/)
+  })
 })

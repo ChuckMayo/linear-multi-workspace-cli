@@ -636,4 +636,51 @@ describe('issueGetRuntime -- --include (Phase 3 RAW-04)', () => {
       expect(handle.issueFn).not.toHaveBeenCalled()
     }
   })
+
+  // Regression: REVIEW BL-03 — the --include composed query must request
+  // every scalar in the issue ALLOWED_FIELDS registry (project.ts), not
+  // a hardcoded subset. Before the fix, --fields=full --include comments
+  // silently dropped priorityLabel, estimate, sortOrder, dueDate, etc.
+  it('Test 9b (BL-03): composed --include query asks for all ALLOWED_FIELDS scalars', async () => {
+    let capturedQuery = ''
+    mockRawRequestFn = async (q) => {
+      capturedQuery = q
+      return {
+        data: {
+          issue: {
+            id: ISSUE_UUID,
+            identifier: 'ENG-1',
+            title: 't',
+            comments: { nodes: [] },
+          },
+        },
+      }
+    }
+
+    const handle = makeMockClient({})
+
+    await issueGetRuntime({
+      args: { identifier: ISSUE_UUID },
+      flags: { include: ['comments'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // Previously-missing scalars from issue ALLOWED_FIELDS must now appear
+    // in the composed query (otherwise --fields=full silently drops them).
+    expect(capturedQuery).toMatch(/\bpriorityLabel\b/)
+    expect(capturedQuery).toMatch(/\bestimate\b/)
+    expect(capturedQuery).toMatch(/\bsortOrder\b/)
+    expect(capturedQuery).toMatch(/\bdueDate\b/)
+    expect(capturedQuery).toMatch(/\bsnoozedUntilAt\b/)
+    expect(capturedQuery).toMatch(/\barchivedAt\b/)
+    expect(capturedQuery).toMatch(/\bcompletedAt\b/)
+    expect(capturedQuery).toMatch(/\bstartedAt\b/)
+    expect(capturedQuery).toMatch(/\bcanceledAt\b/)
+    // Relations whose paths appear in ALLOWED_FIELDS must be selected too
+    expect(capturedQuery).toMatch(/project\s*\{[^}]*\bid\b/)
+    expect(capturedQuery).toMatch(/cycle\s*\{[^}]*\bid\b/)
+    expect(capturedQuery).toMatch(/parent\s*\{[^}]*\bidentifier\b/)
+  })
 })

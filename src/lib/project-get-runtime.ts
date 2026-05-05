@@ -231,12 +231,20 @@ async function resolveLazy(value: unknown): Promise<unknown> {
 // -----------------------------------------------------------------------------
 
 function composeProjectGetWithIncludes(fragmentText: string): string {
+  // BL-03 fix: widen the scalar set to match the project ALLOWED_FIELDS
+  // registry (src/core/projection/project.ts). Without this, the
+  // --include branch silently returned a strict subset of --fields=full
+  // (progress, sortOrder, startedAt, completedAt, color, icon, etc.
+  // were missing).
   return `
     query ProjectWithIncludes($id: String!) {
       project(id: $id) {
-        id name slugId description state startDate targetDate url
-        lead { id name }
-        creator { id name }
+        id name description state progress sortOrder
+        startDate targetDate startedAt completedAt canceledAt archivedAt
+        createdAt updatedAt
+        color icon slugId url
+        lead { id email name }
+        creator { id email name }
         ${fragmentText}
       }
     }

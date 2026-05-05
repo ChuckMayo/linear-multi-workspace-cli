@@ -269,13 +269,23 @@ async function resolveLazy(value: unknown): Promise<unknown> {
 // -----------------------------------------------------------------------------
 
 function composeIssueGetWithIncludes(fragmentText: string): string {
+  // BL-03 fix: widen the scalar set to match the issue ALLOWED_FIELDS
+  // registry (src/core/projection/project.ts). Without this, the
+  // --include branch silently returned a strict subset of --fields=full
+  // (priorityLabel, estimate, sortOrder, dueDate, etc. were missing).
   return `
     query IssueWithIncludes($id: String!) {
       issue(id: $id) {
-        id identifier title number priority url description createdAt updatedAt
-        state { id name }
-        assignee { id name }
-        team { id name }
+        id identifier title description priority priorityLabel
+        estimate sortOrder number url
+        createdAt updatedAt archivedAt completedAt startedAt canceledAt
+        dueDate snoozedUntilAt
+        state { id name type }
+        assignee { id email name }
+        team { id key name }
+        project { id name }
+        cycle { id number }
+        parent { id identifier }
         ${fragmentText}
       }
     }
