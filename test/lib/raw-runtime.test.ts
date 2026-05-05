@@ -451,6 +451,31 @@ describe('rawRuntime — GRAPHQL_QUERY_FILE_NOT_FOUND', () => {
       expect((err.details as Record<string, unknown>)?.path).toBe(nonexistentPath)
     }
   })
+
+  // Regression: REVIEW BL-04 — passing a directory path (EISDIR) used to
+  // re-throw a raw Error with an unstable message, falling through to
+  // GENERIC_ERROR (exit 1). The typed-envelope contract requires every
+  // user-facing failure to surface as LinearAgentError.
+  it('Test 9b (BL-04): --vars=@<dir> → GRAPHQL_QUERY_FILE_NOT_FOUND (not raw Error)', async () => {
+    // tmpdir() is a directory — readFile() will reject with EISDIR
+    expect.assertions(4)
+    try {
+      await runRaw({
+        args: { operation: 'Issues' },
+        flags: { vars: `@${tmpdir()}` },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('GRAPHQL_QUERY_FILE_NOT_FOUND')
+      expect(exitCodeFor(err.code)).toBe(2)
+      // details.cause should record the underlying errno code
+      const cause = (err.details as Record<string, unknown>)?.cause
+      expect(typeof cause === 'string' && cause.length > 0).toBe(true)
+    }
+  })
 })
 
 // -----------------------------------------------------------------------------

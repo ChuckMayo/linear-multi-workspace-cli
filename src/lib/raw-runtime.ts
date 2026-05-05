@@ -193,18 +193,33 @@ async function loadVars(varsArg: string | undefined): Promise<unknown> {
 
   if (varsArg.startsWith('@')) {
     const path = varsArg.slice(1)
+    let raw: string
     try {
-      const raw = await readFile(path, 'utf8')
+      raw = await readFile(path, 'utf8')
+    } catch (err) {
+      // BL-04 fix: catch ALL filesystem errors (EACCES permission denied,
+      // EISDIR user passed a directory, EPERM, ENOENT, etc.), not just
+      // ENOENT. Mirrors graphql-runtime.ts:loadQueryText. A bare Error
+      // would escape to GENERIC_ERROR and break the typed-envelope
+      // contract.
+      const code = (err as NodeJS.ErrnoException).code
+      throw new LinearAgentError({
+        code: 'GRAPHQL_QUERY_FILE_NOT_FOUND',
+        message: `vars file not found or not readable: ${path}`,
+        details: {
+          path,
+          cause: code ?? (err as Error).message,
+        },
+      })
+    }
+    try {
       return JSON.parse(raw)
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-        throw new LinearAgentError({
-          code: 'GRAPHQL_QUERY_FILE_NOT_FOUND',
-          message: `vars file not found: ${path}`,
-          details: { path },
-        })
-      }
-      throw err
+      throw new LinearAgentError({
+        code: 'RAW_VARS_INVALID',
+        message: `vars file is not valid JSON: ${(err as Error).message}`,
+        details: { path, reason: 'parse_error' },
+      })
     }
   }
 

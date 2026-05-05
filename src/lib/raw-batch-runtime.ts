@@ -267,14 +267,20 @@ async function loadAndValidatePlan(planFlag: string): Promise<PlanEntry[]> {
   try {
     rawContent = await readFile(filePath, 'utf8')
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      throw new LinearAgentError({
-        code: 'BATCH_PLAN_INVALID',
-        message: `plan file not found: ${filePath}`,
-        details: { path: filePath, reason: 'file_not_found' },
-      })
-    }
-    throw err
+    // BL-04 fix: catch ALL filesystem errors (EACCES permission denied,
+    // EISDIR user passed a directory, EPERM, ENOENT, etc.), not just
+    // ENOENT. A bare Error would escape to GENERIC_ERROR and break the
+    // typed-envelope contract.
+    const code = (err as NodeJS.ErrnoException).code
+    throw new LinearAgentError({
+      code: 'BATCH_PLAN_INVALID',
+      message: `plan file not found or not readable: ${filePath}`,
+      details: {
+        path: filePath,
+        reason: 'file_not_readable',
+        cause: code ?? (err as Error).message,
+      },
+    })
   }
 
   // Parse JSON

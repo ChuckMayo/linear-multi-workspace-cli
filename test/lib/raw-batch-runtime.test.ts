@@ -383,6 +383,29 @@ describe('rawBatchRuntime — BATCH_PLAN_INVALID (malformed JSON) (Test 5)', () 
       cleanTmp(tmpFile)
     }
   })
+
+  // Regression: REVIEW BL-04 — passing a directory path (EISDIR) used to
+  // re-throw a raw Error, falling through to GENERIC_ERROR (exit 1).
+  // Every user-facing FS failure must surface as BATCH_PLAN_INVALID.
+  it('Test 5b (BL-04): plan=@<dir> → BATCH_PLAN_INVALID with reason=file_not_readable', async () => {
+    expect.assertions(5)
+    try {
+      await runRawBatch({
+        flags: { plan: `@${tmpdir()}` },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('BATCH_PLAN_INVALID')
+      expect(exitCodeFor(err.code)).toBe(12)
+      const details = err.details as Record<string, unknown>
+      expect(details.reason).toBe('file_not_readable')
+      // details.cause should record the underlying errno code
+      expect(typeof details.cause === 'string' && (details.cause as string).length > 0).toBe(true)
+    }
+  })
 })
 
 // -----------------------------------------------------------------------------
