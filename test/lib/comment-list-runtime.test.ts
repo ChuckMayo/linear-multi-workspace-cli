@@ -565,4 +565,80 @@ describe('commentListRuntime -- --include (Phase 3 RAW-04)', () => {
       expect(handle.commentsFn).not.toHaveBeenCalled()
     }
   })
+
+  // Regression: REVIEW BL-01 — `comment list --issue X --include Y` must
+  // thread `--issue` through to the rawRequest path. Before the fix, the
+  // --include branch composed `comments(first, after)` with no `filter`
+  // argument and silently returned ALL workspace comments.
+  it('Test 9c (BL-01): --issue ENG-1 + --include reactions threads filter on rawRequest path', async () => {
+    let capturedQuery = ''
+    let capturedVars: unknown
+    mockRawRequestFn = async (q, vars) => {
+      capturedQuery = q
+      capturedVars = vars
+      return {
+        data: {
+          comments: {
+            nodes: [],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      }
+    }
+
+    const handle = makeMockClient({
+      issues: async () => ({ nodes: [{ id: ISSUE_UUID }] }),
+    })
+
+    await commentListRuntime({
+      flags: { workspace: 'acme', issue: 'ENG-1', include: ['reactions'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // issues() lookup happened to resolve ENG-1 -> UUID
+    expect(handle.issuesFn).toHaveBeenCalledTimes(1)
+    // rawRequest path used (not typed comments())
+    expect(rawRequestCallCount).toBe(1)
+    expect(handle.commentsFn).not.toHaveBeenCalled()
+    // Composed query declares the $filter variable AND passes it to comments()
+    expect(capturedQuery).toContain('$filter: CommentFilter')
+    expect(capturedQuery).toContain('comments(filter: $filter')
+    // Filter actually shipped to Linear with the resolved UUID
+    expect(capturedVars).toMatchObject({
+      filter: { issue: { id: { eq: ISSUE_UUID } } },
+    })
+  })
+
+  it('Test 10c (BL-01): --issue <uuid> + --include reactions skips issues() lookup but still threads filter', async () => {
+    let capturedVars: unknown
+    mockRawRequestFn = async (_q, vars) => {
+      capturedVars = vars
+      return {
+        data: {
+          comments: {
+            nodes: [],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      }
+    }
+
+    const handle = makeMockClient({})
+
+    await commentListRuntime({
+      flags: { workspace: 'acme', issue: ISSUE_UUID, include: ['reactions'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // UUID passthrough: no issues() lookup
+    expect(handle.issuesFn).not.toHaveBeenCalled()
+    expect(rawRequestCallCount).toBe(1)
+    expect(capturedVars).toMatchObject({
+      filter: { issue: { id: { eq: ISSUE_UUID } } },
+    })
+  })
 })

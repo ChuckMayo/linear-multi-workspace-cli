@@ -119,8 +119,23 @@ export async function commentListRuntime(input: CommentListInput): Promise<Comme
     const query = composeCommentListWithIncludes(fragmentText)
 
     return withFetchInterception(async () => {
-      const vars: { first: number; after?: string } = { first }
+      // BL-01 fix: resolve --issue ref and thread it through as `filter`
+      // on the rawRequest path. Without this, `comment list --issue X
+      // --include reactions` silently returns ALL workspace comments
+      // instead of the requested issue's comments.
+      let issueIdFilter: CommentIssueIdFilter | undefined
+      if (input.flags.issue !== undefined && input.flags.issue !== '') {
+        const issueUuid = await resolveIssueRefToUuid(
+          client,
+          input.flags.issue,
+          input.retryOptsOverride,
+        )
+        issueIdFilter = { issue: { id: { eq: issueUuid } } }
+      }
+
+      const vars: { first: number; after?: string; filter?: CommentIssueIdFilter } = { first }
       if (after !== undefined) vars.after = after
+      if (issueIdFilter !== undefined) vars.filter = issueIdFilter
 
       const response = (await withRateLimitRetry(
         () =>
@@ -316,12 +331,13 @@ async function resolveLazy(value: unknown): Promise<unknown> {
 
 function composeCommentListWithIncludes(fragmentText: string): string {
   return `
-    query CommentsWithIncludes($first: Int!, $after: String) {
-      comments(first: $first, after: $after) {
+    query CommentsWithIncludes($filter: CommentFilter, $first: Int!, $after: String) {
+      comments(filter: $filter, first: $first, after: $after) {
         nodes {
-          id body createdAt updatedAt
-          user { id name }
-          issue { id identifier }
+          id body bodyData editedAt createdAt updatedAt archivedAt url
+          user { id name email displayName }
+          issue { id identifier title }
+          parent { id }
           ${fragmentText}
         }
         pageInfo { hasNextPage endCursor hasPreviousPage startCursor }
