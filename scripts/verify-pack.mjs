@@ -14,17 +14,26 @@
  *     graphql-request, dotenv, keytar, eslint, prettier, zod-to-json-schema must
  *     NOT be in package.json#dependencies
  *   - Strict: oclif devkit must live in devDependencies
+ *   - Phase-5 DST-04: pkg.unpackedSize <= 5 MB. On violation, the top-10
+ *     largest files in the tarball are emitted to stderr so the dev knows
+ *     what to evict.
  *
  * Exits 0 with a summary on success, 1 with the violation list + full file list
  * on failure. Both vitest (test/pack.test.ts) and CI (.github/workflows/ci.yml)
  * invoke this script unmodified — keep it that way so the contract has one home.
+ *
+ * Library mode: tests `import { findViolations, topNLargest, SIZE_BUDGET_BYTES }`
+ * to unit-test the assertion logic against synthetic pkg objects without
+ * actually running `npm pack`. The CLI entrypoint runs only when this file is
+ * invoked directly via `node scripts/verify-pack.mjs`.
  */
 
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const REQUIRED_PREFIXES = [
+export const REQUIRED_PREFIXES = [
   'bin/',
   'dist/',
   'schema.graphql',
@@ -38,7 +47,7 @@ const REQUIRED_PREFIXES = [
   'skills/linear-agent/SKILL.md',
 ]
 
-const FORBIDDEN_PATTERNS = [
+export const FORBIDDEN_PATTERNS = [
   /^node_modules\//,
   /(?:^|\/)@aws-sdk\//,
   /(?:^|\/)oclif\/dist\//, // the devkit's runtime path; @oclif/core is fine
@@ -62,7 +71,7 @@ const FORBIDDEN_PATTERNS = [
   /\.tmpl$/,
 ]
 
-const REQUIRED_RUNTIME_DEPS = [
+export const REQUIRED_RUNTIME_DEPS = [
   '@graphql-typed-document-node/core',
   '@linear/sdk',
   '@oclif/core',
@@ -72,7 +81,7 @@ const REQUIRED_RUNTIME_DEPS = [
   'zod',
 ]
 
-const FORBIDDEN_RUNTIME_DEPS = [
+export const FORBIDDEN_RUNTIME_DEPS = [
   'oclif',
   '@aws-sdk/client-s3',
   'tsup',
@@ -86,6 +95,17 @@ const FORBIDDEN_RUNTIME_DEPS = [
   'prettier',
   'zod-to-json-schema',
 ]
+
+/**
+ * Phase 5 DST-04 release-blocking budget: the unpacked tarball must fit
+ * under 5 MB. We use the unpacked size (not the gzipped `size`) because
+ * that's what hits user disks via `npx -y` and matters for cold-start.
+ *
+ * Why 5 MB: PROJECT.md / CLAUDE.md set this as a hard ceiling for the
+ * "any agent that can shell out" promise. A 50 MB bundle would tank `npx`
+ * cold-start on slow networks.
+ */
+export const SIZE_BUDGET_BYTES = 5_000_000
 
 /**
  * Extract the trailing JSON array from npm pack's stdout. npm's lifecycle
@@ -181,10 +201,16 @@ function packDryRun() {
   }
 }
 
-function main() {
+/**
+ * Pure-logic violation finder. Takes the parsed `npm pack --dry-run --json`
+ * output (the `pkg` object) and the parsed `package.json`, returns an array
+ * of violation strings. Used by both `main()` (CLI) and the unit tests.
+ *
+ * Order of checks: allowlist → denylist → deps → size. We don't short-circuit
+ * — every violation is reported in one pass so the dev sees the full picture.
+ */
+export function findViolations({ pkg, packageJson }) {
   const errors = []
-
-  const pkg = packDryRun()
   const paths = (pkg.files ?? []).map((f) => f.path)
 
   for (const prefix of REQUIRED_PREFIXES) {
@@ -200,9 +226,8 @@ function main() {
     }
   }
 
-  const pjson = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'))
-  const deps = pjson.dependencies ?? {}
-  const devDeps = pjson.devDependencies ?? {}
+  const deps = packageJson.dependencies ?? {}
+  const devDeps = packageJson.devDependencies ?? {}
 
   for (const d of REQUIRED_RUNTIME_DEPS) {
     if (!deps[d]) errors.push(`MISSING RUNTIME DEP: ${d}`)
@@ -210,27 +235,74 @@ function main() {
   for (const d of FORBIDDEN_RUNTIME_DEPS) {
     if (deps[d]) errors.push(`FORBIDDEN RUNTIME DEP (must be devDep or absent): ${d}`)
   }
-  if (!devDeps.oclif) errors.push('oclif devkit must be in devDependencies (release tooling only)')
+  if (!devDeps.oclif) {
+    errors.push('oclif devkit must be in devDependencies (release tooling only)')
+  }
 
-  // Bundle size is informational in Phase 0; Phase 5 enforces a 5 MB ceiling.
+  // Phase 5 DST-04: hard size budget. unpackedSize is the on-disk footprint
+  // after `npm install` extracts the tarball; that's what `npx --yes` pays
+  // for on every cold start.
+  const unpackedSize = pkg.unpackedSize ?? pkg.size ?? 0
+  if (unpackedSize > SIZE_BUDGET_BYTES) {
+    const sizeMB = (unpackedSize / 1024 / 1024).toFixed(2)
+    const budgetMB = (SIZE_BUDGET_BYTES / 1024 / 1024).toFixed(0)
+    errors.push(`SIZE BUDGET EXCEEDED: ${sizeMB} MB > ${budgetMB} MB`)
+  }
+
+  return errors
+}
+
+/**
+ * Return the N largest entries from `pkg.files`, sorted by size descending.
+ * Treats missing `size` as 0. Does not mutate the input. If `files` has
+ * fewer than N entries, returns all of them sorted.
+ */
+export function topNLargest(files, n = 10) {
+  return [...files].sort((a, b) => (b.size ?? 0) - (a.size ?? 0)).slice(0, n)
+}
+
+function main() {
+  const pkg = packDryRun()
+  const packageJson = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'))
+  const errors = findViolations({ pkg, packageJson })
+  const paths = (pkg.files ?? []).map((f) => f.path)
+
+  // Bundle size is informational on success; DST-04 enforces a 5 MB ceiling.
   const sizeBytes = pkg.unpackedSize ?? pkg.size ?? 0
   const sizeMb = (sizeBytes / 1024 / 1024).toFixed(2)
 
   if (errors.length === 0) {
     process.stdout.write('✓ pack contract verified\n')
     process.stdout.write(`  files in tarball: ${paths.length}\n`)
-    process.stdout.write(`  unpacked size:    ${sizeMb} MB\n`)
+    process.stdout.write(`  unpacked size:    ${sizeMb} MB (budget: 5.00 MB)\n`)
     process.stdout.write(
-      `  runtime deps:     ${Object.keys(deps).length} (${REQUIRED_RUNTIME_DEPS.length} required)\n`,
+      `  runtime deps:     ${Object.keys(packageJson.dependencies ?? {}).length} (${REQUIRED_RUNTIME_DEPS.length} required)\n`,
     )
     process.exit(0)
   }
 
   process.stderr.write('✗ pack contract violated:\n')
   for (const e of errors) process.stderr.write(`  - ${e}\n`)
+
+  // DST-04 diagnostic: when the size budget is the (or one) reason for
+  // failure, print the top-10 largest files so the dev knows what to evict.
+  if (errors.some((e) => e.startsWith('SIZE BUDGET'))) {
+    process.stderr.write('\nTop 10 largest files in tarball:\n')
+    const top = topNLargest(pkg.files ?? [], 10)
+    for (const f of top) {
+      const kb = ((f.size ?? 0) / 1024).toFixed(1).padStart(10)
+      process.stderr.write(`  ${kb} KB  ${f.path}\n`)
+    }
+  }
+
   process.stderr.write('\nFile list:\n')
   for (const p of paths) process.stderr.write(`  ${p}\n`)
   process.exit(1)
 }
 
-main()
+// Run as CLI when invoked directly; library when imported (tests).
+const isMain =
+  process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])
+if (isMain) {
+  main()
+}
