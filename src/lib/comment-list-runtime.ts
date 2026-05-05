@@ -43,6 +43,7 @@ import {
 } from '@/core/transport/index.js'
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
 import { ISSUE_IDENTIFIER_RE, UUID_RE } from '@/lib/filter-heuristics.js'
+import { validateAndMergeIncludes } from '@/lib/include-fragments.js'
 
 export interface CommentListFlags {
   workspace?: string
@@ -51,6 +52,8 @@ export interface CommentListFlags {
   cursor?: string
   /** Filter to comments on this issue (UUID or ENG-N). */
   issue?: string
+  /** Phase 3: hydrate related entities in a single rawRequest round-trip */
+  include?: string[]
 }
 
 export interface CommentListInput {
@@ -108,6 +111,66 @@ export async function commentListRuntime(input: CommentListInput): Promise<Comme
   })
 
   const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
+
+  // Phase 3: branch on --include. Empty → unchanged Phase 2 typed-SDK call.
+  const includes = input.flags.include ?? []
+  if (includes.length > 0) {
+    const fragmentText = validateAndMergeIncludes('comment list', includes)
+    const query = composeCommentListWithIncludes(fragmentText)
+
+    return withFetchInterception(async () => {
+      const vars: { first: number; after?: string } = { first }
+      if (after !== undefined) vars.after = after
+
+      const response = (await withRateLimitRetry(
+        () =>
+          (
+            client as unknown as {
+              client: {
+                rawRequest: (q: string, v: unknown) => Promise<{ data?: unknown; error?: string }>
+              }
+            }
+          ).client.rawRequest(query, vars),
+        input.retryOptsOverride,
+      )) as { data?: unknown; error?: string }
+
+      if (response.error ?? !response.data) {
+        throw LinearAgentError.linear.apiError({
+          message: response.error ?? 'no data returned from Linear API',
+          details: { command: 'comment list', cause: response.error },
+        })
+      }
+
+      const conn = (response.data as { comments?: { nodes?: unknown[]; pageInfo?: unknown } })
+        .comments
+      const nodes = (conn?.nodes ?? []) as Record<string, unknown>[]
+      const pageInfoRaw = conn?.pageInfo as
+        | {
+            hasNextPage?: boolean
+            endCursor?: string | null
+            hasPreviousPage?: boolean
+            startCursor?: string | null
+          }
+        | undefined
+
+      const projected = nodes.map((node) => project(node, fields))
+
+      const complexity = getLastComplexity()
+      const meta: Omit<Meta, 'command'> = {
+        workspace: resolved.name,
+        workspaceSource: resolved.source,
+        pageInfo: {
+          hasNextPage: Boolean(pageInfoRaw?.hasNextPage),
+          endCursor: pageInfoRaw?.endCursor ?? null,
+          hasPreviousPage: Boolean(pageInfoRaw?.hasPreviousPage),
+          startCursor: pageInfoRaw?.startCursor ?? null,
+        },
+        ...(complexity !== undefined ? { complexity } : {}),
+      }
+
+      return { data: projected, meta }
+    })
+  }
 
   return withFetchInterception(async () => {
     let issueIdFilter: CommentIssueIdFilter | undefined
@@ -245,4 +308,24 @@ async function resolveLazy(value: unknown): Promise<unknown> {
     return await (value as Promise<unknown>)
   }
   return value
+}
+
+// -----------------------------------------------------------------------------
+// Phase 3: compose query for --include path (Approach A — single rawRequest)
+// -----------------------------------------------------------------------------
+
+function composeCommentListWithIncludes(fragmentText: string): string {
+  return `
+    query CommentsWithIncludes($first: Int!, $after: String) {
+      comments(first: $first, after: $after) {
+        nodes {
+          id body createdAt updatedAt
+          user { id name }
+          issue { id identifier }
+          ${fragmentText}
+        }
+        pageInfo { hasNextPage endCursor hasPreviousPage startCursor }
+      }
+    }
+  `.trim()
 }

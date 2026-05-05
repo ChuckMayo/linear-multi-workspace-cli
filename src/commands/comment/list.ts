@@ -21,6 +21,7 @@ export interface RunCommentListArgs {
   limit?: number
   cursor?: string
   issue?: string
+  include?: string[]
   pretty: boolean
 }
 
@@ -35,6 +36,7 @@ export async function runCommentList(args: RunCommentListArgs): Promise<CommandO
       if (args.limit !== undefined) runtimeFlags.limit = args.limit
       if (args.cursor !== undefined) runtimeFlags.cursor = args.cursor
       if (args.issue !== undefined) runtimeFlags.issue = args.issue
+      if (args.include !== undefined) runtimeFlags.include = args.include
 
       const result = await commentListRuntime({
         flags: runtimeFlags,
@@ -62,6 +64,11 @@ export default class CommentList extends Command {
     issue: Flags.string({
       description: 'Filter to comments on this issue (UUID or ENG-123)',
     }),
+    include: Flags.string({
+      description:
+        'Hydrate related entities in a single GraphQL round-trip (e.g. reactions, parent). Available: reactions, parent.',
+      multiple: true,
+    }),
   }
 
   async run(): Promise<unknown> {
@@ -74,6 +81,7 @@ export default class CommentList extends Command {
     if (flags.limit !== undefined) callArgs.limit = flags.limit
     if (flags.cursor !== undefined) callArgs.cursor = flags.cursor
     if (flags.issue !== undefined) callArgs.issue = flags.issue
+    if (flags.include !== undefined) callArgs.include = flags.include
     const out = await runCommentList(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)

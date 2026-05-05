@@ -1,5 +1,38 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`commentListRuntime -- --include (Phase 3 RAW-04) > Test 7c: flags.include=["reactions"] -> rawRequest called ONCE; comments() NOT called > include-reactions-success 1`] = `
+{
+  "data": [
+    {
+      "body": "looks good",
+      "createdAt": "2026-01-02T00:00:00Z",
+      "id": "bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
+      "issue": {
+        "identifier": null,
+      },
+      "parent": {
+        "id": null,
+      },
+      "updatedAt": null,
+      "user": {
+        "email": null,
+        "name": "Alice",
+      },
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
 exports[`commentListRuntime -- ISSUE_NOT_FOUND > Test 8: --issue ENG-99 with no matching node -> ISSUE_NOT_FOUND > failure-ISSUE_NOT_FOUND 1`] = `
 {
   "$apiVersion": "1",
