@@ -1,0 +1,58 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`installSkillRuntime — snapshots > Test 9: snapshot — success envelope > install-skill-success 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "bytes_written": 125,
+    "hint": "Restart Claude Code if your session predates ~/.claude/skills/.",
+    "overwritten": false,
+    "source": "/tmp/linear-agent-install-skill-test-source/SKILL.md",
+    "target": "/tmp/linear-agent-install-skill-test-home/.claude/skills/linear-agent/SKILL.md",
+    "version": "9.9.9",
+  },
+  "meta": {
+    "command": "install-skill",
+  },
+  "ok": true,
+}
+`;
+
+exports[`installSkillRuntime — snapshots > Test 10: snapshot — failure envelope INSTALL_SKILL_BUNDLE_NOT_FOUND > install-skill-failure-bundle-not-found 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "INSTALL_SKILL_BUNDLE_NOT_FOUND",
+    "details": {
+      "errno": "ENOENT",
+      "expected_path": "/tmp/linear-agent-missing-bundle/SKILL.md",
+      "resolved_install_path": Any<String>,
+    },
+    "message": "Could not locate bundled SKILL.md at /tmp/linear-agent-missing-bundle/SKILL.md. This usually means linear-agent was run from a source checkout without a build, or the published tarball is corrupt.",
+    "transient": false,
+  },
+  "meta": {
+    "command": "install-skill",
+  },
+  "ok": false,
+}
+`;
+
+exports[`installSkillRuntime — snapshots > Test 11: snapshot — failure envelope INSTALL_SKILL_WRITE_FAILED > install-skill-failure-write-failed 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "INSTALL_SKILL_WRITE_FAILED",
+    "details": {
+      "errno": "EACCES",
+      "target": "/tmp/linear-agent-install-skill-test-home/.claude/skills/linear-agent/SKILL.md",
+    },
+    "message": "Could not write SKILL.md to /tmp/linear-agent-install-skill-test-home/.claude/skills/linear-agent/SKILL.md. Check directory permissions.",
+    "transient": false,
+  },
+  "meta": {
+    "command": "install-skill",
+  },
+  "ok": false,
+}
+`;
