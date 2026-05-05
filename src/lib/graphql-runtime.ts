@@ -31,7 +31,7 @@
 import { readFile } from 'node:fs/promises'
 import type { DocumentNode } from 'graphql'
 import { parse, validate } from 'graphql'
-import { createLinearClient } from '@/core/client/factory.js'
+import { createLinearClient } from '@/core/client/index.js'
 import type { Config } from '@/core/config/index.js'
 import { loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
