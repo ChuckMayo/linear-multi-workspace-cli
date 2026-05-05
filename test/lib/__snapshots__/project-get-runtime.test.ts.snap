@@ -1,5 +1,26 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`projectGetRuntime -- --include (Phase 3 RAW-04) > Test 7d: flags.include=["members"] -> rawRequest called ONCE; project() NOT called > include-members-success 1`] = `
+{
+  "data": {
+    "description": "Roadmap",
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "lead": {
+      "email": null,
+    },
+    "name": "Roadmap Q1",
+    "progress": null,
+    "state": "started",
+    "targetDate": "2026-12-31",
+    "updatedAt": null,
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
 exports[`projectGetRuntime -- PROJECT_NOT_FOUND > Test 7: unknown name -> resolver throws PROJECT_NOT_FOUND with details.available > failure-PROJECT_NOT_FOUND 1`] = `
 {
   "$apiVersion": "1",

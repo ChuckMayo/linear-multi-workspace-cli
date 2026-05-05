@@ -36,6 +36,7 @@ import {
 } from '@/core/transport/index.js'
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
 import { UUID_RE } from '@/lib/filter-heuristics.js'
+import { validateAndMergeIncludes } from '@/lib/include-fragments.js'
 
 export interface ProjectGetArgs {
   /** Project name or UUID. Required. */
@@ -45,6 +46,8 @@ export interface ProjectGetArgs {
 export interface ProjectGetFlags {
   workspace?: string
   fields?: string
+  /** Phase 3: hydrate related entities in a single rawRequest round-trip */
+  include?: string[]
 }
 
 export interface ProjectGetInput {
@@ -80,6 +83,62 @@ export async function projectGetRuntime(input: ProjectGetInput): Promise<Project
 
   const fields = parseFields(input.flags.fields ?? 'defaults', 'project')
   const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
+
+  // Phase 3: branch on --include. Empty → unchanged Phase 2 typed-SDK call.
+  const includes = input.flags.include ?? []
+  if (includes.length > 0) {
+    const fragmentText = validateAndMergeIncludes('project get', includes)
+    const query = composeProjectGetWithIncludes(fragmentText)
+
+    return withFetchInterception(async () => {
+      const ref = input.args.ref
+      const workspaceKey = resolved.name ?? '_api-key-env_'
+
+      // Resolve to UUID (name path goes through resolver, UUID short-circuits).
+      const projectId = UUID_RE.test(ref)
+        ? ref
+        : await resolveProjectId(client, workspaceKey, ref, input.retryOptsOverride)
+
+      const response = (await withRateLimitRetry(
+        () =>
+          (
+            client as unknown as {
+              client: {
+                rawRequest: (q: string, v: unknown) => Promise<{ data?: unknown; error?: string }>
+              }
+            }
+          ).client.rawRequest(query, { id: projectId }),
+        input.retryOptsOverride,
+      )) as { data?: unknown; error?: string }
+
+      if (response.error ?? !response.data) {
+        throw LinearAgentError.linear.apiError({
+          message: response.error ?? 'no data returned from Linear API',
+          details: { command: 'project get', cause: response.error },
+        })
+      }
+
+      const projectData = (response.data as { project?: Record<string, unknown> }).project
+      if (!projectData) {
+        throw new LinearAgentError({
+          code: 'PROJECT_NOT_FOUND',
+          message: `project not found: ${ref}`,
+          details: { ref },
+        })
+      }
+
+      const data = project(projectData, fields)
+
+      const complexity = getLastComplexity()
+      const meta: Omit<Meta, 'command'> = {
+        workspace: resolved.name,
+        workspaceSource: resolved.source,
+        ...(complexity !== undefined ? { complexity } : {}),
+      }
+
+      return { data, meta }
+    })
+  }
 
   return withFetchInterception(async () => {
     const ref = input.args.ref
@@ -165,4 +224,21 @@ async function resolveLazy(value: unknown): Promise<unknown> {
     return await (value as Promise<unknown>)
   }
   return value
+}
+
+// -----------------------------------------------------------------------------
+// Phase 3: compose query for --include path (Approach A — single rawRequest)
+// -----------------------------------------------------------------------------
+
+function composeProjectGetWithIncludes(fragmentText: string): string {
+  return `
+    query ProjectWithIncludes($id: String!) {
+      project(id: $id) {
+        id name slugId description state startDate targetDate url
+        lead { id name }
+        creator { id name }
+        ${fragmentText}
+      }
+    }
+  `.trim()
 }
