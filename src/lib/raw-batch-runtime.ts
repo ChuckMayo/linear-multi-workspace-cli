@@ -25,6 +25,14 @@
  *   - T-03-05-DRY-RUN: --dry-run is the DEFAULT; both --dry-run + --yes → still dry-run
  *   - T-03-05-PLAN-FILE-INJECTION: Zod validates plan shape; max(100) caps blast radius (Pitfall 6)
  *   - T-03-05-D-RATELIMIT: Sequential dispatch + 100-entry cap
+ *
+ * **Mutation gates apply to dry-run too (REVIEW WR-03 — intentional):**
+ *   Mutation-containing plans require --workspace (WSP-06) and
+ *   --allow-mutations to dry-run, not just to execute. Rationale: the
+ *   safety contract is "any plan touching mutations declares both target
+ *   and intent upfront, regardless of whether it would run". A dry-run
+ *   that side-steps the gates would let agents inspect plans they're not
+ *   authorized to run. Uniform contract beats UX convenience.
  */
 import { readFile } from 'node:fs/promises'
 import { z } from 'zod'
@@ -162,12 +170,25 @@ export async function runRawBatch(input: RunRawBatchInput): Promise<RunRawBatchO
   const batchMeta = { count: enriched.length, kinds }
 
   // Step 5: WSP-06 — only if any mutation present (Pitfall 7)
-  // Fires AFTER plan validation but BEFORE any per-entry dispatch
+  // Fires AFTER plan validation but BEFORE any per-entry dispatch.
+  //
+  // WR-03 (intentional): WSP-06 fires for mutation-containing plans
+  // EVEN IN DRY-RUN MODE. This is deliberate — the safety contract is
+  // "any plan that touches mutations declares its target workspace
+  // upfront, regardless of whether it would actually execute." A
+  // dry-run preview that side-steps WSP-06 weakens the uniform agent
+  // contract: agents would learn to use dry-run as a way to inspect
+  // plans they're not authorized to run. Cost: agents iterating on a
+  // plan must include --workspace + --allow-mutations to preview. We
+  // accept this UX cost for the safety win.
   if (kinds.mutation > 0) {
     requireExplicitWorkspaceForWrite(resolved, flags['allow-active-workspace-write'] ?? false)
   }
 
   // Step 6: --allow-mutations check (after WSP-06 — second gate)
+  // WR-03 (intentional): --allow-mutations is required for mutation
+  // plans even in dry-run. Same rationale as WSP-06 above — uniform
+  // contract beats convenience. See doc-comment on the function header.
   if (kinds.mutation > 0 && !flags['allow-mutations']) {
     throw new LinearAgentError({
       code: 'RAW_MUTATION_REQUIRES_FLAG',
