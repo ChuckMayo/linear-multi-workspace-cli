@@ -37,7 +37,6 @@ export const REQUIRED_PREFIXES = [
   'bin/',
   'dist/',
   'schema.graphql',
-  'src/generated/',
   'README.md',
   'package.json',
   // Phase 5 DST-05: the stamped Claude Code skill bundle. The .tmpl is
@@ -51,7 +50,7 @@ export const FORBIDDEN_PATTERNS = [
   /^node_modules\//,
   /(?:^|\/)@aws-sdk\//,
   /(?:^|\/)oclif\/dist\//, // the devkit's runtime path; @oclif/core is fine
-  /^src\/(?!generated\/)/, // any src/ except src/generated/
+  /^src\//, // no src/ ships — dist/ has the compiled output, src/generated dropped to fit DST-04 5MB budget
   /^test\//,
   /^codegen\//,
   /^codegen\.ts$/,

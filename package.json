@@ -13,7 +13,6 @@
     "bin",
     "dist",
     "schema.graphql",
-    "src/generated",
     "oclif.manifest.json",
     "skills",
     "!skills/**/*.tmpl",
