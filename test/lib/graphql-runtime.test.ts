@@ -26,11 +26,12 @@
  *   12. Schema cache: second call returns the same GraphQLSchema instance; reset works
  *   13. (in graphql.test.ts) command-level success
  */
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Mock @linear/sdk BEFORE any module that imports it is loaded.
@@ -215,7 +216,9 @@ describe('graphql-runtime — GRAPHQL_VALIDATION_FAILED (parse)', () => {
       expect(details?.kind).toBe('parse')
       expect(typeof details?.cause).toBe('string')
       expect(mockRawRequestFn).not.toHaveBeenCalled()
-      expect(snapshotFailureEnvelope(err)).toMatchSnapshot('failure-GRAPHQL_VALIDATION_FAILED-parse')
+      expect(snapshotFailureEnvelope(err)).toMatchSnapshot(
+        'failure-GRAPHQL_VALIDATION_FAILED-parse',
+      )
     }
   })
 })
@@ -245,7 +248,9 @@ describe('graphql-runtime — GRAPHQL_VALIDATION_FAILED (validate, real schema)'
       expect(errs.length).toBeGreaterThan(0)
       expect(mockRawRequestFn).not.toHaveBeenCalled()
       // Snapshot the validate-kind failure envelope (distinct from parse-kind)
-      expect(snapshotFailureEnvelope(err)).toMatchSnapshot('failure-GRAPHQL_VALIDATION_FAILED-validate')
+      expect(snapshotFailureEnvelope(err)).toMatchSnapshot(
+        'failure-GRAPHQL_VALIDATION_FAILED-validate',
+      )
     }
   })
 })
@@ -270,7 +275,9 @@ describe('graphql-runtime — OPERATION_SUBSCRIPTIONS_UNSUPPORTED', () => {
       const err = e as LinearAgentError
       expect(err.code).toBe('OPERATION_SUBSCRIPTIONS_UNSUPPORTED')
       expect(mockRawRequestFn).not.toHaveBeenCalled()
-      expect(snapshotFailureEnvelope(err)).toMatchSnapshot('failure-OPERATION_SUBSCRIPTIONS_UNSUPPORTED')
+      expect(snapshotFailureEnvelope(err)).toMatchSnapshot(
+        'failure-OPERATION_SUBSCRIPTIONS_UNSUPPORTED',
+      )
     }
   })
 })
@@ -494,17 +501,20 @@ describe('schema-loader — lazy module-level cache', () => {
 
     const s1 = getLinearSchema()
     const s2 = getLinearSchema()
-    // Same reference (module-level cache)
-    expect(s1).toBe(s2)
+    // Same reference (module-level cache) — use Object.is for identity check
+    // to avoid vitest's deep equality recursing into the GraphQLSchema object
+    expect(Object.is(s1, s2)).toBe(true)
 
-    // After reset, next call builds a fresh schema
+    // After reset, next call builds a fresh schema (different reference)
     _resetSchemaCacheForTesting()
     const s3 = getLinearSchema()
     // s3 is a new instance (distinct reference)
-    expect(s3).not.toBe(s1)
+    expect(Object.is(s3, s1)).toBe(false)
     // But it's still a valid GraphQLSchema
     expect(typeof s3.getQueryType).toBe('function')
-
+    // And it can type a real field ('viewer' exists in the Query type)
+    const queryType = s3.getQueryType()
+    expect(queryType).toBeDefined()
     // Restore a warm cache for subsequent tests (avoid re-running buildSchema)
     // Note: s3 is now the cached value, which is fine.
   })

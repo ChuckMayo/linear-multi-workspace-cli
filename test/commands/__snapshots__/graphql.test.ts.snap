@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`runGraphql — command-level success envelope > Test 13b: success snapshot via runGraphql directly > graphql-command-success 1`] = `
+{
+  "data": {
+    "viewer": {
+      "id": "cmd-u1",
+      "name": "Commander",
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;

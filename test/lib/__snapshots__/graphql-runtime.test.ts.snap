@@ -1,0 +1,135 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`graphql-runtime — @file.graphql success > Test 9: --query=@<tmpfile> → rawRequest called with file contents > file-query-success 1`] = `
+{
+  "data": {
+    "issues": {
+      "nodes": [
+        {
+          "id": "iss1",
+        },
+      ],
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`graphql-runtime — GRAPHQL_QUERY_FILE_NOT_FOUND > Test 1: @nonexistent.graphql → GRAPHQL_QUERY_FILE_NOT_FOUND (exit 2), ZERO rawRequest > failure-GRAPHQL_QUERY_FILE_NOT_FOUND 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "GRAPHQL_QUERY_FILE_NOT_FOUND",
+    "details": {
+      "cause": "ENOENT",
+      "path": "/tmp/does-not-exist-xyz-graphql-runtime-test.graphql",
+    },
+    "message": "query file not found or not readable: /tmp/does-not-exist-xyz-graphql-runtime-test.graphql",
+    "transient": false,
+  },
+  "meta": {
+    "command": "graphql",
+  },
+  "ok": false,
+}
+`;
+
+exports[`graphql-runtime — GRAPHQL_VALIDATION_FAILED (parse) > Test 2: malformed query → GRAPHQL_VALIDATION_FAILED kind=parse, ZERO rawRequest > failure-GRAPHQL_VALIDATION_FAILED-parse 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "GRAPHQL_VALIDATION_FAILED",
+    "details": {
+      "cause": "Syntax Error: Expected Name, found <EOF>.",
+      "kind": "parse",
+    },
+    "message": "query parse failed: Syntax Error: Expected Name, found <EOF>.",
+    "transient": false,
+  },
+  "meta": {
+    "command": "graphql",
+  },
+  "ok": false,
+}
+`;
+
+exports[`graphql-runtime — GRAPHQL_VALIDATION_FAILED (validate, real schema) > Test 3: unknown field → GRAPHQL_VALIDATION_FAILED kind=validate, real schema, ZERO rawRequest > failure-GRAPHQL_VALIDATION_FAILED-validate 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "GRAPHQL_VALIDATION_FAILED",
+    "details": {
+      "errors": [
+        {
+          "locations": [
+            {
+              "column": 3,
+              "line": 1,
+            },
+          ],
+          "message": "Cannot query field "definitelyNotARealField" on type "Query".",
+          "path": undefined,
+        },
+      ],
+      "kind": "validate",
+    },
+    "message": "query failed schema validation (1 error)",
+    "transient": false,
+  },
+  "meta": {
+    "command": "graphql",
+  },
+  "ok": false,
+}
+`;
+
+exports[`graphql-runtime — OPERATION_SUBSCRIPTIONS_UNSUPPORTED > Test 4: subscription op → OPERATION_SUBSCRIPTIONS_UNSUPPORTED (exit 2), ZERO rawRequest > failure-OPERATION_SUBSCRIPTIONS_UNSUPPORTED 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "OPERATION_SUBSCRIPTIONS_UNSUPPORTED",
+    "message": "subscriptions are not supported in v1 — use query or mutation operations",
+    "transient": false,
+  },
+  "meta": {
+    "command": "graphql",
+  },
+  "ok": false,
+}
+`;
+
+exports[`graphql-runtime — Pitfall 5 (fragment-first) > Test 5: fragment-first query → operation kind=query detected correctly (NOT misclassified) > fragment-first-query-success 1`] = `
+{
+  "data": {
+    "issues": {
+      "nodes": [
+        {
+          "id": "a",
+        },
+      ],
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
+exports[`graphql-runtime — inline query success > Test 8: inline --query success → success envelope > inline-query-success 1`] = `
+{
+  "data": {
+    "viewer": {
+      "id": "u1",
+      "name": "You",
+    },
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
