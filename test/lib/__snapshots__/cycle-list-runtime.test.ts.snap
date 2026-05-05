@@ -1,5 +1,34 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`cycleListRuntime -- --include (Phase 3 RAW-04) > Test 7e: flags.include=["issues"] -> rawRequest called ONCE; cycles() NOT called > include-issues-success 1`] = `
+{
+  "data": [
+    {
+      "endsAt": "2026-01-14T00:00:00Z",
+      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "isActive": null,
+      "name": "Cycle 1",
+      "number": 1,
+      "progress": null,
+      "startsAt": "2026-01-01T00:00:00Z",
+      "team": {
+        "key": null,
+      },
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
 exports[`cycleListRuntime -- workspace-wide (no --team) > Test 1: client.cycles({ first: 25 }) with no filter; team is hydrated for default preset > list-success-workspace-wide 1`] = `
 {
   "$apiVersion": "1",

@@ -21,6 +21,7 @@ export interface RunCycleListArgs {
   limit?: number
   cursor?: string
   team?: string
+  include?: string[]
   pretty: boolean
 }
 
@@ -35,6 +36,7 @@ export async function runCycleList(args: RunCycleListArgs): Promise<CommandOutpu
       if (args.limit !== undefined) runtimeFlags.limit = args.limit
       if (args.cursor !== undefined) runtimeFlags.cursor = args.cursor
       if (args.team !== undefined) runtimeFlags.team = args.team
+      if (args.include !== undefined) runtimeFlags.include = args.include
 
       const result = await cycleListRuntime({
         flags: runtimeFlags,
@@ -62,6 +64,11 @@ export default class CycleList extends Command {
       description: 'Field preset (ids|defaults|full) or comma-separated list',
       default: 'defaults',
     }),
+    include: Flags.string({
+      description:
+        'Hydrate related entities in a single GraphQL round-trip (e.g. issues). Available: issues.',
+      multiple: true,
+    }),
   }
 
   async run(): Promise<unknown> {
@@ -74,6 +81,7 @@ export default class CycleList extends Command {
     if (flags.limit !== undefined) callArgs.limit = flags.limit
     if (flags.cursor !== undefined) callArgs.cursor = flags.cursor
     if (flags.team !== undefined) callArgs.team = flags.team
+    if (flags.include !== undefined) callArgs.include = flags.include
     const out = await runCycleList(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)

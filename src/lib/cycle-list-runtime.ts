@@ -20,6 +20,7 @@
 import type { LinearClient } from '@linear/sdk'
 import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
+import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { parsePagination } from '@/core/pagination/index.js'
 import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
@@ -31,6 +32,7 @@ import {
   withRateLimitRetry,
 } from '@/core/transport/index.js'
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
+import { validateAndMergeIncludes } from '@/lib/include-fragments.js'
 
 export interface CycleListFlags {
   workspace?: string
@@ -38,6 +40,8 @@ export interface CycleListFlags {
   limit?: number
   cursor?: string
   team?: string
+  /** Phase 3: hydrate related entities in a single rawRequest round-trip */
+  include?: string[]
 }
 
 export interface CycleListInput {
@@ -91,6 +95,65 @@ export async function cycleListRuntime(input: CycleListInput): Promise<CycleList
   })
 
   const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
+
+  // Phase 3: branch on --include. Empty → unchanged Phase 2 typed-SDK call.
+  const includes = input.flags.include ?? []
+  if (includes.length > 0) {
+    const fragmentText = validateAndMergeIncludes('cycle list', includes)
+    const query = composeCycleListWithIncludes(fragmentText)
+
+    return withFetchInterception(async () => {
+      const vars: { first: number; after?: string } = { first }
+      if (after !== undefined) vars.after = after
+
+      const response = (await withRateLimitRetry(
+        () =>
+          (
+            client as unknown as {
+              client: {
+                rawRequest: (q: string, v: unknown) => Promise<{ data?: unknown; error?: string }>
+              }
+            }
+          ).client.rawRequest(query, vars),
+        input.retryOptsOverride,
+      )) as { data?: unknown; error?: string }
+
+      if (response.error ?? !response.data) {
+        throw LinearAgentError.linear.apiError({
+          message: response.error ?? 'no data returned from Linear API',
+          details: { command: 'cycle list', cause: response.error },
+        })
+      }
+
+      const conn = (response.data as { cycles?: { nodes?: unknown[]; pageInfo?: unknown } }).cycles
+      const nodes = (conn?.nodes ?? []) as Record<string, unknown>[]
+      const pageInfoRaw = conn?.pageInfo as
+        | {
+            hasNextPage?: boolean
+            endCursor?: string | null
+            hasPreviousPage?: boolean
+            startCursor?: string | null
+          }
+        | undefined
+
+      const projected = nodes.map((node) => project(node, fields))
+
+      const complexity = getLastComplexity()
+      const meta: Omit<Meta, 'command'> = {
+        workspace: resolved.name,
+        workspaceSource: resolved.source,
+        pageInfo: {
+          hasNextPage: Boolean(pageInfoRaw?.hasNextPage),
+          endCursor: pageInfoRaw?.endCursor ?? null,
+          hasPreviousPage: Boolean(pageInfoRaw?.hasPreviousPage),
+          startCursor: pageInfoRaw?.startCursor ?? null,
+        },
+        ...(complexity !== undefined ? { complexity } : {}),
+      }
+
+      return { data: projected, meta }
+    })
+  }
 
   return withFetchInterception(async () => {
     const workspaceKey = resolved.name ?? '_api-key-env_'
@@ -189,4 +252,23 @@ async function resolveLazy(value: unknown): Promise<unknown> {
     return await (value as Promise<unknown>)
   }
   return value
+}
+
+// -----------------------------------------------------------------------------
+// Phase 3: compose query for --include path (Approach A — single rawRequest)
+// -----------------------------------------------------------------------------
+
+function composeCycleListWithIncludes(fragmentText: string): string {
+  return `
+    query CyclesWithIncludes($first: Int!, $after: String) {
+      cycles(first: $first, after: $after) {
+        nodes {
+          id number name startsAt endsAt completedAt
+          team { id name key }
+          ${fragmentText}
+        }
+        pageInfo { hasNextPage endCursor hasPreviousPage startCursor }
+      }
+    }
+  `.trim()
 }
