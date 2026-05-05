@@ -176,63 +176,229 @@ exports[`describeRuntime — snapshots (INT-04) > describe issue list — full o
   "kind": "curated",
   "output": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "additionalProperties": false,
-    "properties": {
-      "$apiVersion": {
-        "const": "1",
-        "type": "string",
-      },
-      "data": {},
-      "meta": {
+    "anyOf": [
+      {
         "additionalProperties": false,
         "properties": {
-          "command": {
+          "$apiVersion": {
+            "const": "1",
             "type": "string",
           },
-          "pageInfo": {
+          "data": {},
+          "meta": {
             "additionalProperties": false,
             "properties": {
-              "endCursor": {
+              "batch": {
+                "additionalProperties": false,
+                "properties": {
+                  "count": {
+                    "type": "number",
+                  },
+                  "kinds": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "mutation": {
+                        "type": "number",
+                      },
+                      "query": {
+                        "type": "number",
+                      },
+                    },
+                    "required": [
+                      "query",
+                      "mutation",
+                    ],
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "count",
+                  "kinds",
+                ],
+                "type": "object",
+              },
+              "command": {
                 "type": "string",
               },
-              "hasNextPage": {
+              "complexity": {
+                "additionalProperties": false,
+                "properties": {
+                  "cost": {
+                    "type": "number",
+                  },
+                  "remaining": {
+                    "type": "number",
+                  },
+                },
+                "required": [
+                  "cost",
+                  "remaining",
+                ],
+                "type": "object",
+              },
+              "pageInfo": {
+                "additionalProperties": false,
+                "properties": {
+                  "endCursor": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                  "hasNextPage": {
+                    "type": "boolean",
+                  },
+                  "hasPreviousPage": {
+                    "type": "boolean",
+                  },
+                  "startCursor": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                      },
+                      {
+                        "type": "null",
+                      },
+                    ],
+                  },
+                },
+                "required": [
+                  "hasNextPage",
+                  "endCursor",
+                  "hasPreviousPage",
+                  "startCursor",
+                ],
+                "type": "object",
+              },
+              "totalCount": {
+                "type": "number",
+              },
+              "workspace": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "workspaceSource": {
+                "enum": [
+                  "flag",
+                  "env",
+                  "active",
+                  "single",
+                  "api-key-env",
+                ],
+                "type": "string",
+              },
+            },
+            "required": [
+              "command",
+            ],
+            "type": "object",
+          },
+          "ok": {
+            "const": true,
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "$apiVersion",
+          "ok",
+          "data",
+          "meta",
+        ],
+        "type": "object",
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "$apiVersion": {
+            "const": "1",
+            "type": "string",
+          },
+          "error": {
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+              },
+              "details": {
+                "additionalProperties": {},
+                "propertyNames": {
+                  "type": "string",
+                },
+                "type": "object",
+              },
+              "message": {
+                "type": "string",
+              },
+              "retryAfterMs": {
+                "type": "number",
+              },
+              "transient": {
                 "type": "boolean",
               },
             },
             "required": [
-              "hasNextPage",
+              "code",
+              "message",
+              "transient",
             ],
             "type": "object",
           },
-          "totalCount": {
-            "type": "number",
+          "meta": {
+            "additionalProperties": false,
+            "properties": {
+              "command": {
+                "type": "string",
+              },
+              "workspace": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                  },
+                  {
+                    "type": "null",
+                  },
+                ],
+              },
+              "workspaceSource": {
+                "enum": [
+                  "flag",
+                  "env",
+                  "active",
+                  "single",
+                  "api-key-env",
+                ],
+                "type": "string",
+              },
+            },
+            "required": [
+              "command",
+            ],
+            "type": "object",
           },
-          "workspace": {
-            "type": "string",
-          },
-          "workspaceSource": {
-            "type": "string",
+          "ok": {
+            "const": false,
+            "type": "boolean",
           },
         },
         "required": [
-          "workspace",
-          "workspaceSource",
-          "command",
+          "$apiVersion",
+          "ok",
+          "error",
+          "meta",
         ],
         "type": "object",
       },
-      "ok": {
-        "const": true,
-        "type": "boolean",
-      },
-    },
-    "required": [
-      "$apiVersion",
-      "ok",
-      "data",
-      "meta",
     ],
-    "type": "object",
   },
 }
 `;

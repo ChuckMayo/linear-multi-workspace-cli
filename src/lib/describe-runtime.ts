@@ -24,26 +24,78 @@ import { getLinearSchema } from '@/lib/schema-loader.js'
 
 /**
  * The Phase 1 envelope output schema for curated commands.
+ *
+ * Mirrors the real envelope contract from `src/core/output/envelope.ts`:
+ *   - SuccessEnvelope: { $apiVersion, ok: true, data, meta: Meta }
+ *   - FailureEnvelope: { $apiVersion, ok: false, error, meta: FailureMeta }
+ *
  * Per CONTEXT.md § describe shape — v1 leaves `data: z.unknown()`.
  * Per-entity output schemas deferred to Phase 5/6.
+ *
+ * If you change the envelope shape in `src/core/output/envelope.ts`, the
+ * snapshot tests in `test/lib/describe-runtime.test.ts` and
+ * `test/commands/describe.test.ts` will fail until this schema is brought
+ * back into parity — that's intentional.
  */
-const EnvelopeOutputSchema = z.object({
+const PageInfoSchema = z.object({
+  hasNextPage: z.boolean(),
+  endCursor: z.string().nullable(),
+  hasPreviousPage: z.boolean(),
+  startCursor: z.string().nullable(),
+})
+
+const ComplexitySchema = z.object({
+  cost: z.number(),
+  remaining: z.number(),
+})
+
+const BatchSchema = z.object({
+  count: z.number(),
+  kinds: z.object({
+    query: z.number(),
+    mutation: z.number(),
+  }),
+})
+
+const WorkspaceSourceSchema = z.enum(['flag', 'env', 'active', 'single', 'api-key-env'])
+
+const MetaSchema = z.object({
+  command: z.string(),
+  workspace: z.string().nullable().optional(),
+  workspaceSource: WorkspaceSourceSchema.optional(),
+  pageInfo: PageInfoSchema.optional(),
+  complexity: ComplexitySchema.optional(),
+  totalCount: z.number().optional(),
+  batch: BatchSchema.optional(),
+})
+
+const FailureMetaSchema = z.object({
+  command: z.string(),
+  workspace: z.string().nullable().optional(),
+  workspaceSource: WorkspaceSourceSchema.optional(),
+})
+
+const SuccessEnvelopeSchema = z.object({
   $apiVersion: z.literal('1'),
   ok: z.literal(true),
   data: z.unknown(),
-  meta: z.object({
-    workspace: z.string(),
-    workspaceSource: z.string(),
-    command: z.string(),
-    pageInfo: z
-      .object({
-        hasNextPage: z.boolean(),
-        endCursor: z.string().optional(),
-      })
-      .optional(),
-    totalCount: z.number().optional(),
-  }),
+  meta: MetaSchema,
 })
+
+const FailureEnvelopeSchema = z.object({
+  $apiVersion: z.literal('1'),
+  ok: z.literal(false),
+  error: z.object({
+    code: z.string(),
+    message: z.string(),
+    transient: z.boolean(),
+    retryAfterMs: z.number().optional(),
+    details: z.record(z.string(), z.unknown()).optional(),
+  }),
+  meta: FailureMetaSchema,
+})
+
+const EnvelopeOutputSchema = z.union([SuccessEnvelopeSchema, FailureEnvelopeSchema])
 
 /**
  * Standard z.toJSONSchema() options per CONTEXT.md § stack contract.
