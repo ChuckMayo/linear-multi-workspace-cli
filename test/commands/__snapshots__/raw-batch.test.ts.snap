@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RawBatchCommand — command-level dry-run (Test 16) > runRawBatch with query plan returns dry-run envelope; matches snapshot > cmd-dry-run-success 1`] = `
+{
+  "data": {
+    "plan": [
+      {
+        "kind": "query",
+        "operation": "Issues",
+        "vars": {
+          "first": 2,
+        },
+        "workspace": "acme",
+      },
+    ],
+  },
+  "meta": {
+    "batch": {
+      "count": 1,
+      "kinds": {
+        "mutation": 0,
+        "query": 1,
+      },
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;

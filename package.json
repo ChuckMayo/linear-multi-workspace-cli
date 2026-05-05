@@ -34,7 +34,9 @@
     "verify-pack": "node scripts/verify-pack.mjs",
     "smoke:phase-2": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs",
     "smoke:phase-2:burst": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs --burst",
-    "smoke:phase-2:keep": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs --keep"
+    "smoke:phase-2:keep": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-2.mjs --keep",
+    "smoke:phase-3": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-3.mjs",
+    "smoke:phase-3:keep": "npm run build && node --env-file-if-exists=.env scripts/smoke-phase-3.mjs --keep"
   },
   "oclif": {
     "bin": "linear-agent",

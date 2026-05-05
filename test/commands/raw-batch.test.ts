@@ -9,7 +9,7 @@
  *   17. Command metadata: enableJsonFlag=true, expected flags present (plan required, dry-run default true).
  */
 import { randomBytes } from 'node:crypto'
-import { writeFileSync, unlinkSync } from 'node:fs'
+import { unlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -161,8 +161,8 @@ describe('RawBatchCommand — command-level dry-run (Test 16)', () => {
 
       expect((out.data as Record<string, unknown>).plan).toBeDefined()
       const plan = (out.data as Record<string, unknown>).plan as Array<Record<string, unknown>>
-      expect(plan[0].operation).toBe('Issues')
-      expect(plan[0].kind).toBe('query')
+      expect(plan[0]?.operation).toBe('Issues')
+      expect(plan[0]?.kind).toBe('query')
       expect(out).toMatchSnapshot('cmd-dry-run-success')
     } finally {
       cleanTmp(tmpFile)

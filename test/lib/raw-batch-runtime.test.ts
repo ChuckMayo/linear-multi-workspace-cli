@@ -25,7 +25,7 @@
  *   16 (raw-batch.test.ts). Command-level dry-run snapshot.
  */
 import { randomBytes } from 'node:crypto'
-import { writeFileSync, unlinkSync } from 'node:fs'
+import { unlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -134,8 +134,7 @@ vi.mock('@/generated/operations.js', () => ({
 let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | undefined
 
 import type { Config } from '@/core/config/index.js'
-import { LinearAgentError } from '@/core/errors/index.js'
-import { exitCodeFor } from '@/core/errors/index.js'
+import { exitCodeFor, LinearAgentError } from '@/core/errors/index.js'
 import { failure } from '@/core/output/index.js'
 import { runRawBatch } from '@/lib/raw-batch-runtime.js'
 
@@ -197,7 +196,11 @@ describe('rawBatchRuntime — dry-run default (Test 1)', () => {
     const rawRequestSpy = vi.fn()
     mockRawRequestFn = rawRequestSpy
 
-    const tmpFile = writeTmp(JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'a', input: { stateId: 'state-x' } } }]))
+    const tmpFile = writeTmp(
+      JSON.stringify([
+        { operation: 'IssueUpdate', vars: { id: 'a', input: { stateId: 'state-x' } } },
+      ]),
+    )
     try {
       const out = await runRawBatch({
         flags: {
@@ -214,9 +217,9 @@ describe('rawBatchRuntime — dry-run default (Test 1)', () => {
       expect(Array.isArray((out.data as Record<string, unknown>).plan)).toBe(true)
       const plan = (out.data as Record<string, unknown>).plan as Array<Record<string, unknown>>
       expect(plan).toHaveLength(1)
-      expect(plan[0].operation).toBe('IssueUpdate')
-      expect(plan[0].kind).toBe('mutation')
-      expect(plan[0].workspace).toBe('acme')
+      expect(plan[0]?.operation).toBe('IssueUpdate')
+      expect(plan[0]?.kind).toBe('mutation')
+      expect(plan[0]?.workspace).toBe('acme')
 
       // data.results is NOT present
       expect((out.data as Record<string, unknown>).results).toBeUndefined()
@@ -243,7 +246,11 @@ describe('rawBatchRuntime — execute path (Test 2)', () => {
   it('--dry-run false --yes → data.results array; rawRequest called once', async () => {
     mockRawRequestFn = vi.fn().mockResolvedValue({ data: { issueUpdate: { success: true } } })
 
-    const tmpFile = writeTmp(JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'a', input: { stateId: 'state-x' } } }]))
+    const tmpFile = writeTmp(
+      JSON.stringify([
+        { operation: 'IssueUpdate', vars: { id: 'a', input: { stateId: 'state-x' } } },
+      ]),
+    )
     try {
       const out = await runRawBatch({
         flags: {
@@ -258,12 +265,14 @@ describe('rawBatchRuntime — execute path (Test 2)', () => {
       })
 
       // data.results present
-      const results = (out.data as Record<string, unknown>).results as Array<Record<string, unknown>>
+      const results = (out.data as Record<string, unknown>).results as Array<
+        Record<string, unknown>
+      >
       expect(Array.isArray(results)).toBe(true)
       expect(results).toHaveLength(1)
-      expect(results[0].ok).toBe(true)
-      expect(results[0].operation).toBe('IssueUpdate')
-      expect(results[0].data).toBeDefined()
+      expect(results[0]?.ok).toBe(true)
+      expect(results[0]?.operation).toBe('IssueUpdate')
+      expect(results[0]?.data).toBeDefined()
 
       // data.plan is NOT present
       expect((out.data as Record<string, unknown>).plan).toBeUndefined()
@@ -321,7 +330,9 @@ describe('rawBatchRuntime — dry-run + yes precedence (Test 4)', () => {
     const rawRequestSpy = vi.fn()
     mockRawRequestFn = rawRequestSpy
 
-    const tmpFile = writeTmp(JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'b', input: {} } }]))
+    const tmpFile = writeTmp(
+      JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'b', input: {} } }]),
+    )
     try {
       const out = await runRawBatch({
         flags: {
@@ -492,7 +503,9 @@ describe('rawBatchRuntime — WSP-06 ordering, Pitfall 7 (Test 10)', () => {
     mockRawRequestFn = rawRequestSpy
 
     // Mutation plan with active workspace in config but no explicit --workspace
-    const tmpFile = writeTmp(JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'x', input: {} } }]))
+    const tmpFile = writeTmp(
+      JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'x', input: {} } }]),
+    )
     expect.assertions(4)
     try {
       await runRawBatch({
@@ -512,7 +525,9 @@ describe('rawBatchRuntime — WSP-06 ordering, Pitfall 7 (Test 10)', () => {
       // ZERO rawRequest calls — WSP-06 fires BEFORE any dispatch
       expect(rawRequestSpy).not.toHaveBeenCalled()
       // Snapshot the failure envelope (suffix -batch distinguishes from 03-02's single-op WSP-06 case)
-      expect(snapshotFailureEnvelope(err)).toMatchSnapshot('failure-WORKSPACE_REQUIRED_FOR_WRITE-batch')
+      expect(snapshotFailureEnvelope(err)).toMatchSnapshot(
+        'failure-WORKSPACE_REQUIRED_FOR_WRITE-batch',
+      )
     } finally {
       cleanTmp(tmpFile)
     }
@@ -540,7 +555,7 @@ describe('rawBatchRuntime — query-only plan, no WSP-06 (Test 11)', () => {
       // Should succeed as dry-run (no WSP-06 for query-only)
       expect((out.data as Record<string, unknown>).plan).toBeDefined()
       const plan = (out.data as Record<string, unknown>).plan as Array<Record<string, unknown>>
-      expect(plan[0].kind).toBe('query')
+      expect(plan[0]?.kind).toBe('query')
     } finally {
       cleanTmp(tmpFile)
     }
@@ -563,9 +578,11 @@ describe('rawBatchRuntime — query-only plan, no WSP-06 (Test 11)', () => {
       })
 
       // data.results present
-      const results = (out.data as Record<string, unknown>).results as Array<Record<string, unknown>>
+      const results = (out.data as Record<string, unknown>).results as Array<
+        Record<string, unknown>
+      >
       expect(Array.isArray(results)).toBe(true)
-      expect(results[0].ok).toBe(true)
+      expect(results[0]?.ok).toBe(true)
       // rawRequest was called
       expect(mockRawRequestFn).toHaveBeenCalledTimes(1)
     } finally {
@@ -583,7 +600,9 @@ describe('rawBatchRuntime — RAW_MUTATION_REQUIRES_FLAG (Test 12)', () => {
     const rawRequestSpy = vi.fn()
     mockRawRequestFn = rawRequestSpy
 
-    const tmpFile = writeTmp(JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'x', input: {} } }]))
+    const tmpFile = writeTmp(
+      JSON.stringify([{ operation: 'IssueUpdate', vars: { id: 'x', input: {} } }]),
+    )
     expect.assertions(3)
     try {
       await runRawBatch({
@@ -621,7 +640,9 @@ describe('rawBatchRuntime — per-entry partial failure (Test 13)', () => {
         return { data: { issueUpdate: { success: true } } }
       }
       // Simulate a real LinearAgentError-like throw from the runtime
-      throw Object.assign(new Error('ISSUE_NOT_FOUND: issue not found'), { code: 'ISSUE_NOT_FOUND' })
+      throw Object.assign(new Error('ISSUE_NOT_FOUND: issue not found'), {
+        code: 'ISSUE_NOT_FOUND',
+      })
     })
 
     const plan = [
@@ -643,18 +664,20 @@ describe('rawBatchRuntime — per-entry partial failure (Test 13)', () => {
       })
 
       // Top-level ok:true (batch ran)
-      const results = (out.data as Record<string, unknown>).results as Array<Record<string, unknown>>
+      const results = (out.data as Record<string, unknown>).results as Array<
+        Record<string, unknown>
+      >
       expect(Array.isArray(results)).toBe(true)
       expect(results).toHaveLength(2)
 
       // Entry 0: succeeded
-      expect(results[0].ok).toBe(true)
-      expect(results[0].operation).toBe('IssueUpdate')
+      expect(results[0]?.ok).toBe(true)
+      expect(results[0]?.operation).toBe('IssueUpdate')
 
       // Entry 1: failed
-      expect(results[1].ok).toBe(false)
-      expect(results[1].operation).toBe('IssueDelete')
-      expect(results[1].error).toBeDefined()
+      expect(results[1]?.ok).toBe(false)
+      expect(results[1]?.operation).toBe('IssueDelete')
+      expect(results[1]?.error).toBeDefined()
 
       // meta.batch present
       const meta = out.meta as Record<string, unknown>

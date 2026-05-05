@@ -1,0 +1,157 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`rawBatchRuntime — BATCH_PLAN_INVALID (malformed JSON) (Test 5) > malformed JSON plan → BATCH_PLAN_INVALID (exit 12); canonical failure-envelope snapshot > failure-BATCH_PLAN_INVALID 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "BATCH_PLAN_INVALID",
+    "details": {
+      "reason": "parse_error",
+    },
+    "message": "plan file is not valid JSON: Unexpected token 'o', "not-valid-json{" is not valid JSON",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw batch",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawBatchRuntime — BATCH_REQUIRES_YES (Test 3) > --dry-run false without --yes → BATCH_REQUIRES_YES (exit 2) > failure-BATCH_REQUIRES_YES 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "BATCH_REQUIRES_YES",
+    "details": {
+      "hint": "pass --yes to confirm execution, or remove --no-dry-run for a dry-run preview",
+    },
+    "message": "batch execution requires --yes to confirm (or remove --no-dry-run for a dry-run preview)",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw batch",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawBatchRuntime — WSP-06 ordering, Pitfall 7 (Test 10) > mutation plan + no --workspace → WORKSPACE_REQUIRED_FOR_WRITE BEFORE any rawRequest call > failure-WORKSPACE_REQUIRED_FOR_WRITE-batch 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "WORKSPACE_REQUIRED_FOR_WRITE",
+    "details": {
+      "remediation": "pass --workspace <name>, set LINEAR_WORKSPACE=<name>, or pass --allow-active-workspace-write",
+      "resolvedFrom": "active",
+      "resolvedWorkspace": "acme",
+    },
+    "message": "write commands require an explicit workspace selector: pass --workspace <name>, set LINEAR_WORKSPACE, or pass --allow-active-workspace-write to opt in to using the active default for this invocation",
+    "transient": false,
+  },
+  "meta": {
+    "command": "raw batch",
+  },
+  "ok": false,
+}
+`;
+
+exports[`rawBatchRuntime — dry-run default (Test 1) > returns dry-run envelope with data.plan; ZERO rawRequest calls; no data.results > dry-run-success 1`] = `
+{
+  "data": {
+    "plan": [
+      {
+        "kind": "mutation",
+        "operation": "IssueUpdate",
+        "vars": {
+          "id": "a",
+          "input": {
+            "stateId": "state-x",
+          },
+        },
+        "workspace": "acme",
+      },
+    ],
+  },
+  "meta": {
+    "batch": {
+      "count": 1,
+      "kinds": {
+        "mutation": 1,
+        "query": 0,
+      },
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
+exports[`rawBatchRuntime — execute path (Test 2) > --dry-run false --yes → data.results array; rawRequest called once > execute-success 1`] = `
+{
+  "data": {
+    "results": [
+      {
+        "data": {
+          "issueUpdate": {
+            "success": true,
+          },
+        },
+        "ok": true,
+        "operation": "IssueUpdate",
+      },
+    ],
+  },
+  "meta": {
+    "batch": {
+      "count": 1,
+      "kinds": {
+        "mutation": 1,
+        "query": 0,
+      },
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
+
+exports[`rawBatchRuntime — per-entry partial failure (Test 13) > entry 0 succeeds, entry 1 fails → top-level ok:true; results[0].ok=true, results[1].ok=false > partial-failure-success 1`] = `
+{
+  "data": {
+    "results": [
+      {
+        "data": {
+          "issueUpdate": {
+            "success": true,
+          },
+        },
+        "ok": true,
+        "operation": "IssueUpdate",
+      },
+      {
+        "error": {
+          "code": "LINEAR_API_ERROR",
+          "details": {
+            "cause": "ISSUE_NOT_FOUND: issue not found",
+          },
+          "message": "Linear API call failed",
+        },
+        "ok": false,
+        "operation": "IssueDelete",
+      },
+    ],
+  },
+  "meta": {
+    "batch": {
+      "count": 2,
+      "kinds": {
+        "mutation": 2,
+        "query": 0,
+      },
+    },
+    "workspace": "acme",
+    "workspaceSource": "flag",
+  },
+}
+`;
