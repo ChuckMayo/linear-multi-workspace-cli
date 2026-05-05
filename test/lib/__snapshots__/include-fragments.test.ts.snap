@@ -1,0 +1,35 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`validateAndMergeIncludes -- INVALID_INCLUDE > Test 2: unknown key throws INVALID_INCLUDE with details.allowed (sorted) + details.unknown > failure-INVALID_INCLUDE 1`] = `
+{
+  "$apiVersion": "1",
+  "error": {
+    "code": "INVALID_INCLUDE",
+    "details": {
+      "allowed": [
+        "attachments",
+        "comments",
+        "history",
+        "labels",
+        "subscribers",
+      ],
+      "unknown": [
+        "nonexistentKey",
+      ],
+    },
+    "message": "unknown --include keys for issue list: nonexistentKey",
+    "transient": false,
+  },
+  "meta": {
+    "command": "issue list",
+  },
+  "ok": false,
+}
+`;
+
+exports[`validateAndMergeIncludes -- happy paths > Test 1: valid keys ["comments", "labels"] for "issue list" returns merged fragment text > issue-list-comments-labels 1`] = `
+"comments(first: 50) { nodes { id body createdAt user { id name } } }
+      labels(first: 50) { nodes { id name color } }"
+`;
+
+exports[`validateAndMergeIncludes -- happy paths > Test 4: valid key ["issues"] for "cycle list" returns cycle-issues fragment > cycle-list-issues 1`] = `"issues(first: 50) { nodes { id identifier title } }"`;
