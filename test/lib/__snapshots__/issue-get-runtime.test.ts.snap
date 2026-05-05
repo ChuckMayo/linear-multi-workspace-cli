@@ -1,5 +1,30 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`issueGetRuntime -- --include (Phase 3 RAW-04) > Test 7b: flags.include=["comments"] -> rawRequest called ONCE; issue() NOT called > include-comments-success 1`] = `
+{
+  "data": {
+    "assignee": {
+      "email": null,
+    },
+    "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "identifier": "ENG-1",
+    "priority": 0,
+    "state": {
+      "name": "Todo",
+    },
+    "team": {
+      "key": null,
+    },
+    "title": "with-comments",
+    "updatedAt": "2026-01-01T00:00:00Z",
+  },
+  "meta": {
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
 exports[`issueGetRuntime — identifier vs UUID resolution > Test 1: UUID input routes to client.issue(uuid) exactly once > uuid-success 1`] = `
 {
   "data": {

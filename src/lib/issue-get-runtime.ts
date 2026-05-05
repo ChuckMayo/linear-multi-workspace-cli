@@ -44,6 +44,7 @@ import {
 } from '@/core/transport/index.js'
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
 import { ISSUE_IDENTIFIER_RE } from '@/lib/filter-heuristics.js'
+import { validateAndMergeIncludes } from '@/lib/include-fragments.js'
 
 export interface IssueGetArgs {
   /** Issue identifier (`ENG-123`) or UUID. Required. */
@@ -53,6 +54,8 @@ export interface IssueGetArgs {
 export interface IssueGetFlags {
   workspace?: string
   fields?: string
+  /** Phase 3: hydrate related entities in a single rawRequest round-trip */
+  include?: string[]
 }
 
 export interface IssueGetInput {
@@ -102,10 +105,62 @@ export async function issueGetRuntime(input: IssueGetInput): Promise<IssueGetOut
   const fields = parseFields(input.flags.fields ?? 'defaults', 'issue')
   const client = (input.clientFactoryOverride ?? createLinearClient)(resolved)
 
+  // Phase 3: branch on --include. Empty → unchanged Phase 2 typed-SDK call.
+  const includes = input.flags.include ?? []
+  if (includes.length === 0) {
+    // PHASE 2 BEHAVIOR — UNCHANGED
+    return withFetchInterception(async () => {
+      const ref = input.args.identifier
+      const issue = await resolveIssue(client, ref, input.retryOptsOverride)
+      if (!issue) {
+        throw new LinearAgentError({
+          code: 'ISSUE_NOT_FOUND',
+          message: `issue not found: ${ref}`,
+          details: { ref },
+        })
+      }
+
+      const hydrated = await hydrateForProjection(issue, fields)
+      const data = project(hydrated, fields)
+
+      const complexity = getLastComplexity()
+      const meta: Omit<Meta, 'command'> = {
+        workspace: resolved.name,
+        workspaceSource: resolved.source,
+        ...(complexity !== undefined ? { complexity } : {}),
+      }
+
+      return { data, meta }
+    })
+  }
+
+  // PHASE 3 INCLUDE PATH — single rawRequest with inlined fragments
+  const fragmentText = validateAndMergeIncludes('issue get', includes)
+  const query = composeIssueGetWithIncludes(fragmentText)
+
   return withFetchInterception(async () => {
     const ref = input.args.identifier
-    const issue = await resolveIssue(client, ref, input.retryOptsOverride)
-    if (!issue) {
+    const response = (await withRateLimitRetry(
+      () =>
+        (
+          client as unknown as {
+            client: {
+              rawRequest: (q: string, v: unknown) => Promise<{ data?: unknown; error?: string }>
+            }
+          }
+        ).client.rawRequest(query, { id: ref }),
+      input.retryOptsOverride,
+    )) as { data?: unknown; error?: string }
+
+    if (response.error ?? !response.data) {
+      throw LinearAgentError.linear.apiError({
+        message: response.error ?? 'no data returned from Linear API',
+        details: { command: 'issue get', cause: response.error },
+      })
+    }
+
+    const issueData = (response.data as { issue?: Record<string, unknown> }).issue
+    if (!issueData) {
       throw new LinearAgentError({
         code: 'ISSUE_NOT_FOUND',
         message: `issue not found: ${ref}`,
@@ -113,8 +168,7 @@ export async function issueGetRuntime(input: IssueGetInput): Promise<IssueGetOut
       })
     }
 
-    const hydrated = await hydrateForProjection(issue, fields)
-    const data = project(hydrated, fields)
+    const data = project(issueData, fields)
 
     const complexity = getLastComplexity()
     const meta: Omit<Meta, 'command'> = {
@@ -208,4 +262,22 @@ async function resolveLazy(value: unknown): Promise<unknown> {
     return await (value as Promise<unknown>)
   }
   return value
+}
+
+// -----------------------------------------------------------------------------
+// Phase 3: compose query for --include path (Approach A — single rawRequest)
+// -----------------------------------------------------------------------------
+
+function composeIssueGetWithIncludes(fragmentText: string): string {
+  return `
+    query IssueWithIncludes($id: String!) {
+      issue(id: $id) {
+        id identifier title number priority url description createdAt updatedAt
+        state { id name }
+        assignee { id name }
+        team { id name }
+        ${fragmentText}
+      }
+    }
+  `.trim()
 }

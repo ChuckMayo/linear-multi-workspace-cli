@@ -211,7 +211,11 @@ function makeMockClient(opts: {
     rawRequestCallCount++
     return mockRawRequestFn(q, vars)
   }
-  const client = { issues: issuesFn, issue: issueFn, client: { rawRequest } } as unknown as LinearClient
+  const client = {
+    issues: issuesFn,
+    issue: issueFn,
+    client: { rawRequest },
+  } as unknown as LinearClient
   return { client, issuesFn, issueFn, lastIssuesArgs, lastIssueArg }
 }
 
@@ -579,7 +583,16 @@ describe('issueGetRuntime -- --include (Phase 3 RAW-04)', () => {
           state: { id: 'state-1', name: 'Todo' },
           assignee: { id: 'user-1', name: 'Alice' },
           team: { id: 'team-1', name: 'Engineering' },
-          comments: { nodes: [{ id: 'cmt-1', body: 'hello', createdAt: '2026-01-01T00:00:00Z', user: { id: 'u1', name: 'Bob' } }] },
+          comments: {
+            nodes: [
+              {
+                id: 'cmt-1',
+                body: 'hello',
+                createdAt: '2026-01-01T00:00:00Z',
+                user: { id: 'u1', name: 'Bob' },
+              },
+            ],
+          },
         },
       },
     })

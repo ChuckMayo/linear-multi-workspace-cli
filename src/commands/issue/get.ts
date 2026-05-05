@@ -20,6 +20,7 @@ export interface RunIssueGetArgs {
   identifier: string
   workspace?: string
   fields?: string
+  include?: string[]
   pretty: boolean
 }
 
@@ -31,6 +32,7 @@ export async function runIssueGet(args: RunIssueGetArgs): Promise<CommandOutput>
       const runtimeFlags: Parameters<typeof issueGetRuntime>[0]['flags'] = {}
       if (args.workspace !== undefined) runtimeFlags.workspace = args.workspace
       if (args.fields !== undefined) runtimeFlags.fields = args.fields
+      if (args.include !== undefined) runtimeFlags.include = args.include
 
       const result = await issueGetRuntime({
         args: { identifier: args.identifier },
@@ -60,6 +62,11 @@ export default class IssueGet extends Command {
       description: 'Field preset (ids|defaults|full) or comma-separated list',
       default: 'defaults',
     }),
+    include: Flags.string({
+      description:
+        'Hydrate related entities in a single GraphQL round-trip (e.g. comments, labels). Available: comments, labels, attachments, subscribers, history.',
+      multiple: true,
+    }),
   }
 
   async run(): Promise<unknown> {
@@ -70,6 +77,7 @@ export default class IssueGet extends Command {
     }
     if (flags.workspace !== undefined) callArgs.workspace = flags.workspace
     if (flags.fields !== undefined) callArgs.fields = flags.fields
+    if (flags.include !== undefined) callArgs.include = flags.include
     const out = await runIssueGet(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)

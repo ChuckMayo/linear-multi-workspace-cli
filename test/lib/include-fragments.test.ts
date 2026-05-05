@@ -13,9 +13,7 @@
  * meta.command varies).
  */
 import { describe, expect, it } from 'vitest'
-
-import { LinearAgentError } from '@/core/errors/index.js'
-import { exitCodeFor } from '@/core/errors/index.js'
+import { exitCodeFor, LinearAgentError } from '@/core/errors/index.js'
 import { failure } from '@/core/output/index.js'
 import { INCLUDE_FRAGMENT_MAP, validateAndMergeIncludes } from '@/lib/include-fragments.js'
 
