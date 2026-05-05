@@ -34,12 +34,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import {
-  buildResult,
-  findTarball,
-  median,
-  parseArgs,
-} from '../../scripts/measure-cold-start.mjs'
+import { buildResult, findTarball, median, parseArgs } from '../../scripts/measure-cold-start.mjs'
 
 const REPO_ROOT = process.cwd()
 const COLDSTART_SCRIPT = resolve(REPO_ROOT, 'scripts/measure-cold-start.mjs')
@@ -253,9 +248,12 @@ describe('scripts/measure-cold-start.mjs — CLI', () => {
 
       const matches = readdirSync(REPO_ROOT).filter((f) => /^linear-agent-.*\.tgz$/.test(f))
       expect(matches.length).toBeGreaterThan(0)
-      const tarball = matches
+      const sorted = matches
         .map((f) => ({ f, mtime: statSync(join(REPO_ROOT, f)).mtimeMs }))
-        .sort((a, b) => b.mtime - a.mtime)[0]!.f
+        .sort((a, b) => b.mtime - a.mtime)
+      const newest = sorted[0]
+      if (!newest) throw new Error('expected a tarball after npm pack')
+      const tarball = newest.f
 
       let exitCode = 0
       let stdout = ''
@@ -273,9 +271,14 @@ describe('scripts/measure-cold-start.mjs — CLI', () => {
       // Either pass (0) or fail (1) — both are clean exits. We only assert shape.
       expect([0, 1]).toContain(exitCode)
       // stdout should contain at least one JSON line we can parse.
-      const lines = stdout.trim().split('\n').filter((l) => l.trim().startsWith('{'))
+      const lines = stdout
+        .trim()
+        .split('\n')
+        .filter((l) => l.trim().startsWith('{'))
       expect(lines.length).toBeGreaterThan(0)
-      const parsed = JSON.parse(lines[lines.length - 1]!) as Record<string, unknown>
+      const lastLine = lines[lines.length - 1]
+      if (!lastLine) throw new Error('expected at least one JSON line on stdout')
+      const parsed = JSON.parse(lastLine) as Record<string, unknown>
       expect(parsed).toHaveProperty('ok')
       expect(parsed).toHaveProperty('runs_ms')
       expect(parsed).toHaveProperty('median_ms')
