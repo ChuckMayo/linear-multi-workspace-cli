@@ -458,6 +458,36 @@ describe('rawBatchRuntime — BATCH_PLAN_INVALID (unknown operation) (Test 7)', 
       cleanTmp(tmpFile)
     }
   })
+
+  // Regression: REVIEW WR-02 — dry-run must validate per-entry vars
+  // against the registry's per-operation varsSchema. Before the fix,
+  // a plan with `{operation: "IssueUpdate", vars: {}}` (missing
+  // required `id` and `input`) returned a successful dry-run preview
+  // and only crashed on the first --no-dry-run --yes execution.
+  it('Test 7b (WR-02): dry-run rejects entry whose vars fail per-operation Zod', async () => {
+    // IssueUpdate requires { id: string, input: object }; pass {} to trip the schema.
+    const tmpFile = writeTmp(JSON.stringify([{ operation: 'IssueUpdate', vars: {} }]))
+    expect.assertions(5)
+    try {
+      await runRawBatch({
+        flags: { plan: `@${tmpFile}`, workspace: 'acme', 'allow-mutations': true },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('BATCH_PLAN_INVALID')
+      const details = err.details as Record<string, unknown>
+      expect(details.entry_index).toBe(0)
+      expect(details.reason).toBe('vars_invalid')
+      // Should carry Zod issues so agents can act on them
+      const issues = details.issues as Array<{ path: unknown; message: string; code: string }>
+      expect(Array.isArray(issues) && issues.length > 0).toBe(true)
+    } finally {
+      cleanTmp(tmpFile)
+    }
+  })
 })
 
 // -----------------------------------------------------------------------------

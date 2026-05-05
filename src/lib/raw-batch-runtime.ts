@@ -123,6 +123,34 @@ export async function runRawBatch(input: RunRawBatchInput): Promise<RunRawBatchO
         },
       })
     }
+
+    // WR-02 fix: validate each entry's vars against the registry's
+    // per-operation varsSchema so dry-run actually catches shape errors.
+    // Previously the Plan-level Zod schema only enforced
+    // `vars: z.record(z.string(), z.unknown())` (i.e., "vars is some
+    // JSON object"); the per-operation Zod parsing happened later inside
+    // runRaw, which dry-run never reaches. Result: a dry-run plan with a
+    // missing required `input` field returned a successful preview, then
+    // crashed on first execution. Mirrors runRaw's RAW_VARS_INVALID
+    // shape but uses BATCH_PLAN_INVALID + entry_index for batch context.
+    const varsResult = reg.varsSchema.safeParse(entry.vars)
+    if (!varsResult.success) {
+      throw new LinearAgentError({
+        code: 'BATCH_PLAN_INVALID',
+        message: `entry ${index}: vars failed validation for operation '${entry.operation}'`,
+        details: {
+          entry_index: index,
+          reason: 'vars_invalid',
+          operation: entry.operation,
+          issues: varsResult.error.issues.map((i) => ({
+            path: i.path,
+            message: i.message,
+            code: i.code,
+          })),
+        },
+      })
+    }
+
     return { ...entry, kind: reg.kind as 'query' | 'mutation' }
   })
 
