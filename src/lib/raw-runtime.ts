@@ -100,7 +100,20 @@ export async function runRaw(input: RunRawInput): Promise<RunRawOutput> {
     })
   }
 
-  // Step 3: Subscription guard (defensive — real codegen excludes them, but guard anyway)
+  // Step 3: Subscription guard.
+  //
+  // OperationKind in src/generated/operations.ts is 'query' | 'mutation';
+  // codegen excludes subscriptions, so the type-level check at the call
+  // site already rules this branch out. The `as string` cast exists
+  // precisely *because* TypeScript knows this can't be 'subscription'.
+  //
+  // Why keep the runtime guard (REVIEW WR-04): codegen could regress
+  // (someone could widen OperationKind) and the registry could ship a
+  // subscription op that breaks the rawRequest dispatch contract. We
+  // pay one comparison per call to fail loudly instead of silently
+  // forwarding a subscription to client.client.rawRequest. The branch is
+  // exercised by Test 8b in raw-runtime.test.ts via a mocked subscription
+  // entry in the OPERATION_REGISTRY fixture, so it stays covered.
   if ((entry.kind as string) === 'subscription') {
     throw new LinearAgentError({
       code: 'OPERATION_SUBSCRIPTIONS_UNSUPPORTED',
