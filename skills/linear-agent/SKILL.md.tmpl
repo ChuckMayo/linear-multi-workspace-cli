@@ -1,0 +1,156 @@
+---
+name: linear-agent
+description: Operate Linear from any agent. Use when the user asks about Linear issues, projects, cycles, comments, teams, labels, workflow states, or wants to query/mutate Linear via CLI. Single-CLI surface for any Linear workspace; works across multiple workspaces in one session. JSON-by-default output for agent consumption.
+compatibility: Requires Node 22+ and a Linear API key (LINEAR_API_KEY env var or `linear-agent workspace add`).
+metadata:
+  version: "{{VERSION}}"
+  homepage: "https://github.com/charliehelman/linear-multi-workspace"
+---
+
+# linear-agent
+
+Pinned version: `{{VERSION}}`. Always invoke as `npx -y linear-agent@{{VERSION}} <command>`. Never the floating dist-tag — agents must pin so a registry update doesn't silently change the contract mid-session.
+
+## When to invoke
+
+Invoke `linear-agent` when the user wants to read or write Linear data and you can shell out. Trigger phrases include:
+
+- "create / update / archive / list / search / get an issue"
+- "add a comment", "find issues in <team>", "what's in cycle <n>"
+- "create / update a project", "set project status"
+- "list teams / labels / workflow states / cycles"
+- "who am I" / "what workspace am I in" (use `me` or `whoami`)
+- Any GraphQL query a curated command doesn't cover — fall back to the raw layer
+
+You do NOT need to ask the user for permission to call a read-only command (`*list*`, `*get*`, `*search*`, `me`, `whoami`, `describe`, `list-tools`, `schema`). For write commands (create/update/delete/archive/trash/transition/purge), confirm intent first unless the user has clearly asked for the write.
+
+## Auth setup
+
+`linear-agent` reads its Linear API key from one of two sources, in this order:
+
+1. **Per-shell env var** (preferred for CI / one-shot invocations):
+   ```
+   export LINEAR_API_KEY=lin_api_...
+   npx -y linear-agent@{{VERSION}} me --json
+   ```
+
+2. **Persistent workspace registry** (preferred for interactive use, supports multiple workspaces):
+   ```
+   npx -y linear-agent@{{VERSION}} workspace add --name acme --token lin_api_...
+   npx -y linear-agent@{{VERSION}} workspace use acme
+   npx -y linear-agent@{{VERSION}} me --json
+   ```
+
+If the user has multiple Linear workspaces, every command accepts `--workspace <name>` to override the active one. Tokens are stored under `conf`'s platform-conventional config dir (XDG on Linux, `~/Library/Preferences/...` on macOS, `%APPDATA%\...` on Windows). Personal API keys only — no OAuth in v1.
+
+If neither source is set, every command exits with `WORKSPACE_NOT_RESOLVED` (exit 10). Run `linear-agent workspace list` to see what's registered.
+
+## JSON-by-default contract
+
+Every command emits a versioned envelope on stdout. **Pass `--json` for machine output** — pretty/human output is on by default but agents should always use `--json`.
+
+Success envelope (locked key order):
+```json
+{
+  "$apiVersion": "1",
+  "ok": true,
+  "data": { /* command-specific payload */ },
+  "meta": { "command": "issue list", "workspace": "acme" }
+}
+```
+
+Failure envelope:
+```json
+{
+  "$apiVersion": "1",
+  "ok": false,
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Title is required",
+    "transient": false,
+    "details": { "field": "title" }
+  },
+  "meta": { "command": "issue create" }
+}
+```
+
+`ok: true` ⇒ exit 0. `ok: false` ⇒ exit > 0 (taxonomy below). The `data` payload shape is stable per command — pin tests against `data.*` paths, not human prose.
+
+## Curated commands quick-reference
+
+Top-of-funnel commands (one line each). Run `npx -y linear-agent@{{VERSION}} describe <command>` for full flag schema, or `npx -y linear-agent@{{VERSION}} list-tools` for the full inventory.
+
+| Command | Purpose |
+|---------|---------|
+| `me --json` | Fetch viewer + organization (auth probe). |
+| `whoami --json` | Active workspace + user identity. |
+| `issue list --team <slug> --json` | Page through issues in a team. |
+| `issue get <id> --json` | Fetch one issue by identifier (e.g. `ENG-123`). |
+| `issue search "<query>" --json` | Full-text search. |
+| `issue create --team <slug> --title "..." [--description "..." --state <name> --assignee <email> --labels <l1,l2>] --json` | Create. |
+| `issue update <id> [--title --description --state --assignee --labels] --json` | Patch fields. |
+| `issue transition <id> --state <name> --json` | Move to a workflow state. |
+| `issue archive <id> --json` / `issue trash <id> --json` / `issue purge <id> --json` | Lifecycle ops (require confirmation). |
+| `comment create --issue <id> --body "..." --json` | Add a comment. |
+| `comment list --issue <id> --json` | List comments on an issue. |
+| `project list [--team <slug>] --json` | List projects (optionally team-scoped). |
+| `project create --team <slug> --name "..." [--description ...] --json` | Create project. |
+| `project update-status <id> --status <name> --json` | Update a project's status field. |
+| `cycle list --team <slug> --json` | List cycles for a team. |
+| `team list --json` / `label list --team <slug> --json` / `state list --team <slug> --json` | Read-only catalogs. |
+
+Every write command short-circuits to a `CONFIRMATION_REQUIRED` error if it looks destructive without `--yes`. Pass `--yes` only when the user has explicitly approved the write.
+
+## Raw GraphQL escape hatch
+
+When a curated command doesn't expose a field you need, use the raw layer. Workflow:
+
+1. **Discover the operation:**
+   ```
+   npx -y linear-agent@{{VERSION}} describe IssueBatchCreate --json
+   ```
+   `describe` returns a Zod-derived schema with required + optional fields.
+
+2. **Invoke it via `raw`:**
+   ```
+   npx -y linear-agent@{{VERSION}} raw IssueBatchCreate \
+     --variables '{"input":{"issues":[{"teamId":"...","title":"..."}]}}' \
+     --json
+   ```
+   Output is the SAME envelope shape as curated commands.
+
+3. **Or run an arbitrary GraphQL query string:**
+   ```
+   npx -y linear-agent@{{VERSION}} graphql \
+     --query 'query { viewer { id } }' \
+     --json
+   ```
+
+The raw layer covers Linear's full GraphQL surface (~500+ operations). Use it when the user asks for something a curated command doesn't expose; otherwise prefer the curated command for cleaner UX and snapshot-stable output.
+
+## Common error envelopes
+
+The five most-likely failure codes you'll see:
+
+| Code | Exit | Meaning |
+|------|------|---------|
+| `WORKSPACE_NOT_RESOLVED` | 10 | No `LINEAR_API_KEY` and no active workspace. Tell the user to run `linear-agent workspace add` or set `LINEAR_API_KEY`. |
+| `AUTH_INVALID` | 11 | Token is malformed or has been revoked. Tell the user to regenerate at <https://linear.app/settings/api>. |
+| `VALIDATION_FAILED` | 12 | A required field is missing or malformed. Inspect `error.details.field`. |
+| `RATELIMITED` | 14 | Linear's rate limit is hit (3M points/hr authenticated). `error.transient: true` — back off and retry. |
+| `NETWORK_ERROR` | 15 | Transport-level failure (DNS, TLS, timeout). `error.transient: true` — retry once before surfacing to the user. |
+
+For the full taxonomy and the complete description of every error code, run:
+```
+npx -y linear-agent@{{VERSION}} describe errors --json
+```
+
+## Self-discovery (introspection)
+
+The CLI ships with three introspection commands that let an agent learn the surface without external docs:
+
+- `npx -y linear-agent@{{VERSION}} list-tools --json` — every command (curated + raw) with its one-line description.
+- `npx -y linear-agent@{{VERSION}} describe <command-or-operation> --json` — flag schema, JSON output schema, examples.
+- `npx -y linear-agent@{{VERSION}} schema --json` — the full Linear GraphQL schema (cached) for arbitrary queries.
+
+Always prefer `describe` over reading source. The `describe` output is generated from the same Zod schemas that drive command parsing, so it's the canonical contract for what a command accepts and returns.
