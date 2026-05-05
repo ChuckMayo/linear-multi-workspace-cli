@@ -1,5 +1,38 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`issueListRuntime -- --include (Phase 3 RAW-04) > Test 6a: empty --include preserves Phase 2 behavior (typed SDK issues() called; rawRequest NOT called) > include-empty-preserves-phase2 1`] = `
+{
+  "data": [
+    {
+      "assignee": {
+        "email": "alice@example.com",
+      },
+      "id": "iss_1",
+      "identifier": "ENG-1",
+      "priority": 0,
+      "state": {
+        "name": "Todo",
+      },
+      "team": {
+        "key": "ENG",
+      },
+      "title": "phase-2",
+      "updatedAt": "2026-01-01T00:00:00Z",
+    },
+  ],
+  "meta": {
+    "pageInfo": {
+      "endCursor": null,
+      "hasNextPage": false,
+      "hasPreviousPage": false,
+      "startCursor": null,
+    },
+    "workspace": "acme",
+    "workspaceSource": "active",
+  },
+}
+`;
+
 exports[`issueListRuntime — failure envelopes (KRN-09) > Test 9: WORKSPACE_NOT_RESOLVED (exit 10) — empty config, no env keys > failure-WORKSPACE_NOT_RESOLVED 1`] = `
 {
   "$apiVersion": "1",

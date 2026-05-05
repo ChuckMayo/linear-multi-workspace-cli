@@ -57,8 +57,15 @@ vi.mock('@linear/sdk', () => {
     InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
+      client: { rawRequest: (q: string, vars: unknown) => Promise<unknown> }
       constructor(opts: { apiKey: string }) {
         this.apiKey = opts.apiKey
+        this.client = {
+          rawRequest: async (q: string, vars: unknown): Promise<unknown> => {
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+            return mockRawRequestFn(q, vars)
+          },
+        }
       }
     },
   }
@@ -72,6 +79,10 @@ import { LinearAgentError } from '@/core/errors/index.js'
 import { failure } from '@/core/output/index.js'
 import { _clearProjectCache } from '@/core/resolvers/index.js'
 import { projectGetRuntime } from '@/lib/project-get-runtime.js'
+
+// Module-level rawRequest mock for --include tests (Phase 3 RAW-04)
+let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | null = null
+let rawRequestCallCount = 0
 
 const STUB_CONFIG: Config = {
   active: 'acme',
@@ -112,9 +123,15 @@ function makeMockClient(opts: MockOpts): MockHandle {
     if (!opts.projects) throw new Error('mock client.projects not configured')
     return opts.projects()
   })
+  const rawRequest = async (q: string, vars: unknown): Promise<unknown> => {
+    if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+    rawRequestCallCount++
+    return mockRawRequestFn(q, vars)
+  }
   const client = {
     project: projectFn,
     projects: projectsFn,
+    client: { rawRequest },
   } as unknown as LinearClient
   return { client, projectFn, projectsFn, callLog }
 }
@@ -131,11 +148,15 @@ beforeEach(() => {
   _clearProjectCache()
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 afterEach(() => {
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 function fakeProject(id: string, name = PROJECT_NAME): Record<string, unknown> {
@@ -267,5 +288,90 @@ describe('ProjectGet oclif command', () => {
 
   it('Test get-cmd-b: runProjectGet is exported as a named function', () => {
     expect(typeof runProjectGet).toBe('function')
+  })
+
+  it('Test get-cmd-c: --include flag declared on ProjectGet command', () => {
+    const flagNames = Object.keys(ProjectGet.flags)
+    expect(flagNames).toContain('include')
+  })
+})
+
+// -----------------------------------------------------------------------------
+// Phase 3 --include tests (RAW-04)
+// -----------------------------------------------------------------------------
+
+describe('projectGetRuntime -- --include (Phase 3 RAW-04)', () => {
+  it('Test 6d: empty --include preserves Phase 2 behavior (typed SDK project() called; rawRequest NOT called)', async () => {
+    const handle = makeMockClient({
+      project: async () => fakeProject(PROJECT_UUID),
+    })
+
+    const out = await projectGetRuntime({
+      args: { ref: PROJECT_UUID },
+      flags: { workspace: 'acme', include: [] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // Phase 2 typed path used
+    expect(handle.projectFn).toHaveBeenCalledTimes(1)
+    expect(rawRequestCallCount).toBe(0)
+    expect(out.data).toBeDefined()
+  })
+
+  it('Test 7d: flags.include=["members"] -> rawRequest called ONCE; project() NOT called', async () => {
+    mockRawRequestFn = async () => ({
+      data: {
+        project: {
+          id: PROJECT_UUID,
+          name: PROJECT_NAME,
+          slugId: 'roadmap-q1',
+          description: 'Roadmap',
+          state: 'started',
+          startDate: null,
+          targetDate: '2026-12-31',
+          members: { nodes: [{ id: 'u1', name: 'Alice', email: 'alice@example.com' }] },
+        },
+      },
+    })
+
+    const handle = makeMockClient({})
+
+    const out = await projectGetRuntime({
+      args: { ref: PROJECT_UUID },
+      flags: { workspace: 'acme', include: ['members'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // rawRequest called exactly once
+    expect(rawRequestCallCount).toBe(1)
+    // Typed project() NOT called
+    expect(handle.projectFn).not.toHaveBeenCalled()
+    expect(out.data).toBeDefined()
+    expect(out).toMatchSnapshot('include-members-success')
+  })
+
+  it('Test 8d: flags.include=["nonexistentKey"] -> INVALID_INCLUDE (exit 2); rawRequest NOT called', async () => {
+    const handle = makeMockClient({})
+
+    expect.assertions(4)
+    try {
+      await projectGetRuntime({
+        args: { ref: PROJECT_UUID },
+        flags: { workspace: 'acme', include: ['nonexistentKey'] },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+        clientFactoryOverride: () => handle.client,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('INVALID_INCLUDE')
+      expect(rawRequestCallCount).toBe(0)
+      expect(handle.projectFn).not.toHaveBeenCalled()
+    }
   })
 })

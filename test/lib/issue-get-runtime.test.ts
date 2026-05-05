@@ -68,8 +68,15 @@ vi.mock('@linear/sdk', () => {
     InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
+      client: { rawRequest: (q: string, vars: unknown) => Promise<unknown> }
       constructor(opts: { apiKey: string }) {
         this.apiKey = opts.apiKey
+        this.client = {
+          rawRequest: async (q: string, vars: unknown): Promise<unknown> => {
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+            return mockRawRequestFn(q, vars)
+          },
+        }
       }
     },
   }
@@ -77,6 +84,10 @@ vi.mock('@linear/sdk', () => {
 
 import type { LinearClient } from '@linear/sdk'
 import { RatelimitedLinearError as RealRatelimitedLinearError } from '@linear/sdk'
+
+// Module-level rawRequest mock for --include tests (Phase 3 RAW-04)
+let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | null = null
+let rawRequestCallCount = 0
 
 import IssueGet, { runIssueGet } from '@/commands/issue/get.js'
 import type { Config } from '@/core/config/index.js'
@@ -195,7 +206,12 @@ function makeMockClient(opts: {
     if (!opts.issue) throw new Error('mock client.issue not configured')
     return opts.issue(id)
   })
-  const client = { issues: issuesFn, issue: issueFn } as unknown as LinearClient
+  const rawRequest = async (q: string, vars: unknown): Promise<unknown> => {
+    if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+    rawRequestCallCount++
+    return mockRawRequestFn(q, vars)
+  }
+  const client = { issues: issuesFn, issue: issueFn, client: { rawRequest } } as unknown as LinearClient
   return { client, issuesFn, issueFn, lastIssuesArgs, lastIssueArg }
 }
 
@@ -210,11 +226,15 @@ beforeAll(() => {
 beforeEach(() => {
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 afterEach(() => {
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 describe('issueGetRuntime — identifier vs UUID resolution', () => {
@@ -503,5 +523,104 @@ describe('IssueGet oclif command', () => {
 
   it('Test 10b: runIssueGet is exported as a named function', () => {
     expect(typeof runIssueGet).toBe('function')
+  })
+
+  it('Test 10c: --include flag declared on IssueGet command', () => {
+    const flagNames = Object.keys(IssueGet.flags)
+    expect(flagNames).toContain('include')
+  })
+})
+
+// -----------------------------------------------------------------------------
+// Phase 3 --include tests (RAW-04)
+// -----------------------------------------------------------------------------
+
+describe('issueGetRuntime -- --include (Phase 3 RAW-04)', () => {
+  it('Test 6b: empty --include preserves Phase 2 behavior (typed SDK issue() called; rawRequest NOT called)', async () => {
+    const handle = makeMockClient({
+      issue: async () =>
+        sdkIssue({
+          id: ISSUE_UUID,
+          identifier: 'ENG-1',
+          title: 'phase2-path',
+          state: { name: 'Todo' },
+          assignee: { email: 'alice@example.com' },
+          team: { key: 'ENG' },
+        }),
+    })
+
+    const out = await issueGetRuntime({
+      args: { identifier: ISSUE_UUID },
+      flags: { include: [] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // Phase 2 typed path used
+    expect(handle.issueFn).toHaveBeenCalledTimes(1)
+    expect(rawRequestCallCount).toBe(0)
+    expect(out.data).toBeDefined()
+  })
+
+  it('Test 7b: flags.include=["comments"] -> rawRequest called ONCE; issue() NOT called', async () => {
+    mockRawRequestFn = async () => ({
+      data: {
+        issue: {
+          id: ISSUE_UUID,
+          identifier: 'ENG-1',
+          title: 'with-comments',
+          number: 1,
+          priority: 0,
+          url: 'https://linear.app/acme/issue/ENG-1',
+          description: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedAt: '2026-01-01T00:00:00Z',
+          state: { id: 'state-1', name: 'Todo' },
+          assignee: { id: 'user-1', name: 'Alice' },
+          team: { id: 'team-1', name: 'Engineering' },
+          comments: { nodes: [{ id: 'cmt-1', body: 'hello', createdAt: '2026-01-01T00:00:00Z', user: { id: 'u1', name: 'Bob' } }] },
+        },
+      },
+    })
+
+    const handle = makeMockClient({})
+
+    const out = await issueGetRuntime({
+      args: { identifier: ISSUE_UUID },
+      flags: { include: ['comments'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // rawRequest called exactly once
+    expect(rawRequestCallCount).toBe(1)
+    // Typed issue() and issues() NOT called
+    expect(handle.issueFn).not.toHaveBeenCalled()
+    expect(handle.issuesFn).not.toHaveBeenCalled()
+    expect(out.data).toBeDefined()
+    expect(out).toMatchSnapshot('include-comments-success')
+  })
+
+  it('Test 8b: flags.include=["nonexistentKey"] -> INVALID_INCLUDE (exit 2); rawRequest NOT called', async () => {
+    const handle = makeMockClient({})
+
+    expect.assertions(4)
+    try {
+      await issueGetRuntime({
+        args: { identifier: ISSUE_UUID },
+        flags: { include: ['nonexistentKey'] },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+        clientFactoryOverride: () => handle.client,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('INVALID_INCLUDE')
+      expect(rawRequestCallCount).toBe(0)
+      expect(handle.issueFn).not.toHaveBeenCalled()
+    }
   })
 })

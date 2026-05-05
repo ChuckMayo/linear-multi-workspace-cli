@@ -87,8 +87,15 @@ vi.mock('@linear/sdk', () => {
     InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
+      client: { rawRequest: (q: string, vars: unknown) => Promise<unknown> }
       constructor(opts: { apiKey: string }) {
         this.apiKey = opts.apiKey
+        this.client = {
+          rawRequest: async (q: string, vars: unknown): Promise<unknown> => {
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+            return mockRawRequestFn(q, vars)
+          },
+        }
       }
       async issues(args: { first?: number; after?: string; filter?: unknown }): Promise<unknown> {
         if (!mockIssuesFn) throw new Error('mockIssuesFn not configured')
@@ -101,6 +108,8 @@ vi.mock('@linear/sdk', () => {
 type IssuesArgs = { first?: number; after?: string; filter?: unknown }
 let mockIssuesFn: ((args: IssuesArgs) => Promise<unknown>) | null = null
 let lastIssuesArgs: IssuesArgs | null = null
+let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | null = null
+let rawRequestCallCount = 0
 
 function setMockIssues(fn: (args: IssuesArgs) => Promise<unknown>): void {
   mockIssuesFn = async (args) => {
@@ -112,6 +121,15 @@ function setMockIssues(fn: (args: IssuesArgs) => Promise<unknown>): void {
 function clearMockIssues(): void {
   mockIssuesFn = null
   lastIssuesArgs = null
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
+}
+
+function setMockRawRequest(fn: (q: string, vars: unknown) => Promise<unknown>): void {
+  mockRawRequestFn = async (q, vars) => {
+    rawRequestCallCount++
+    return fn(q, vars)
+  }
 }
 
 import {
@@ -693,5 +711,103 @@ describe('IssueList oclif command', () => {
     expect(out).toMatch(/--fields/)
     expect(out).toMatch(/--limit/)
     expect(out).toMatch(/--cursor/)
+  })
+
+  it('Test 17: --include flag declared on IssueList command', () => {
+    const flagNames = Object.keys(IssueList.flags)
+    expect(flagNames).toContain('include')
+  })
+})
+
+// -----------------------------------------------------------------------------
+// SECTION D: Phase 3 --include tests (RAW-04)
+// -----------------------------------------------------------------------------
+
+describe('issueListRuntime -- --include (Phase 3 RAW-04)', () => {
+  it('Test 6a: empty --include preserves Phase 2 behavior (typed SDK issues() called; rawRequest NOT called)', async () => {
+    setMockIssues(async () =>
+      sdkConnection([
+        sdkIssue({
+          id: 'iss_1',
+          identifier: 'ENG-1',
+          title: 'phase-2',
+          state: { name: 'Todo' },
+          assignee: { email: 'alice@example.com' },
+          team: { key: 'ENG' },
+        }),
+      ]),
+    )
+
+    const out = await issueListRuntime({
+      flags: { include: [] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+    })
+
+    // Typed SDK path used; rawRequest must NOT have been called
+    expect(rawRequestCallCount).toBe(0)
+    expect(lastIssuesArgs).not.toBeNull()
+    expect(out.data).toBeInstanceOf(Array)
+    // Snapshot must match existing Phase 2 snapshot (byte-identical; no -u needed)
+    expect(out).toMatchSnapshot('include-empty-preserves-phase2')
+  })
+
+  it('Test 7a: flags.include=["comments"] -> rawRequest called ONCE; issues() NOT called', async () => {
+    // rawRequest returns a valid GraphQL response shape for IssuesWithIncludes
+    setMockRawRequest(async () => ({
+      data: {
+        issues: {
+          nodes: [
+            {
+              id: 'iss_with_include',
+              identifier: 'ENG-99',
+              title: 'with-include',
+              number: 99,
+              priority: 0,
+              url: 'https://linear.app/acme/issue/ENG-99',
+              createdAt: '2026-01-01T00:00:00Z',
+              updatedAt: '2026-01-01T00:00:00Z',
+              state: { id: 'state-1', name: 'Todo' },
+              assignee: { id: 'user-1', name: 'Alice' },
+              team: { id: 'team-1', name: 'Engineering' },
+              comments: { nodes: [{ id: 'cmt-1', body: 'hi', createdAt: '2026-01-01T00:00:00Z', user: { id: 'u1', name: 'Bob' } }] },
+            },
+          ],
+          pageInfo: { hasNextPage: false, endCursor: null },
+        },
+      },
+    }))
+
+    const out = await issueListRuntime({
+      flags: { include: ['comments'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+    })
+
+    // rawRequest was called exactly once
+    expect(rawRequestCallCount).toBe(1)
+    // Typed issues() was NOT called
+    expect(lastIssuesArgs).toBeNull()
+    expect(out.data).toBeInstanceOf(Array)
+    expect(out).toMatchSnapshot('include-comments-success')
+  })
+
+  it('Test 8a: flags.include=["nonexistentKey"] -> INVALID_INCLUDE (exit 2); rawRequest NOT called', async () => {
+    expect.assertions(4)
+    try {
+      await issueListRuntime({
+        flags: { include: ['nonexistentKey'] },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('INVALID_INCLUDE')
+      // rawRequest must NOT have been called
+      expect(rawRequestCallCount).toBe(0)
+      // issues() must NOT have been called
+      expect(lastIssuesArgs).toBeNull()
+    }
   })
 })

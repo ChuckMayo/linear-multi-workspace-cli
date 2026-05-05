@@ -60,8 +60,15 @@ vi.mock('@linear/sdk', () => {
     InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
+      client: { rawRequest: (q: string, vars: unknown) => Promise<unknown> }
       constructor(opts: { apiKey: string }) {
         this.apiKey = opts.apiKey
+        this.client = {
+          rawRequest: async (q: string, vars: unknown): Promise<unknown> => {
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+            return mockRawRequestFn(q, vars)
+          },
+        }
       }
     },
   }
@@ -71,9 +78,14 @@ import type { LinearClient } from '@linear/sdk'
 
 import CycleList, { runCycleList } from '@/commands/cycle/list.js'
 import type { Config } from '@/core/config/index.js'
+import { LinearAgentError } from '@/core/errors/index.js'
 import { success } from '@/core/output/index.js'
 import { _clearTeamCache } from '@/core/resolvers/index.js'
 import { cycleListRuntime } from '@/lib/cycle-list-runtime.js'
+
+// Module-level rawRequest mock for --include tests (Phase 3 RAW-04)
+let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | null = null
+let rawRequestCallCount = 0
 
 const STUB_CONFIG: Config = {
   active: 'acme',
@@ -125,9 +137,15 @@ function makeMockClient(opts: MockOpts): MockHandle {
     if (!opts.teams) throw new Error('mock client.teams not configured')
     return opts.teams()
   })
+  const rawRequest = async (q: string, vars: unknown): Promise<unknown> => {
+    if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+    rawRequestCallCount++
+    return mockRawRequestFn(q, vars)
+  }
   const client = {
     cycles: cyclesFn,
     teams: teamsFn,
+    client: { rawRequest },
   } as unknown as LinearClient
   return { client, cyclesFn, teamsFn, callLog }
 }
@@ -140,11 +158,15 @@ beforeEach(() => {
   _clearTeamCache()
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 afterEach(() => {
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 function fakeCycle(id: string, num = 1): Record<string, unknown> {
@@ -339,5 +361,93 @@ describe('CycleList oclif command', () => {
 
   it('Test list-cmd-b: runCycleList is exported as a named function', () => {
     expect(typeof runCycleList).toBe('function')
+  })
+
+  it('Test list-cmd-c: --include flag declared on CycleList command', () => {
+    const flagNames = Object.keys(CycleList.flags)
+    expect(flagNames).toContain('include')
+  })
+})
+
+// -----------------------------------------------------------------------------
+// Phase 3 --include tests (RAW-04)
+// -----------------------------------------------------------------------------
+
+describe('cycleListRuntime -- --include (Phase 3 RAW-04)', () => {
+  it('Test 6e: empty --include preserves Phase 2 behavior (typed SDK cycles() called; rawRequest NOT called)', async () => {
+    const handle = makeMockClient({
+      cycles: async () => ({
+        nodes: [fakeCycle(CYCLE_UUID_1, 1)],
+        pageInfo: { hasNextPage: false, endCursor: null },
+      }),
+    })
+
+    const out = await cycleListRuntime({
+      flags: { workspace: 'acme', include: [] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // Phase 2 typed path used
+    expect(handle.cyclesFn).toHaveBeenCalledTimes(1)
+    expect(rawRequestCallCount).toBe(0)
+    expect(out.data).toBeInstanceOf(Array)
+  })
+
+  it('Test 7e: flags.include=["issues"] -> rawRequest called ONCE; cycles() NOT called', async () => {
+    mockRawRequestFn = async () => ({
+      data: {
+        cycles: {
+          nodes: [
+            {
+              id: CYCLE_UUID_1,
+              number: 1,
+              name: 'Cycle 1',
+              startsAt: '2026-01-01T00:00:00Z',
+              endsAt: '2026-01-14T00:00:00Z',
+              issues: { nodes: [{ id: 'iss-1', identifier: 'ENG-1', title: 'first' }] },
+            },
+          ],
+          pageInfo: { hasNextPage: false, endCursor: null },
+        },
+      },
+    })
+
+    const handle = makeMockClient({})
+
+    const out = await cycleListRuntime({
+      flags: { workspace: 'acme', include: ['issues'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // rawRequest called exactly once
+    expect(rawRequestCallCount).toBe(1)
+    // Typed cycles() NOT called
+    expect(handle.cyclesFn).not.toHaveBeenCalled()
+    expect(out.data).toBeInstanceOf(Array)
+    expect(out).toMatchSnapshot('include-issues-success')
+  })
+
+  it('Test 8e: flags.include=["nonexistentKey"] -> INVALID_INCLUDE (exit 2); rawRequest NOT called', async () => {
+    const handle = makeMockClient({})
+
+    expect.assertions(4)
+    try {
+      await cycleListRuntime({
+        flags: { workspace: 'acme', include: ['nonexistentKey'] },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+        clientFactoryOverride: () => handle.client,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('INVALID_INCLUDE')
+      expect(rawRequestCallCount).toBe(0)
+      expect(handle.cyclesFn).not.toHaveBeenCalled()
+    }
   })
 })

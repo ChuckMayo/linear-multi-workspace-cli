@@ -62,8 +62,15 @@ vi.mock('@linear/sdk', () => {
     InternalLinearError,
     LinearClient: class MockLinearClient {
       apiKey: string
+      client: { rawRequest: (q: string, vars: unknown) => Promise<unknown> }
       constructor(opts: { apiKey: string }) {
         this.apiKey = opts.apiKey
+        this.client = {
+          rawRequest: async (q: string, vars: unknown): Promise<unknown> => {
+            if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+            return mockRawRequestFn(q, vars)
+          },
+        }
       }
     },
   }
@@ -76,6 +83,10 @@ import type { Config } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import { failure, success } from '@/core/output/index.js'
 import { commentListRuntime } from '@/lib/comment-list-runtime.js'
+
+// Module-level rawRequest mock for --include tests (Phase 3 RAW-04)
+let mockRawRequestFn: ((q: string, vars: unknown) => Promise<unknown>) | null = null
+let rawRequestCallCount = 0
 
 const STUB_CONFIG: Config = {
   active: 'acme',
@@ -127,9 +138,15 @@ function makeMockClient(opts: MockOpts): MockHandle {
     if (!opts.issues) throw new Error('mock client.issues not configured')
     return opts.issues(args)
   })
+  const rawRequest = async (q: string, vars: unknown): Promise<unknown> => {
+    if (!mockRawRequestFn) throw new Error('mockRawRequestFn not configured')
+    rawRequestCallCount++
+    return mockRawRequestFn(q, vars)
+  }
   const client = {
     comments: commentsFn,
     issues: issuesFn,
+    client: { rawRequest },
   } as unknown as LinearClient
   return { client, commentsFn, issuesFn, callLog }
 }
@@ -145,11 +162,15 @@ beforeAll(() => {
 beforeEach(() => {
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 afterEach(() => {
   delete process.env.LINEAR_WORKSPACE
   delete process.env.LINEAR_API_KEY
+  mockRawRequestFn = null
+  rawRequestCallCount = 0
 })
 
 function fakeComment(id: string): Record<string, unknown> {
@@ -461,5 +482,87 @@ describe('commentListRuntime -- no-N+1 guarantee on --fields=ids (CR-01 regressi
     expect(issueAccess.count).toBe(0)
     expect(parentAccess.count).toBe(0)
     expect((out.data as Array<Record<string, unknown>>)[0]).toEqual({ id: COMMENT_UUID_1 })
+  })
+})
+
+// -----------------------------------------------------------------------------
+// Phase 3 --include tests (RAW-04)
+// -----------------------------------------------------------------------------
+
+describe('commentListRuntime -- --include (Phase 3 RAW-04)', () => {
+  it('Test 6c: empty --include preserves Phase 2 behavior (typed SDK comments() called; rawRequest NOT called)', async () => {
+    const handle = makeMockClient({
+      comments: async () => ({
+        nodes: [fakeComment(COMMENT_UUID_1)],
+        pageInfo: { hasNextPage: false, endCursor: null },
+      }),
+    })
+
+    const out = await commentListRuntime({
+      flags: { workspace: 'acme', include: [] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // Phase 2 typed path used
+    expect(handle.commentsFn).toHaveBeenCalledTimes(1)
+    expect(rawRequestCallCount).toBe(0)
+    expect(out.data).toBeInstanceOf(Array)
+  })
+
+  it('Test 7c: flags.include=["reactions"] -> rawRequest called ONCE; comments() NOT called', async () => {
+    mockRawRequestFn = async () => ({
+      data: {
+        comments: {
+          nodes: [
+            {
+              id: COMMENT_UUID_1,
+              body: 'looks good',
+              createdAt: '2026-01-02T00:00:00Z',
+              user: { id: 'u1', name: 'Alice' },
+              reactions: [{ id: 'r1', emoji: '👍' }],
+            },
+          ],
+          pageInfo: { hasNextPage: false, endCursor: null },
+        },
+      },
+    })
+
+    const handle = makeMockClient({})
+
+    const out = await commentListRuntime({
+      flags: { workspace: 'acme', include: ['reactions'] },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    // rawRequest called exactly once
+    expect(rawRequestCallCount).toBe(1)
+    // Typed comments() NOT called
+    expect(handle.commentsFn).not.toHaveBeenCalled()
+    expect(out.data).toBeInstanceOf(Array)
+    expect(out).toMatchSnapshot('include-reactions-success')
+  })
+
+  it('Test 8c: flags.include=["nonexistentKey"] -> INVALID_INCLUDE (exit 2); rawRequest NOT called', async () => {
+    const handle = makeMockClient({})
+
+    expect.assertions(4)
+    try {
+      await commentListRuntime({
+        flags: { workspace: 'acme', include: ['nonexistentKey'] },
+        env: {},
+        loadConfigOverride: () => STUB_CONFIG,
+        clientFactoryOverride: () => handle.client,
+      })
+    } catch (e) {
+      expect(e).toBeInstanceOf(LinearAgentError)
+      const err = e as LinearAgentError
+      expect(err.code).toBe('INVALID_INCLUDE')
+      expect(rawRequestCallCount).toBe(0)
+      expect(handle.commentsFn).not.toHaveBeenCalled()
+    }
   })
 })
