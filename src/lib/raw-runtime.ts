@@ -44,6 +44,7 @@ import {
 import { type ResolvedWorkspace, resolveWorkspace } from '@/core/workspace/index.js'
 import { requireExplicitWorkspaceForWrite } from '@/core/workspace/write-guard.js'
 import { OPERATION_REGISTRY } from '@/generated/operations.js'
+import { suggestClosest } from '@/lib/levenshtein.js'
 
 export interface RunRawArgs {
   /** PascalCase operation name from the registry (e.g. Issues, IssueCreate). */
@@ -255,37 +256,3 @@ async function loadVars(varsArg: string | undefined): Promise<unknown> {
   }
 }
 
-/**
- * Return the top `limit` closest operation names to `missing` by Levenshtein distance.
- * Inlined ~20 LOC — no new dependency.
- */
-function suggestClosest(missing: string, names: string[], limit = 3): string[] {
-  return names
-    .map((n) => ({ name: n, d: levenshtein(missing.toLowerCase(), n.toLowerCase()) }))
-    .sort((a, b) => a.d - b.d)
-    .slice(0, limit)
-    .map((x) => x.name)
-}
-
-/**
- * Simple iterative Levenshtein distance.
- * Uses flat typed array to avoid biome noNonNullAssertion warnings on 2D indexing.
- */
-function levenshtein(a: string, b: string): number {
-  const m = a.length
-  const n = b.length
-  // Flat row-major array: dp[i][j] = dp[i * (n+1) + j]
-  const dp = new Int32Array((m + 1) * (n + 1))
-  for (let i = 0; i <= m; i++) dp[i * (n + 1)] = i
-  for (let j = 0; j <= n; j++) dp[j] = j
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      const sub = a[i - 1] === b[j - 1] ? 0 : 1
-      const del = (dp[(i - 1) * (n + 1) + j] ?? i) + 1
-      const ins = (dp[i * (n + 1) + (j - 1)] ?? j) + 1
-      const rep = (dp[(i - 1) * (n + 1) + (j - 1)] ?? i + j) + sub
-      dp[i * (n + 1) + j] = Math.min(del, ins, rep)
-    }
-  }
-  return dp[m * (n + 1) + n] ?? 0
-}

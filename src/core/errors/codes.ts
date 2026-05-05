@@ -63,6 +63,9 @@ export const ERROR_CODES = [
   'RAW_VARS_INVALID',
   'GRAPHQL_VALIDATION_FAILED',
   'BATCH_PLAN_INVALID',
+  // ─── Phase 4 additions ──────────────────────────────────────
+  // Usage family — exit 2 (joins USAGE_ERROR)
+  'DESCRIBE_COMMAND_NOT_FOUND',
 ] as const
 
 export type ErrorCode = (typeof ERROR_CODES)[number]

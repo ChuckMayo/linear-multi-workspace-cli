@@ -61,6 +61,8 @@ export function exitCodeFor(code: ErrorCode): number {
     case 'GRAPHQL_QUERY_FILE_NOT_FOUND':
     case 'BATCH_REQUIRES_YES':
     case 'INVALID_INCLUDE':
+    // Phase 4 PLAN 04-01: introspection usage-class errors share exit 2.
+    case 'DESCRIBE_COMMAND_NOT_FOUND':
       return EXIT_CODES.USAGE
     // Phase 3 PLAN 03-01: validation-class errors join exit 12.
     case 'RAW_VARS_INVALID':
