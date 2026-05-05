@@ -3,7 +3,9 @@
  * verify-pack.mjs — Single source of truth for the published-tarball contract.
  *
  * Runs `npm pack --dry-run --json`, parses the file list, and asserts:
- *   - Allowlist: every required path prefix is present
+ *   - Allowlist: every required path prefix is present (bin/, dist/,
+ *     schema.graphql, src/generated/, README.md, package.json, and the
+ *     stamped Phase-5 skill bundle skills/linear-agent/SKILL.md)
  *   - Denylist: no forbidden path patterns appear (node_modules, src/*.ts except
  *     src/generated/, test/, codegen/, .planning/, .github/, dotfiles, *.tgz, etc.)
  *   - Runtime deps allowlist: @oclif/core, @linear/sdk, zod, conf, picocolors,
@@ -29,6 +31,11 @@ const REQUIRED_PREFIXES = [
   'src/generated/',
   'README.md',
   'package.json',
+  // Phase 5 DST-05: the stamped Claude Code skill bundle. The .tmpl is
+  // checked in but excluded from the published tarball; the prepack pipeline
+  // produces SKILL.md from the template. If this prefix isn't in the pack,
+  // the skill never reaches users.
+  'skills/linear-agent/SKILL.md',
 ]
 
 const FORBIDDEN_PATTERNS = [
@@ -50,6 +57,9 @@ const FORBIDDEN_PATTERNS = [
   /^\.env/,
   /\.tgz$/,
   /^\.DS_Store$/,
+  // Phase 5 DST-05: only the stamped SKILL.md ships; the .tmpl source is
+  // a build input, not a publishable artifact.
+  /\.tmpl$/,
 ]
 
 const REQUIRED_RUNTIME_DEPS = [
@@ -136,10 +146,14 @@ function parseHumanReadablePackOutput(text) {
 }
 
 function packDryRun() {
-  // First try `npm pack --dry-run --json`. npm 7+ supports it.
+  // First try `npm pack --dry-run --json --ignore-scripts`. npm 7+ supports it.
+  // `--ignore-scripts` skips prepack/postpack so the dry-run reflects ONLY the
+  // current on-disk state — i.e., it checks that whoever invoked verify-pack
+  // already produced the build + stamped artifacts. Without this flag the
+  // dry-run would silently re-run prepack and mask a broken pipeline.
   let stdout
   try {
-    stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+    stdout = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     })
@@ -155,7 +169,7 @@ function packDryRun() {
     return parsed[0]
   } catch (jsonErr) {
     // Fallback to human-readable parsing. Re-run without --json so npm emits the table.
-    const text = execFileSync('npm', ['pack', '--dry-run'], {
+    const text = execFileSync('npm', ['pack', '--dry-run', '--ignore-scripts'], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     })
