@@ -43,6 +43,7 @@ import {
   type SuccessEnvelopeNoMeta,
   success,
 } from '@/core/output/index.js'
+import type { RetryOpts } from '@/core/transport/index.js'
 
 /**
  * `classifySdkError` lives in `src/core/transport/rate-limit.ts` as of
@@ -65,6 +66,11 @@ export const BASE_FLAGS = {
     description:
       'Omit the meta block from success envelopes (smaller token footprint; failure envelopes unchanged).',
   }),
+  retry: Flags.integer({
+    description: 'Extra retries on transient errors (added on top of defaults). Min 0.',
+    min: 0,
+    default: 0,
+  }),
 } as const
 
 export interface RunCommandArgs {
@@ -75,11 +81,24 @@ export interface RunCommandArgs {
   noMeta?: boolean
   /** MNT-02: drop meta + suppress pretty-mode banner. Implies noMeta. */
   quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
   /**
    * Handler returns the success envelope's `{ data, meta }` parts. The shared
    * runtime fills in `meta.command` automatically.
+   *
+   * MNT-03: handler receives `retryOptsOverride` carrying the operator's
+   * `--retry N` choice plus a stderr `onRetry` writer (gated on `--quiet`).
+   * Existing handlers that don't forward to `withRateLimitRetry` may ignore
+   * the argument; new wiring (e.g. `me`) forwards it through to the runtime
+   * so the override reaches the transport layer.
+   *
+   * TypeScript variance allows `() => ...` closures to satisfy this widened
+   * signature, so existing call sites compile unchanged — only sites that
+   * NEED to forward the override (the canonical example is `me`) need to
+   * read `retryOpts`.
    */
-  handler: () => Promise<{
+  handler: (retryOptsOverride: RetryOpts) => Promise<{
     data: unknown
     meta: Omit<Meta, 'command'>
   }>
@@ -98,8 +117,24 @@ export async function runCommand(args: RunCommandArgs): Promise<CommandOutput> {
   // semantics for --quiet (mute banners) and --no-meta (token-saving JSON).
   const dropMeta = args.quiet === true || args.noMeta === true
   const effectivePretty = args.pretty && !dropMeta
+  // PLAN-06-02 MNT-03: build the retry override threaded into the handler.
+  // `onRetry` writer is gated on !quiet — the transport layer is unaware of
+  // presentation; runCommand owns the gating decision per CONTEXT D-MNT-03.
+  // The greppable line shape is `[retry K/M] CODE: backing off Xms\n`.
+  const extraAttempts = args.retry ?? 0
+  const retryOptsOverride: RetryOpts =
+    args.quiet === true
+      ? { extraAttempts }
+      : {
+          extraAttempts,
+          onRetry: (info) => {
+            process.stderr.write(
+              `[retry ${info.attempt}/${info.total}] ${info.code}: backing off ${info.backoffMs}ms\n`,
+            )
+          },
+        }
   try {
-    const { data, meta } = await args.handler()
+    const { data, meta } = await args.handler(retryOptsOverride)
     const env: Envelope = dropMeta
       ? ({ $apiVersion: '1', ok: true, data } satisfies SuccessEnvelopeNoMeta)
       : success(data, { ...meta, command: args.commandPath })

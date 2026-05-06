@@ -22,13 +22,15 @@ export interface RunMeArgs {
   noMeta?: boolean
   /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
   quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
 }
 
 export async function runMe(args: RunMeArgs): Promise<CommandOutput> {
   const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'me',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (retryOpts) => {
       const runtimeFlags: Parameters<typeof meRuntime>[0]['flags'] = {}
       if (args.workspace !== undefined) runtimeFlags.workspace = args.workspace
       if (args.fields !== undefined) runtimeFlags.fields = args.fields
@@ -36,12 +38,17 @@ export async function runMe(args: RunMeArgs): Promise<CommandOutput> {
       const result = await meRuntime({
         flags: runtimeFlags,
         env: process.env,
+        // MNT-03: forward the operator's --retry N (and the --quiet-gated
+        // onRetry writer) into the transport layer that wraps client.viewer
+        // and viewer.organization.
+        retryOptsOverride: retryOpts,
       })
       return { data: result.data, meta: result.meta }
     },
   }
   if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
   if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
   return runCommand(runArgs)
 }
 
@@ -69,6 +76,7 @@ export default class Me extends Command {
     if (flags.fields !== undefined) callArgs.fields = flags.fields
     if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
     if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
     const out = await runMe(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)

@@ -12,7 +12,8 @@
  */
 import { beforeAll, describe, expect, it } from 'vitest'
 import { LinearAgentError } from '@/core/errors/index.js'
-import { runCommand } from '@/lib/workspace-runtime.js'
+import type { RetryOpts } from '@/core/transport/index.js'
+import { type RunCommandArgs, runCommand } from '@/lib/workspace-runtime.js'
 
 beforeAll(() => {
   process.env.NO_COLOR = '1'
@@ -32,6 +33,26 @@ function mkFailingHandler() {
   }> => {
     throw new LinearAgentError({ code: 'GENERIC_ERROR', message: 'fail' })
   }
+}
+
+/**
+ * Capture the `retryOptsOverride` argument that `runCommand` passes into
+ * the handler closure. Used by MNT-03 threading tests to assert the
+ * operator's --retry flag actually reaches the transport-bound handler.
+ */
+function mkHandlerCapturingRetry(): {
+  handler: RunCommandArgs['handler']
+  captured: { override?: RetryOpts }
+} {
+  const captured: { override?: RetryOpts } = {}
+  const handler: RunCommandArgs['handler'] = async (retryOpts) => {
+    captured.override = retryOpts
+    return {
+      data: { id: 'u1' },
+      meta: { workspace: 'acme', workspaceSource: 'flag' as const },
+    }
+  }
+  return { handler, captured }
 }
 
 describe('runCommand — flag interactions (MNT-02)', () => {
@@ -118,5 +139,66 @@ describe('runCommand — flag interactions (MNT-02)', () => {
     // Failure path is byte-identical to Phase 1 — meta still carries command.
     expect(env.meta).toBeDefined()
     expect(env.meta.command).toBe('me')
+  })
+})
+
+describe('runCommand — retry threading (MNT-03)', () => {
+  it('(g) runCommand({ retry: 2 }) threads extraAttempts: 2 and an onRetry writer into handler', async () => {
+    const { handler, captured } = mkHandlerCapturingRetry()
+    await runCommand({ commandPath: 'me', pretty: false, retry: 2, handler })
+    expect(captured.override?.extraAttempts).toBe(2)
+    expect(typeof captured.override?.onRetry).toBe('function')
+  })
+
+  it('(g2) runCommand({ retry: 2, quiet: true }) threads extraAttempts: 2 but onRetry === undefined', async () => {
+    const { handler, captured } = mkHandlerCapturingRetry()
+    await runCommand({
+      commandPath: 'me',
+      pretty: false,
+      quiet: true,
+      retry: 2,
+      handler,
+    })
+    expect(captured.override?.extraAttempts).toBe(2)
+    expect(captured.override?.onRetry).toBeUndefined()
+  })
+
+  it('(h) runCommand({ retry: 0 }) threads extraAttempts: 0 (legacy / default behavior)', async () => {
+    const { handler, captured } = mkHandlerCapturingRetry()
+    await runCommand({ commandPath: 'me', pretty: false, retry: 0, handler })
+    expect(captured.override?.extraAttempts).toBe(0)
+  })
+
+  it('(h2) runCommand without retry flag still threads extraAttempts: 0 (default)', async () => {
+    const { handler, captured } = mkHandlerCapturingRetry()
+    await runCommand({ commandPath: 'me', pretty: false, handler })
+    expect(captured.override?.extraAttempts).toBe(0)
+  })
+
+  it('(g3) onRetry writer emits the greppable line shape to process.stderr', async () => {
+    const { handler, captured } = mkHandlerCapturingRetry()
+    await runCommand({ commandPath: 'me', pretty: false, retry: 1, handler })
+    // Capture stderr via the writer the handler received — invoke it with a
+    // synthetic info object and assert the written bytes match the greppable
+    // contract from CONTEXT D-MNT-03 line 74.
+    const writes: string[] = []
+    const origWrite = process.stderr.write.bind(process.stderr)
+    process.stderr.write = ((chunk: unknown) => {
+      if (typeof chunk === 'string') writes.push(chunk)
+      return true
+    }) as typeof process.stderr.write
+    try {
+      captured.override?.onRetry?.({
+        attempt: 2,
+        total: 4,
+        code: 'RATELIMITED',
+        backoffMs: 487,
+      })
+    } finally {
+      process.stderr.write = origWrite
+    }
+    expect(writes).toHaveLength(1)
+    expect(writes[0]).toBe('[retry 2/4] RATELIMITED: backing off 487ms\n')
+    expect(writes[0]).toMatch(/^\[retry \d+\/\d+\] [A-Z_]+: backing off \d+ms\n$/)
   })
 })
