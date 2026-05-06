@@ -73,6 +73,19 @@ const SECRET_ENV_VARS = Object.freeze([
  * a regex replace because secret values can contain regex metacharacters
  * (`$`, `.`, `\`, etc.) that would otherwise be misinterpreted.
  *
+ * Invariants:
+ *   - Falsy input (null, undefined, '') is returned unchanged. The function
+ *     is a no-op when there is nothing to redact.
+ *   - Only secrets of length >= 8 are redacted. This is an INTENTIONAL
+ *     false-positive guard: a real Linear personal API key is `lin_api_<32+
+ *     chars>` (well above 8), so any configured secret of length < 8 is by
+ *     definition NOT a real key and is almost certainly a placeholder
+ *     ("test", "key", "abc") that would over-redact common substrings in
+ *     captured stdout. The trade-off: a developer who deliberately
+ *     configures a short test key (e.g., `LINEAR_TEST_API_KEY=test`) for
+ *     local debugging will see that value survive into captured output.
+ *     This is a debug-time concession, not a production threat.
+ *
  * @param {string|undefined|null} text
  * @param {Record<string,string|undefined>} [env=process.env]
  * @returns the input with each known secret value replaced by '[REDACTED]'
@@ -82,8 +95,8 @@ export function redact(text, env = process.env) {
   let out = String(text)
   for (const name of SECRET_ENV_VARS) {
     const value = env[name]
-    // Only redact non-empty secrets of length >= 8. Shorter values are too
-    // likely to false-positive on common substrings ("test", "key", etc.).
+    // Only redact non-empty secrets of length >= 8. See docstring "Invariants"
+    // for why short values are intentionally passed through unredacted.
     if (typeof value === 'string' && value.length >= 8) {
       out = out.split(value).join('[REDACTED]')
     }
