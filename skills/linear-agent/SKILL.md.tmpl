@@ -145,6 +145,24 @@ For the full taxonomy and the complete description of every error code, run:
 npx -y linear-agent@{{VERSION}} describe errors --json
 ```
 
+### Token & Retry Knobs
+
+Three flags help shave bytes or control retries in high-volume agent sessions.
+
+- `--no-meta`: drop the `meta` block from success envelopes (failure envelopes unchanged for debuggability). Saves ~150–250 bytes per call.
+
+  ```
+  npx -y linear-agent@{{VERSION}} issue list --json --no-meta
+  ```
+
+- `--quiet`: implies `--no-meta` AND suppresses pretty-mode banners. Useful for human pipelines and CI scripts that just want the data.
+
+  ```
+  npx -y linear-agent@{{VERSION}} me --json --quiet
+  ```
+
+<!-- 06-02 splice point: --retry N example goes here. Section stays ≤30 lines total. -->
+
 ## Self-discovery (introspection)
 
 The CLI ships with three introspection commands that let an agent learn the surface without external docs:
