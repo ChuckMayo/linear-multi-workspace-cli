@@ -45,6 +45,10 @@ export default class InstallSkill extends Command {
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)
-    return JSON.parse(out.stdout)
+    // In --pretty mode, stdout is human-readable text (not JSON). Parsing it
+    // would throw SyntaxError and surface as an oclif uncaught-exception
+    // traceback — confusing both humans and agent error-branching. Only
+    // parse when we know stdout is the JSON envelope.
+    return flags.pretty ? undefined : JSON.parse(out.stdout)
   }
 }
