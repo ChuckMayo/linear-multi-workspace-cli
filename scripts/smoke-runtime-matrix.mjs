@@ -32,7 +32,7 @@
  *     lanes MUST exit 1 hard on any failure.
  */
 import { spawnSync as realSpawnSync } from 'node:child_process'
-import { readFileSync as realReadFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync as realReadFileSync, readdirSync, existsSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -188,21 +188,45 @@ export function parseEnvelopeFromStdout(stdout) {
 }
 
 /**
- * Auto-discover the packed tarball in cwd. Mirrors the convention used by
- * `measure-cold-start.mjs`. Falls back to null if no match found.
+ * Auto-discover the most-recently-modified `linear-agent-*.tgz` in `cwd`.
+ *
+ * Why mtime (not lex sort): lex sort breaks for SemVer (e.g.,
+ * `linear-agent-0.1.10.tgz` sorts before `linear-agent-0.1.2.tgz`) and
+ * disagrees with `measure-cold-start.mjs:findTarball` when multiple
+ * tarballs coexist locally (e.g., `0.1.0-rc.1.tgz` and `0.1.0.tgz`).
+ * Cold-start times the just-packed tarball; this script must agree, or
+ * a maintainer running both back-to-back gets inconsistent measurements.
+ *
+ * Returns the absolute path, or null on no match. Files not matching
+ * `^linear-agent-.*\.tgz$` are filtered out.
  *
  * @param {string} cwd
  */
 export function findTarball(cwd) {
+  let entries
   try {
-    const entries = readdirSync(cwd)
-    const matches = entries.filter((f) => /^linear-agent-.*\.tgz$/.test(f)).sort()
-    if (matches.length === 0) return null
-    // Last match (lexicographic) is typically the most recent version.
-    return resolve(cwd, matches[matches.length - 1])
+    entries = readdirSync(cwd)
   } catch {
     return null
   }
+  const matches = entries.filter((f) => /^linear-agent-.*\.tgz$/.test(f))
+  if (matches.length === 0) return null
+  let best = null
+  let bestMtime = -Infinity
+  for (const f of matches) {
+    const path = resolve(cwd, f)
+    let st
+    try {
+      st = statSync(path)
+    } catch {
+      continue
+    }
+    if (st.mtimeMs > bestMtime) {
+      best = path
+      bestMtime = st.mtimeMs
+    }
+  }
+  return best
 }
 
 // ─────────────────────────── Lane implementations ───────────────────────────
