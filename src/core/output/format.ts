@@ -34,6 +34,15 @@ export function format(envelope: Envelope, opts: FormatOptions): FormatOutput {
   }
 
   if (redacted.ok) {
+    // PLAN-06-01 G1: a `SuccessEnvelopeNoMeta` cannot be rendered as a
+    // pretty banner (no meta.command, no meta.workspace). The runtime
+    // (`runCommand`) forces `pretty: false` whenever the no-meta path is
+    // taken, so this branch is unreachable in practice — but as a defense
+    // in-depth fall back to JSON if a caller bypasses `runCommand` and
+    // hands us a no-meta envelope with `pretty: true` directly.
+    if (!('meta' in redacted)) {
+      return { stdout: `${JSON.stringify(redacted)}\n` }
+    }
     return { stdout: renderSuccessPretty(redacted) }
   }
   return {

@@ -73,6 +73,20 @@ export type SuccessEnvelope<T = unknown> = {
   meta: Meta
 }
 
+/**
+ * Meta-less success envelope variant produced when `--quiet` or `--no-meta`
+ * is set (Phase 6 PLAN 06-01, MNT-02). Same shape as `SuccessEnvelope<T>`
+ * minus the `meta` block, for token-saving in high-volume agent sessions.
+ *
+ * Failure envelopes are NEVER reduced this way — debuggability outweighs
+ * the rounding-error token cost on the failure path.
+ */
+export type SuccessEnvelopeNoMeta<T = unknown> = {
+  $apiVersion: '1'
+  ok: true
+  data: T
+}
+
 export type FailureEnvelopeError = {
   code: ErrorCode
   message: string
@@ -88,7 +102,7 @@ export type FailureEnvelope = {
   meta: FailureMeta
 }
 
-export type Envelope<T = unknown> = SuccessEnvelope<T> | FailureEnvelope
+export type Envelope<T = unknown> = SuccessEnvelope<T> | SuccessEnvelopeNoMeta<T> | FailureEnvelope
 
 /**
  * Build a stable Meta record with the canonical key order:

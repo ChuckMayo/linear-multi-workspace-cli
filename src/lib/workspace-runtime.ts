@@ -34,7 +34,15 @@
 
 import { Flags } from '@oclif/core'
 import { exitCodeFor, LinearAgentError } from '@/core/errors/index.js'
-import { type FailureMeta, failure, format, type Meta, success } from '@/core/output/index.js'
+import {
+  type Envelope,
+  type FailureMeta,
+  failure,
+  format,
+  type Meta,
+  success,
+  type SuccessEnvelopeNoMeta,
+} from '@/core/output/index.js'
 
 /**
  * `classifySdkError` lives in `src/core/transport/rate-limit.ts` as of
@@ -48,12 +56,25 @@ export const BASE_FLAGS = {
   pretty: Flags.boolean({
     description: 'Human-readable output (default is JSON)',
   }),
-}
+  quiet: Flags.boolean({
+    description:
+      'Suppress meta block from success envelopes and pretty-mode banners (implies --no-meta).',
+  }),
+  noMeta: Flags.boolean({
+    name: 'no-meta',
+    description:
+      'Omit the meta block from success envelopes (smaller token footprint; failure envelopes unchanged).',
+  }),
+} as const
 
 export interface RunCommandArgs {
   /** Full subcommand path, e.g. `'workspace add'`. Becomes `meta.command`. */
   commandPath: string
   pretty: boolean
+  /** MNT-02: drop meta from success envelope only (failure envelope unchanged). */
+  noMeta?: boolean
+  /** MNT-02: drop meta + suppress pretty-mode banner. Implies noMeta. */
+  quiet?: boolean
   /**
    * Handler returns the success envelope's `{ data, meta }` parts. The shared
    * runtime fills in `meta.command` automatically.
@@ -71,16 +92,24 @@ export interface CommandOutput {
 }
 
 export async function runCommand(args: RunCommandArgs): Promise<CommandOutput> {
+  // PLAN-06-01 G1: pretty mode + meta-less envelope is incoherent (the pretty
+  // renderer reads env.meta.command). Forcing pretty: false whenever either
+  // flag is set keeps the runtime safe and matches the locked CONTEXT
+  // semantics for --quiet (mute banners) and --no-meta (token-saving JSON).
+  const dropMeta = args.quiet === true || args.noMeta === true
+  const effectivePretty = args.pretty && !dropMeta
   try {
     const { data, meta } = await args.handler()
-    const env = success(data, { ...meta, command: args.commandPath })
-    const out = format(env, { pretty: args.pretty })
+    const env: Envelope = dropMeta
+      ? ({ $apiVersion: '1', ok: true, data } satisfies SuccessEnvelopeNoMeta)
+      : success(data, { ...meta, command: args.commandPath })
+    const out = format(env, { pretty: effectivePretty })
     return { stdout: out.stdout, stderr: out.stderr, exitCode: 0 }
   } catch (raw) {
     const err = wrapAsLinearAgentError(raw)
     const failureMeta: FailureMeta = { command: args.commandPath }
     const env = failure(err, failureMeta)
-    const out = format(env, { pretty: args.pretty })
+    const out = format(env, { pretty: effectivePretty })
     return { stdout: out.stdout, stderr: out.stderr, exitCode: exitCodeFor(err.code) }
   }
 }

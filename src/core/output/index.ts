@@ -7,6 +7,7 @@ export {
   type Meta,
   type PageInfo,
   type SuccessEnvelope,
+  type SuccessEnvelopeNoMeta,
   success,
   type WorkspaceSource,
 } from './envelope.js'
