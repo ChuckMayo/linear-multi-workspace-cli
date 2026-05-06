@@ -15,7 +15,6 @@
     "schema.graphql",
     "oclif.manifest.json",
     "skills",
-    "!skills/**/*.tmpl",
     "README.md"
   ],
   "main": "./dist/index.js",

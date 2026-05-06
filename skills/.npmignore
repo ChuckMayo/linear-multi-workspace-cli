@@ -1,0 +1,15 @@
+# skills/.npmignore — exclusions applied to the skills/ subtree before
+# pack. Only the stamped SKILL.md (produced by scripts/stamp-skill.mjs
+# during prepack) ships in the tarball — the source template is a build
+# input, not a publishable artifact.
+#
+# Why this lives here (and not at the package root): npm's pruning
+# semantics for `.npmignore` apply most reliably to the directory the
+# file lives in. A root `.npmignore` is sometimes shadowed by
+# `package.json#files`. Co-locating the exclusion with the directory it
+# governs sidesteps that ambiguity.
+#
+# DST-05 contract: verify-pack.mjs's FORBIDDEN_PATTERNS keeps /\.tmpl$/
+# as a defense-in-depth check that fails the release if anything
+# bypasses this exclusion.
+**/*.tmpl
