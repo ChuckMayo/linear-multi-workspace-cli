@@ -15,11 +15,13 @@
  * — uniform across macOS, Linux, and Windows. Claude Code uses `os.homedir()`
  * everywhere; no `%APPDATA%` branching, no `~` shell expansion.
  *
- * Live-change-detection mitigation (RESEARCH §4 / Pitfall P12): If
- * `~/.claude/skills/` did NOT exist before this run (we just created it via
- * mkdir-p), the envelope includes a `hint` field telling the user to restart
- * Claude Code. If the parent dir already existed, the field is omitted (the
- * envelope's optional-field-strip invariant takes over).
+ * Live-change-detection mitigation (RESEARCH §4 / Pitfall P12): If THIS
+ * process created `~/.claude/skills/` (or one of its ancestors) during the
+ * mkdir-p step, the envelope includes a `hint` field telling the user to
+ * restart Claude Code. We derive that signal from the return value of
+ * `mkdirSync({ recursive: true })` — which returns the first directory it
+ * actually created — instead of an existsSync check that races with
+ * concurrent installs and produces misleading hints.
  *
  * Frontmatter parsing: We parse `metadata.version` from a YAML-ish frontmatter
  * block ourselves rather than depending on `js-yaml`. Rationale: js-yaml is
@@ -115,9 +117,6 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
   const target = path.join(targetDir, 'SKILL.md')
   const parentSkillsDir = path.join(home, '.claude', 'skills')
 
-  // Capture the live-change-detection state BEFORE we touch the filesystem.
-  const parentExistedBefore = fsx.existsSync(parentSkillsDir)
-
   // 1. Read source (bundle).
   let contents: string
   try {
@@ -143,8 +142,29 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
   const overwritten = fsx.existsSync(target)
 
   // 4. mkdir -p targetDir.
+  //
+  // Live-change-detection (RESEARCH §4 / Pitfall P12) used to be implemented
+  // with an existsSync(parentSkillsDir) check BEFORE mkdir, then comparing
+  // after the fact. That had a TOCTOU race: a concurrent install (or Claude
+  // Code itself initializing ~/.claude/skills/) could create the parent
+  // between the check and the mkdir, producing a misleading hint. Use
+  // mkdirSync({ recursive: true })'s return value instead — Node 14+
+  // returns the FIRST directory it had to create (undefined if no creation
+  // happened). If that first-created path is at or above the parent
+  // skills dir, we know the parent was just created by THIS process.
+  let parentSkillsCreatedNow = false
   try {
-    fsx.mkdirSync(targetDir, { recursive: true })
+    const created = fsx.mkdirSync(targetDir, { recursive: true })
+    if (typeof created === 'string') {
+      // `created` is the first directory created. If it's the parent
+      // skills dir itself, or an ancestor of it (e.g., ~/.claude was
+      // missing), then this process just created the parent.
+      const createdResolved = path.resolve(created)
+      const parentResolved = path.resolve(parentSkillsDir)
+      parentSkillsCreatedNow =
+        createdResolved === parentResolved ||
+        parentResolved.startsWith(`${createdResolved}${path.sep}`)
+    }
   } catch (err) {
     const errno = (err as NodeJS.ErrnoException | undefined)?.code ?? 'UNKNOWN'
     throw new LinearAgentError({
@@ -177,7 +197,7 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
     version,
     overwritten,
   }
-  if (!parentExistedBefore) {
+  if (parentSkillsCreatedNow) {
     data.hint = HINT_PARENT_CREATED
   }
 
