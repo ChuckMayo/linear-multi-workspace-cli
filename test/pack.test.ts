@@ -141,7 +141,12 @@ describe('npm pack contract', () => {
       runStamp()
     }
     expect(exitCode).toBeGreaterThan(0)
-    expect(stderr).toMatch(/MISSING REQUIRED.*skills\/linear-agent\/SKILL\.md/)
+    // verify-pack fails fast with the precondition guard (introduced by
+    // Phase 5 review WR-03) — surfaces an actionable "run stamp-skill first"
+    // message instead of letting --ignore-scripts silently produce a tarball
+    // that diverges from what `npm publish` would pack.
+    expect(stderr).toMatch(/skills\/linear-agent\/SKILL\.md/)
+    expect(stderr).toMatch(/stamp-skill\.mjs/)
   }, 60_000)
 })
 

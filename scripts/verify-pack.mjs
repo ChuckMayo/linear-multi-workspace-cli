@@ -29,7 +29,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -230,7 +230,46 @@ export function topNLargest(files, n = 10) {
   return [...files].sort((a, b) => (b.size ?? 0) - (a.size ?? 0)).slice(0, n)
 }
 
+/**
+ * Preconditions for `--ignore-scripts` mode (which is what we always use):
+ * the prepack lifecycle is intentionally NOT executed, so the build output
+ * (dist/) AND the stamped Phase-5 skill bundle (skills/linear-agent/SKILL.md)
+ * must already exist on disk. Without this guard, a developer running
+ * `node scripts/verify-pack.mjs` without first running `npm run build` and
+ * `node scripts/stamp-skill.mjs` would see a misleading MISSING REQUIRED
+ * violation instead of an actionable "you skipped the prepack steps"
+ * message — silently diverging from what `npm publish` will actually pack.
+ */
+function assertPrepackArtifacts() {
+  const cwd = process.cwd()
+  const stampedSkill = resolve(cwd, 'skills/linear-agent/SKILL.md')
+  // tsdown's `unbundle: true` config emits per-file outputs under dist/ —
+  // dist/commands/ is the load-bearing directory the published `main`
+  // and oclif manifest both reference, so its presence is the cheapest
+  // signal that `npm run build` has run.
+  const distCommands = resolve(cwd, 'dist/commands')
+  const missing = []
+  if (!existsSync(distCommands)) missing.push('dist/commands/ (run `npm run build`)')
+  if (!existsSync(stampedSkill)) {
+    missing.push('skills/linear-agent/SKILL.md (run `node scripts/stamp-skill.mjs`)')
+  }
+  if (missing.length > 0) {
+    process.stderr.write(
+      'verify-pack: prepack artifacts missing — verify-pack runs npm pack with\n' +
+        '--ignore-scripts (so the prepack lifecycle is NOT executed), and the\n' +
+        'following on-disk artifacts must already exist:\n',
+    )
+    for (const m of missing) process.stderr.write(`  - ${m}\n`)
+    process.stderr.write(
+      '\nFix: run `npm run build && node scripts/stamp-skill.mjs` before this\n' +
+        'script, or invoke verify-pack via `npm pack` so prepack runs.\n',
+    )
+    process.exit(1)
+  }
+}
+
 function main() {
+  assertPrepackArtifacts()
   const pkg = packDryRun()
   const packageJson = JSON.parse(readFileSync(resolve(process.cwd(), 'package.json'), 'utf8'))
   const errors = findViolations({ pkg, packageJson })
