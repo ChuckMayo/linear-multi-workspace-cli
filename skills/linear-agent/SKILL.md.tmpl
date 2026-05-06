@@ -161,7 +161,11 @@ Three flags help shave bytes or control retries in high-volume agent sessions.
   npx -y linear-agent@{{VERSION}} me --json --quiet
   ```
 
-<!-- 06-02 splice point: --retry N example goes here. Section stays ≤30 lines total. -->
+- `--retry N`: add N additional retries on top of the per-error-type defaults (3 for rate-limit, 3 for network). Only retries `transient: true` errors; auth and validation errors fail immediately regardless. Each retry attempt is logged to stderr unless `--quiet` is set.
+
+  ```
+  npx -y linear-agent@{{VERSION}} issue list --json --retry 2
+  ```
 
 ## Self-discovery (introspection)
 
