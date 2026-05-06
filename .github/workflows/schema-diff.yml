@@ -1,0 +1,141 @@
+# Weekly schema-diff: detect when Linear ships a GraphQL schema change
+# before our vendored `schema.graphql` falls behind (per MNT-01).
+#
+# Cron: Monday 12:00 UTC (`0 12 * * 1`). GitHub Actions schedule has a
+# 15min - 2h+ delay during peak load windows; schema-diff is not
+# time-critical so this is acceptable. Manual smoke / re-run:
+#
+#   gh workflow run schema-diff.yml --ref main
+#
+# Secret reuse: `LINEAR_TEST_API_KEY` is the same secret consumed by Phase
+# 5's smoke matrix in `release.yml`. No new secret required.
+#
+# Three-branch outcome classification (see `graphql-inspector diff` source --
+# the tool exits 1 ONLY when `breakingCount > 0`; dangerous-only diffs
+# exit 0; "no change" exits 0 with stdout `No changes detected`):
+#
+#   - breaking          -> fail the job, write list to $GITHUB_STEP_SUMMARY,
+#                          do NOT open a PR. Maintainer triages by hand.
+#   - additive/dangerous -> open / update an idempotent sync PR on the
+#                           stable head branch `schema-sync/auto`.
+#   - no change         -> no-op; job exits 0 with `has_diff=false`.
+#
+# Authentication: Linear's API key header is `Authorization: <KEY>` with
+# NO `Bearer` prefix. `--token` flag in graphql-inspector adds `Bearer`
+# and Linear rejects, so we use `--header "Authorization: ${LINEAR_API_KEY}"`
+# instead.
+#
+# `--write` flag fallback: if a future graphql-inspector version drops or
+# renames `--write`, replace the introspect step's `--write <path>` with
+# stdout-redirection `> codegen/linear-schema-source.graphql` (or run a
+# `tsx codegen/introspect.ts` step). The structural test in
+# `test/schema-diff-workflow.test.ts` will keep the workflow contract
+# pinned across the rewrite.
+#
+# 60-day inactivity: GitHub disables scheduled workflows after 60 days of
+# repo inactivity. `ci.yml` runs on every PR, so the repo stays active;
+# no extra mitigation needed.
+
+name: Schema Diff
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'   # Monday 12:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  diff:
+    name: Diff vendored schema vs live Linear schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run graphql-inspector diff
+        id: diff
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_TEST_API_KEY }}
+        run: |
+          set +e
+          OUTPUT=$(npx -y @graphql-inspector/cli@6.0.8 diff \
+            schema.graphql \
+            https://api.linear.app/graphql \
+            --header "Authorization: ${LINEAR_API_KEY}" 2>&1)
+          EXIT=$?
+          set -e
+          {
+            echo "exit_code=${EXIT}"
+            echo 'output<<EOF_DIFF'
+            echo "${OUTPUT}"
+            echo 'EOF_DIFF'
+          } >> "$GITHUB_OUTPUT"
+          echo "${OUTPUT}"
+          # Breaking change -> fail with summary
+          if [ "${EXIT}" -ne 0 ]; then
+            {
+              echo "## Breaking changes detected"
+              echo
+              echo '```'
+              echo "${OUTPUT}"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          # No diff
+          if echo "${OUTPUT}" | grep -q "No changes detected"; then
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Additive / dangerous (exit 0 but non-empty diff)
+          echo "has_diff=true" >> "$GITHUB_OUTPUT"
+
+      - name: Refresh vendored schema source
+        if: steps.diff.outputs.has_diff == 'true'
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_TEST_API_KEY }}
+        run: |
+          # Pull the live SDL into codegen/linear-schema-source.graphql
+          # BEFORE running fetch-schema. fetch-schema only normalizes the
+          # local snapshot; without this introspect refresh it would write
+          # the SAME bytes back. (See codegen/fetch-schema.ts header.)
+          npx -y @graphql-inspector/cli@6.0.8 introspect \
+            https://api.linear.app/graphql \
+            --header "Authorization: ${LINEAR_API_KEY}" \
+            --write codegen/linear-schema-source.graphql
+          npm run fetch-schema
+
+      - name: Open / update sync PR
+        if: steps.diff.outputs.has_diff == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: schema-sync/auto
+          base: main
+          title: 'chore(schema): sync vendored schema (additive changes)'
+          commit-message: 'chore(schema): sync vendored schema'
+          body: |
+            Automated schema sync from `https://api.linear.app/graphql`.
+
+            Re-run `npm run codegen` locally and push to this branch before merging if any new operations need wiring into `OPERATION_REGISTRY`.
+
+            <details><summary>graphql-inspector diff</summary>
+
+            ```
+            ${{ steps.diff.outputs.output }}
+            ```
+            </details>
+          add-paths: |
+            schema.graphql
+            codegen/linear-schema-source.graphql
