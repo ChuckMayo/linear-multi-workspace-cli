@@ -217,19 +217,24 @@ describe('release.yml smoke-matrix job exercises the 4-lane runtime matrix', () 
     expect(lanes).toEqual([...EXPECTED_LANES])
   })
 
-  it('invokes scripts/smoke-runtime-matrix.mjs with --lane=${{ matrix.lane }}', () => {
+  it('invokes scripts/smoke-runtime-matrix.mjs with matrix.lane piped through env (no script-injection sink)', () => {
     const wf = loadRelease()
     const steps = wf.jobs?.['smoke-matrix']?.steps ?? []
     const laneStep = steps.find(
       (s) =>
         typeof s.run === 'string' &&
         s.run.includes('scripts/smoke-runtime-matrix.mjs') &&
-        s.run.includes('--lane=${{ matrix.lane }}'),
+        s.run.includes('--lane="$LANE"'),
     )
     expect(
       laneStep,
-      'smoke-matrix: step running smoke-runtime-matrix.mjs with --lane=${{ matrix.lane }} missing',
+      'smoke-matrix: step running smoke-runtime-matrix.mjs with --lane="$LANE" missing',
     ).toBeDefined()
+    // matrix.lane MUST be passed via env block, not interpolated directly into run:
+    expect(laneStep?.env?.LANE).toBe('${{ matrix.lane }}')
+    // The run: block must NOT contain `${{ matrix.lane }}` — that's the
+    // GitHub Actions script-injection sink we're avoiding.
+    expect(laneStep?.run).not.toContain('${{ matrix.lane }}')
   })
 
   it('wires LINEAR_TEST_API_KEY, CODEX_TEST_API_KEY, GEMINI_TEST_API_KEY from secrets.*', () => {

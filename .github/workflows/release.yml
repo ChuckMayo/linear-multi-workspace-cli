@@ -136,13 +136,29 @@ jobs:
       - name: Pack tarball
         run: npm pack
 
-      # `linear-agent-*.tgz` is a controlled glob (no user input), so the
-      # shell expansion is safe. The smoke script enforces SAFE-API
-      # (spawnSync with arg arrays — no shell strings) inside.
-      - name: Run lane ${{ matrix.lane }}
+      # SECURITY: pipe matrix.lane through `env:` so the shell receives it
+      # via $LANE (quoted/parsed safely) instead of YAML-time interpolation
+      # into the run: block. Direct `${{ matrix.lane }}` interpolation is
+      # GitHub's canonical script-injection sink — even though current lane
+      # values are static, a future lane name with shell metacharacters or
+      # whitespace would splat into additional shell tokens.
+      #
+      # Tarball discovery uses `shopt -s nullglob` + array expansion so a
+      # missing tarball fails loudly instead of `ls | head -1` returning
+      # an empty string and silently misinvoking the smoke script.
+      - name: Run lane
+        env:
+          LANE: ${{ matrix.lane }}
         run: |
-          TARBALL=$(ls linear-agent-*.tgz | head -1)
-          node scripts/smoke-runtime-matrix.mjs --lane=${{ matrix.lane }} --tarball="./$TARBALL"
+          set -euo pipefail
+          shopt -s nullglob
+          tarballs=( linear-agent-*.tgz )
+          if [ ${#tarballs[@]} -eq 0 ]; then
+            echo "no linear-agent-*.tgz tarball found" >&2
+            exit 1
+          fi
+          TARBALL="${tarballs[0]}"
+          node scripts/smoke-runtime-matrix.mjs --lane="$LANE" --tarball="./$TARBALL"
 
   # ─────────────────────────────────────────────────────────────────────
   # TODO (post-milestone): once the repo is flipped public, `--provenance`
