@@ -136,40 +136,23 @@ function extractJsonArray(stdout) {
   throw new Error('Could not locate a parseable JSON array in npm pack output')
 }
 
-/**
- * Parse the human-readable `npm pack --dry-run` fallback output. Used when
- * `--json` is not supported (npm < 7). The lines we want sit between
- * "Tarball Contents" and "Tarball Details", each formatted like
- * `<size>  <path>` with leading whitespace.
- */
-function parseHumanReadablePackOutput(text) {
-  const lines = text.split('\n')
-  const start = lines.findIndex((l) => /Tarball Contents/i.test(l))
-  if (start === -1) {
-    throw new Error('Fallback parser could not find "Tarball Contents" section')
-  }
-  const files = []
-  for (let i = start + 1; i < lines.length; i++) {
-    const line = lines[i]
-    if (line === undefined) break
-    if (/^\s*$/.test(line)) break
-    if (/Tarball Details/i.test(line)) break
-    // Format example: "  npm notice 1.4kB  README.md"
-    const match = line.match(/\s+([\d.]+\s*[a-zA-Z]*)\s+(.+?)\s*$/)
-    if (match?.[2]) files.push({ path: match[2] })
-  }
-  if (files.length === 0) {
-    throw new Error('Fallback parser found "Tarball Contents" but extracted no files')
-  }
-  return [{ files, size: 0 }]
-}
-
 function packDryRun() {
-  // First try `npm pack --dry-run --json --ignore-scripts`. npm 7+ supports it.
-  // `--ignore-scripts` skips prepack/postpack so the dry-run reflects ONLY the
-  // current on-disk state — i.e., it checks that whoever invoked verify-pack
-  // already produced the build + stamped artifacts. Without this flag the
-  // dry-run would silently re-run prepack and mask a broken pipeline.
+  // `npm pack --dry-run --json --ignore-scripts` requires npm 7+, which
+  // ships with Node 16+. Our `engines.node` floor is 22, which ships npm
+  // 10+, so JSON output is guaranteed.
+  //
+  // `--ignore-scripts` skips prepack/postpack so the dry-run reflects ONLY
+  // the current on-disk state — i.e., it checks that whoever invoked
+  // verify-pack already produced the build + stamped artifacts. Without
+  // this flag the dry-run would silently re-run prepack and mask a broken
+  // pipeline.
+  //
+  // We deliberately do NOT keep a human-readable fallback parser. The
+  // previous fallback returned `size: 0` on parse failure, which silently
+  // bypassed the DST-04 5MB unpacked-size budget — a worse failure mode
+  // than just exiting 1. Any future npm JSON-shape regression should
+  // surface as a hard error so the maintainer fixes verify-pack, not as
+  // a silent budget bypass.
   let stdout
   try {
     stdout = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
@@ -180,24 +163,11 @@ function packDryRun() {
     throw new Error(`npm pack --dry-run --json failed to execute: ${err.message ?? err}`)
   }
 
-  try {
-    const parsed = extractJsonArray(stdout)
-    if (!Array.isArray(parsed) || parsed.length !== 1) {
-      throw new Error(`Expected one packed package, got ${parsed.length ?? 'non-array'}`)
-    }
-    return parsed[0]
-  } catch (jsonErr) {
-    // Fallback to human-readable parsing. Re-run without --json so npm emits the table.
-    const text = execFileSync('npm', ['pack', '--dry-run', '--ignore-scripts'], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
-    const fallback = parseHumanReadablePackOutput(text)
-    process.stderr.write(
-      `note: npm pack --dry-run --json output unparseable (${jsonErr.message}); using fallback parser\n`,
-    )
-    return fallback[0]
+  const parsed = extractJsonArray(stdout)
+  if (!Array.isArray(parsed) || parsed.length !== 1) {
+    throw new Error(`Expected one packed package, got ${parsed.length ?? 'non-array'}`)
   }
+  return parsed[0]
 }
 
 /**
