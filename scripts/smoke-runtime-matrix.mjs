@@ -237,17 +237,25 @@ export function findTarball(cwd) {
  * acceptable — both prove the CLI is reachable and the envelope contract holds.
  */
 function runPlainBashLane({ tarball, spawnImpl, env }) {
+  // Build the child env up front so we can pass the SAME object to both
+  // spawn and redact. The child sees LINEAR_API_KEY=LINEAR_TEST_API_KEY
+  // even if the parent's LINEAR_API_KEY is unset; redacting only against
+  // the parent env would miss the child's value if a future change made
+  // them different (transformation, wrapper, separate workspace token).
+  // Sourcing both from the SAME object keeps the redact contract symmetric
+  // with what the child actually saw.
+  const childEnv = { ...env, LINEAR_API_KEY: env.LINEAR_TEST_API_KEY ?? '' }
   const result = spawnImpl('npx', ['--yes', `file:${tarball}`, 'me', '--json'], {
     stdio: ['ignore', 'pipe', 'pipe'],
     encoding: 'utf8',
-    env: { ...env, LINEAR_API_KEY: env.LINEAR_TEST_API_KEY ?? '' },
+    env: childEnv,
     timeout: 60_000,
   })
   if (result.status === null) {
     return {
       ok: false,
       lane: 'plain-bash',
-      reason: redact(`spawn signal: ${result.signal}`, env),
+      reason: redact(`spawn signal: ${result.signal}`, childEnv),
     }
   }
   // The CLI may emit two JSON objects on non-zero exit: our envelope first,
@@ -256,7 +264,7 @@ function runPlainBashLane({ tarball, spawnImpl, env }) {
   // is the discriminator).
   let parsed = parseEnvelopeFromStdout(String(result.stdout ?? ''))
   if (!parsed) {
-    const sample = redact(String(result.stdout ?? '').slice(0, 200), env)
+    const sample = redact(String(result.stdout ?? '').slice(0, 200), childEnv)
     return {
       ok: false,
       lane: 'plain-bash',
@@ -267,7 +275,7 @@ function runPlainBashLane({ tarball, spawnImpl, env }) {
     return {
       ok: false,
       lane: 'plain-bash',
-      reason: `bad $apiVersion: ${redact(String(parsed.$apiVersion), env)}`,
+      reason: `bad $apiVersion: ${redact(String(parsed.$apiVersion), childEnv)}`,
     }
   }
   const okWithKey =
@@ -369,15 +377,21 @@ function runAdvisoryLane({
       reason: `${envVarName} not set`,
     }
   }
+  // Build the child env up front so the redact value-set covers the
+  // child's LINEAR_API_KEY (= LINEAR_TEST_API_KEY) even when the parent's
+  // own LINEAR_API_KEY is unset. See runPlainBashLane for the rationale.
+  const childEnv = { ...env, LINEAR_API_KEY: env.LINEAR_TEST_API_KEY ?? '' }
   const result = spawnImpl('npx', spawnArgs, {
     stdio: ['ignore', 'pipe', 'pipe'],
     encoding: 'utf8',
-    env: { ...env, LINEAR_API_KEY: env.LINEAR_TEST_API_KEY ?? '' },
+    env: childEnv,
     timeout: 120_000,
   })
-  // Capture limited slices of stdout/stderr, redacted.
-  const stdoutSlice = redact(String(result.stdout ?? '').slice(0, 5000), env)
-  const stderrSlice = redact(String(result.stderr ?? '').slice(0, 2000), env)
+  // Capture limited slices of stdout/stderr, redacted against the child env
+  // (so child-only values like LINEAR_API_KEY get scrubbed even if the
+  // parent didn't have them set).
+  const stdoutSlice = redact(String(result.stdout ?? '').slice(0, 5000), childEnv)
+  const stderrSlice = redact(String(result.stderr ?? '').slice(0, 2000), childEnv)
   if (result.status === null) {
     return {
       ok: false,
