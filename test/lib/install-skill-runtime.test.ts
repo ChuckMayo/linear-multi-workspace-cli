@@ -135,6 +135,33 @@ describe('installSkillRuntime — happy path', () => {
     expect(out.data.hint).toBeUndefined()
     expect(out.data.overwritten).toBe(false)
   })
+
+  it('Test 3b: target already byte-identical to source → unchanged: true; mtime preserved', async () => {
+    const { home, source } = makeScratch()
+    writeFileSync(source, FIXTURE_BODY, 'utf8')
+
+    const targetDir = path.join(home, '.claude', 'skills', 'linear-agent')
+    mkdirSync(targetDir, { recursive: true })
+    const target = path.join(targetDir, 'SKILL.md')
+    // Pre-write byte-identical content
+    writeFileSync(target, FIXTURE_BODY, 'utf8')
+    const mtimeBefore = fsModule.statSync(target).mtimeMs
+
+    // Wait a hair so a re-write would clearly bump mtime if it happened
+    await new Promise((resolve) => setTimeout(resolve, 20))
+
+    const out = await installSkillRuntime({
+      homedirOverride: () => home,
+      sourcePathOverride: source,
+    })
+
+    expect(out.data.overwritten).toBe(true)
+    expect(out.data.unchanged).toBe(true)
+    // mtime preserved — proof the no-op skip-write path was taken
+    expect(fsModule.statSync(target).mtimeMs).toBe(mtimeBefore)
+    // Content is still the fixture (didn't get clobbered)
+    expect(fsModule.readFileSync(target, 'utf8')).toBe(FIXTURE_BODY)
+  })
 })
 
 describe('installSkillRuntime — INSTALL_SKILL_BUNDLE_NOT_FOUND', () => {
