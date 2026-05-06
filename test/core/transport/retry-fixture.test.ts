@@ -175,10 +175,29 @@ describe('withRateLimitRetry — final-exhaustion attempt count plumb', () => {
     expect(call).toHaveBeenCalledTimes(5)
   })
 
-  it('(d2) on default exhaustion (no extraAttempts), details.attempts === 3', async () => {
+  it('(d2) when opted in via onRetry (no extraAttempts), default exhaustion still tags details.attempts === 3', async () => {
     const seams = makeSeams()
     const call = vi.fn().mockImplementation(async () => {
       throw new NetworkLinearError()
+    })
+    let caught: unknown
+    try {
+      // Passing `onRetry` opts the caller in to retry observability —
+      // attempts are tagged even with the default `maxAttempts: 3`.
+      await withRateLimitRetry(call, { ...seams, onRetry: () => {} })
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(LinearAgentError)
+    const err = caught as LinearAgentError
+    expect(err.code).toBe('NETWORK_ERROR')
+    expect(err.details?.attempts).toBe(3)
+  })
+
+  it('(d3) default behavior (no extraAttempts, no onRetry) is byte-identical to Phase 2 — details.attempts NOT tagged', async () => {
+    const seams = makeSeams()
+    const call = vi.fn().mockImplementation(async () => {
+      throw new RatelimitedLinearError({ complexityRemaining: 99 })
     })
     let caught: unknown
     try {
@@ -188,8 +207,10 @@ describe('withRateLimitRetry — final-exhaustion attempt count plumb', () => {
     }
     expect(caught).toBeInstanceOf(LinearAgentError)
     const err = caught as LinearAgentError
-    expect(err.code).toBe('NETWORK_ERROR')
-    expect(err.details?.attempts).toBe(3)
+    // Phase 2 byte-identity: details mirrors the SDK error fields, no
+    // attempts key when the caller didn't opt in.
+    expect(err.details).toEqual({ complexityRemaining: 99 })
+    expect((err.details as Record<string, unknown>).attempts).toBeUndefined()
   })
 })
 
