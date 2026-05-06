@@ -58,6 +58,23 @@ exports[`me / whoami runtime sharing > Test 19: runMe and runWhoami emit identic
 }
 `;
 
+exports[`me --no-meta (Phase 6 PLAN 06-01, MNT-02) > drops meta from the success envelope when --no-meta is set > me-no-meta-envelope 1`] = `
+{
+  "$apiVersion": "1",
+  "data": {
+    "organization": {
+      "id": "org-acme",
+      "name": "Acme",
+      "urlKey": "acme",
+    },
+    "user": {
+      "id": "user-uuid-1",
+    },
+  },
+  "ok": true,
+}
+`;
+
 exports[`meRuntime -- AUTH_INVALID > Test 16: AuthenticationLinearError -> AUTH_INVALID > failure-AUTH_INVALID 1`] = `
 {
   "$apiVersion": "1",

@@ -323,6 +323,26 @@ exports[`describeRuntime — snapshots (INT-04) > describe issue list — full o
             "const": "1",
             "type": "string",
           },
+          "data": {},
+          "ok": {
+            "const": true,
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "$apiVersion",
+          "ok",
+          "data",
+        ],
+        "type": "object",
+      },
+      {
+        "additionalProperties": false,
+        "properties": {
+          "$apiVersion": {
+            "const": "1",
+            "type": "string",
+          },
           "error": {
             "additionalProperties": false,
             "properties": {

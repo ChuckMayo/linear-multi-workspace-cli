@@ -85,6 +85,7 @@ import type { Config } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import { failure, success } from '@/core/output/index.js'
 import { meRuntime } from '@/lib/me-runtime.js'
+import { runCommand } from '@/lib/workspace-runtime.js'
 
 const STUB_CONFIG: Config = {
   active: 'acme',
@@ -284,5 +285,35 @@ describe('me / whoami runtime sharing', () => {
     expect(Whoami.enableJsonFlag).toBe(true)
     expect(typeof runMe).toBe('function')
     expect(typeof runWhoami).toBe('function')
+  })
+})
+
+describe('me --no-meta (Phase 6 PLAN 06-01, MNT-02)', () => {
+  it('drops meta from the success envelope when --no-meta is set', async () => {
+    // Run the same pipeline runMe drives -- meRuntime produces { data, meta },
+    // runCommand wraps it. The new --no-meta path is a runCommand-level
+    // concern, so we feed runCommand a handler that returns the exact shape
+    // meRuntime emits for `me --fields=ids`. This pins the no-meta envelope
+    // bytes against any future drift to runCommand without spinning up a
+    // mock client through runMe (whose factory injection seam is internal
+    // to meRuntime tests above).
+    const client = makeMockClient()
+    const upstream = await meRuntime({
+      flags: { workspace: 'acme', fields: 'ids' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => client,
+    })
+
+    const out = await runCommand({
+      commandPath: 'me',
+      pretty: false,
+      noMeta: true,
+      handler: async () => ({ data: upstream.data, meta: upstream.meta }),
+    })
+
+    const env = JSON.parse(out.stdout)
+    expect(env).toMatchSnapshot('me-no-meta-envelope')
+    expect('meta' in env).toBe(false) // structural belt-and-suspenders
   })
 })

@@ -27,10 +27,15 @@ import { getLinearSchema } from '@/lib/schema-loader.js'
  *
  * Mirrors the real envelope contract from `src/core/output/envelope.ts`:
  *   - SuccessEnvelope: { $apiVersion, ok: true, data, meta: Meta }
+ *   - SuccessEnvelopeNoMeta: { $apiVersion, ok: true, data } -- emitted when
+ *     `--quiet` or `--no-meta` is set (Phase 6 PLAN 06-01, MNT-02).
  *   - FailureEnvelope: { $apiVersion, ok: false, error, meta: FailureMeta }
  *
  * Per CONTEXT.md § describe shape — v1 leaves `data: z.unknown()`.
  * Per-entity output schemas deferred to Phase 5/6.
+ *
+ * Phase 6 PLAN 06-01 (MNT-02) extends this to a 3-way union to reflect the
+ * `--no-meta` / `--quiet` envelope variants.
  *
  * If you change the envelope shape in `src/core/output/envelope.ts`, the
  * snapshot tests in `test/lib/describe-runtime.test.ts` and
@@ -82,6 +87,12 @@ const SuccessEnvelopeSchema = z.object({
   meta: MetaSchema,
 })
 
+const SuccessEnvelopeNoMetaSchema = z.object({
+  $apiVersion: z.literal('1'),
+  ok: z.literal(true),
+  data: z.unknown(),
+})
+
 const FailureEnvelopeSchema = z.object({
   $apiVersion: z.literal('1'),
   ok: z.literal(false),
@@ -95,7 +106,11 @@ const FailureEnvelopeSchema = z.object({
   meta: FailureMetaSchema,
 })
 
-const EnvelopeOutputSchema = z.union([SuccessEnvelopeSchema, FailureEnvelopeSchema])
+const EnvelopeOutputSchema = z.union([
+  SuccessEnvelopeSchema,
+  SuccessEnvelopeNoMetaSchema,
+  FailureEnvelopeSchema,
+])
 
 /**
  * Standard z.toJSONSchema() options per CONTEXT.md § stack contract.
