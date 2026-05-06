@@ -34,6 +34,7 @@
 import { spawnSync as realSpawnSync } from 'node:child_process'
 import { readFileSync as realReadFileSync, readdirSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 // ─────────────────────────── Lane registry ───────────────────────────
 
@@ -536,7 +537,15 @@ async function main() {
   return result.ok ? 0 : 1
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run as CLI when invoked directly; library when imported.
+// Use the same pattern as measure-cold-start.mjs / verify-pack.mjs:
+// fileURLToPath(import.meta.url) gives the canonical, platform-correct
+// filesystem path (handles `file:///C:/...` on Windows and POSIX symlink
+// realpaths). The naive `file://${process.argv[1]}` pattern produces
+// malformed file URLs on Windows and the script silently no-ops.
+const isMain =
+  process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])
+if (isMain) {
   main()
     .then((code) => process.exit(code ?? 0))
     .catch((err) => {
