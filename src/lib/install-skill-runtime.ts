@@ -85,13 +85,25 @@ export interface InstallSkillInput {
 export interface InstallSkillData {
   /** Absolute path of the bundled SKILL.md that was read. */
   source: string
-  /** Absolute path that was written. */
+  /** Absolute path that was written (or would have been written if unchanged). */
   target: string
+  /**
+   * Bytes actually written to disk. Zero when `unchanged: true` — we did
+   * not touch the file because it was already byte-identical to the source.
+   */
   bytes_written: number
   /** Pulled from frontmatter `metadata.version` of the bundled SKILL.md. */
   version: string
   /** True if the target file already existed before write. */
   overwritten: boolean
+  /**
+   * True when the existing target was byte-identical to the source bundle
+   * and the write was skipped (mtime preserved). Mutually exclusive with
+   * `overwritten: true`-and-bytes-written: when this is true, no write
+   * occurred. Repeated `linear-agent install-skill` invocations after a
+   * version bump will set `unchanged: true` from the second call onward.
+   */
+  unchanged?: boolean
   /** Present only when `~/.claude/skills/` was just created. */
   hint?: string
 }
@@ -175,17 +187,40 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
     })
   }
 
-  // 5. Write target.
-  try {
-    fsx.writeFileSync(target, contents, 'utf8')
-  } catch (err) {
-    const errno = (err as NodeJS.ErrnoException | undefined)?.code ?? 'UNKNOWN'
-    throw new LinearAgentError({
-      code: 'INSTALL_SKILL_WRITE_FAILED',
-      message: `Could not write SKILL.md to ${target}. Check directory permissions.`,
-      transient: false,
-      details: { target, errno },
-    })
+  // 5. Write target — but skip the write when the existing file is
+  //    byte-identical to the source. install-skill is the canonical
+  //    post-version-bump re-install path; agents and users will run it
+  //    repeatedly. Skipping no-op writes (a) avoids touching mtime —
+  //    Claude Code's skill-cache uses mtime as a staleness signal — and
+  //    (b) makes the envelope's `unchanged: true` an unambiguous "your
+  //    on-disk bundle already matches the source" signal.
+  let unchanged = false
+  if (overwritten) {
+    let existing: string | undefined
+    try {
+      existing = fsx.readFileSync(target, 'utf8') as string
+    } catch {
+      // If the read fails (race, permission, etc.), fall through to the
+      // unconditional write — that's strictly safer than skipping.
+      existing = undefined
+    }
+    if (existing === contents) {
+      unchanged = true
+    }
+  }
+
+  if (!unchanged) {
+    try {
+      fsx.writeFileSync(target, contents, 'utf8')
+    } catch (err) {
+      const errno = (err as NodeJS.ErrnoException | undefined)?.code ?? 'UNKNOWN'
+      throw new LinearAgentError({
+        code: 'INSTALL_SKILL_WRITE_FAILED',
+        message: `Could not write SKILL.md to ${target}. Check directory permissions.`,
+        transient: false,
+        details: { target, errno },
+      })
+    }
   }
 
   // 6. Build envelope data. `hint` only present when the parent dir was
@@ -193,9 +228,12 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
   const data: InstallSkillData = {
     source: sourcePath,
     target,
-    bytes_written: Buffer.byteLength(contents, 'utf8'),
+    bytes_written: unchanged ? 0 : Buffer.byteLength(contents, 'utf8'),
     version,
     overwritten,
+  }
+  if (unchanged) {
+    data.unchanged = true
   }
   if (parentSkillsCreatedNow) {
     data.hint = HINT_PARENT_CREATED
