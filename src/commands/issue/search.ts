@@ -32,13 +32,19 @@ export interface RunIssueSearchArgs {
   noSnippet?: boolean
   includeArchived?: boolean
   pretty: boolean
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
 }
 
 export async function runIssueSearch(args: RunIssueSearchArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'issue search',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (retryOpts) => {
       const runtimeFlags: Parameters<typeof issueSearchRuntime>[0]['flags'] = {}
       if (args.workspace !== undefined) runtimeFlags.workspace = args.workspace
       if (args.fields !== undefined) runtimeFlags.fields = args.fields
@@ -57,10 +63,15 @@ export async function runIssueSearch(args: RunIssueSearchArgs): Promise<CommandO
         args: { query: args.query },
         flags: runtimeFlags,
         env: process.env,
+        retryOptsOverride: retryOpts,
       })
       return { data: result.data, meta: result.meta }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class IssueSearch extends Command {
@@ -115,6 +126,9 @@ export default class IssueSearch extends Command {
     if (flags.label !== undefined) callArgs.label = flags.label
     if (flags.project !== undefined) callArgs.project = flags.project
     if (flags.cycle !== undefined) callArgs.cycle = flags.cycle
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
     const out = await runIssueSearch(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
