@@ -552,15 +552,25 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
   })
 
   // ─── Test 4: --retry unrecognized (assertion 3 fires) ─────────────
-  // Spawn sequence: (1) baseline ok, (2) --vars ok, (3) --no-meta ok with
-  // NO meta, (4) --retry stderr: "unknown flag --retry" → lane fails.
+  // Spawn sequence (after WR-02 added Assertion 2b):
+  //   (1) plain-bash baseline, (2) raw --vars, (3) issue list --no-meta,
+  //   (4) describe me --no-meta (WR-02 sub-step), (5) issue list --retry.
+  // We let assertions 1-2b all pass (using args-aware matching) and
+  // fail only on the --retry call.
   it('fails when issue list rejects --retry as unknown', async () => {
-    let i = 0
-    const spawn = vi.fn().mockImplementation(() => {
-      i++
-      if (i <= 2) return SUCCESS_ME
-      if (i === 3) {
-        // --no-meta call: success envelope with NO meta key (correct shape).
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      const argsArr = Array.isArray(args) ? args : []
+      // --retry call: parse error (this is the only call carrying --retry).
+      if (argsArr.includes('--retry')) {
+        return {
+          status: 2,
+          stdout: '',
+          stderr: ' ›   Error: Nonexistent flag: --retry\n ›   See more help with --help',
+          signal: null,
+        }
+      }
+      // Any --no-meta call (issue list OR describe me): ok:true, NO meta.
+      if (argsArr.includes('--no-meta')) {
         return {
           status: 0,
           stdout: JSON.stringify({
@@ -572,13 +582,8 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
           signal: null,
         }
       }
-      // --retry call: parse error
-      return {
-        status: 2,
-        stdout: '',
-        stderr: ' ›   Error: Nonexistent flag: --retry\n ›   See more help with --help',
-        signal: null,
-      }
+      // Baseline (`me`) and --vars probe: standard success envelope.
+      return SUCCESS_ME
     })
 
     const result = await runLane({
@@ -714,10 +719,112 @@ Pass \`--no-meta\` for token-budget control.
     expect(result.reason).toMatch(/--retry/i)
   })
 
-  // ─── Happy path: all 4 assertions pass ────────────────────────────
-  // Baseline + --vars + --no-meta (drops meta) + --retry all return clean
-  // success envelopes; SKILL body has no forbidden phrase. Lane returns ok.
-  it('passes when all 4 SKILL examples behave as documented', async () => {
+  // ─── Test 8 (WR-02): describe me --no-meta keeps meta on success ──
+  // The original `issue list --no-meta` semantic check only fires when the
+  // envelope is ok:true — and in default CI without LINEAR_TEST_API_KEY
+  // that envelope is ok:false (WORKSPACE_NOT_RESOLVED), which is exempt
+  // from meta-drop. WR-02 adds an offline `describe me --no-meta` sub-step
+  // that ALWAYS returns ok:true (no-network curated command), so the
+  // semantic check runs in default CI regardless of token availability.
+  // This test guards the regression where meta-drop stops working but the
+  // ok:false-only smoke would let it through.
+  it('fails when describe me --no-meta keeps meta on success envelope (WR-02)', async () => {
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      const argsArr = Array.isArray(args) ? args : []
+      // The describe me --no-meta call: ok:true BUT meta still present
+      // (the regression we guard).
+      if (argsArr.includes('describe') && argsArr.includes('me')) {
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { name: 'me', summary: '...' },
+            meta: { command: 'describe' },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      // The `issue list --no-meta` semantic check: ok:true with NO meta
+      // (so assertion 2 doesn't fire first; we want 2b to fire).
+      if (argsArr.includes('--no-meta')) {
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      return SUCCESS_ME
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/describe me/i)
+    expect(result.reason).toMatch(/meta/i)
+  })
+
+  // ─── Test 9 (WR-02): describe me returns no envelope ──────────────
+  // If `describe me` regresses to emitting non-envelope output (e.g., a
+  // help blurb, a malformed JSON error trace), the sub-step must surface
+  // that as a specific failure rather than silently passing. Guards
+  // against describe-runtime stdout contract drift.
+  it('fails when describe me --no-meta returns no envelope (WR-02)', async () => {
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      const argsArr = Array.isArray(args) ? args : []
+      if (argsArr.includes('describe') && argsArr.includes('me')) {
+        return {
+          status: 0,
+          stdout: 'not an envelope',
+          stderr: '',
+          signal: null,
+        }
+      }
+      if (argsArr.includes('--no-meta')) {
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      return SUCCESS_ME
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/describe me/i)
+  })
+
+  // ─── Happy path: all SKILL doc-truth assertions pass ───────────────
+  // Baseline + --vars + --no-meta (drops meta on issue list) +
+  // describe me --no-meta (drops meta, WR-02 sub-step) + --retry all
+  // return clean success envelopes; SKILL body has no forbidden phrase
+  // and documents both --vars and --retry (WR-01). Lane returns ok.
+  it('passes when all SKILL examples behave as documented', async () => {
     const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
       if (Array.isArray(args) && args.includes('--no-meta')) {
         // --no-meta call: ok:true with NO meta key (correct behavior).
@@ -932,26 +1039,42 @@ Pass \`--retry 2\` for transient-error tolerance.
   })
 
   it('aggregate stays ok:true when an advisory lane fails', async () => {
-    // Simulate: blocking lanes pass, codex returns nonzero with API key set
-    let callIdx = 0
-    const spawn = vi.fn().mockImplementation(() => {
-      callIdx += 1
-      // First two spawn calls are plain-bash + claude-code-via-skill (both succeed)
-      // Third is codex (fails); fourth is gemini (skipped because GEMINI not set)
-      if (callIdx <= 2) {
+    // Simulate: blocking lanes pass, codex returns nonzero with API key set.
+    // The claude-code-via-skill lane has multiple spawn steps (baseline +
+    // 4 SKILL example assertions + WR-02 describe me sub-step). Use an
+    // args-aware mock so all blocking-lane spawns succeed cleanly and only
+    // the codex call fails. Identifying the codex spawn by RUNTIME_PINS.codex
+    // ('@openai/codex@latest') is robust to future spawn-order changes.
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      const argsArr = Array.isArray(args) ? args : []
+      // Codex advisory lane: nonzero exit
+      if (argsArr.some((a) => typeof a === 'string' && a.includes('@openai/codex'))) {
+        return { status: 1, stdout: '', stderr: 'boom', signal: null }
+      }
+      // Any --no-meta call (issue list OR describe me): ok:true with no meta
+      if (argsArr.includes('--no-meta')) {
         return {
           status: 0,
           stdout: JSON.stringify({
             $apiVersion: '1',
             ok: true,
-            data: { user: { id: 'u-1' } },
+            data: { issues: [] },
           }),
           stderr: '',
           signal: null,
         }
       }
-      // codex non-zero exit
-      return { status: 1, stdout: '', stderr: 'boom', signal: null }
+      // Baseline (`me`) and other blocking-lane probes: standard success envelope.
+      return {
+        status: 0,
+        stdout: JSON.stringify({
+          $apiVersion: '1',
+          ok: true,
+          data: { user: { id: 'u-1' } },
+        }),
+        stderr: '',
+        signal: null,
+      }
     })
     const result = await runLane({
       lane: 'all',

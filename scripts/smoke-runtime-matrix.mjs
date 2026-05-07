@@ -474,6 +474,58 @@ function runClaudeCodeViaSkillLane({ tarball, skillPath, spawnImpl, fsImpl, env 
     }
   }
 
+  // ─── Assertion 2b (WR-02): offline meta-drop semantics via `describe me` ──
+  // The `issue list --no-meta` check above only exercises the meta-drop
+  // SEMANTICS when the envelope is ok:true — and in default CI without
+  // LINEAR_TEST_API_KEY that envelope is `ok:false WORKSPACE_NOT_RESOLVED`,
+  // which is exempt from meta-drop per Phase 6 D-MNT-02. So the production
+  // smoke effectively only tested the parse path in CI.
+  //
+  // `describe me` is a curated no-network introspection command (Phase 4
+  // PLAN 04-03, INT-02): it reads from the in-process registry only and
+  // returns ok:true deterministically with NO API key required. Adding this
+  // sub-step gives us a real meta-drop semantic check that runs on every
+  // CI invocation regardless of token availability.
+  {
+    const r = spawnImpl(
+      'npx',
+      ['--yes', `file:${tarball}`, 'describe', 'me', '--json', '--no-meta'],
+      {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        env: childEnv,
+        timeout: 60_000,
+      },
+    )
+    const parsed = parseEnvelopeFromStdout(String(r.stdout ?? ''))
+    if (!parsed || parsed.$apiVersion !== '1') {
+      const sample = redact(String(r.stdout ?? '').slice(0, 200), childEnv)
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: `describe me --no-meta returned no envelope (status=${r.status}): ${sample}`,
+      }
+    }
+    // describe is no-network and `me` is in the curated registry, so this
+    // MUST be ok:true. Anything else means describe-runtime regressed.
+    if (parsed.ok !== true) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: `describe me --no-meta returned ok:false (code=${parsed.error?.code ?? 'none'})`,
+      }
+    }
+    // The meta-drop contract for success envelopes: --no-meta MUST strip
+    // the meta key. This now runs in default CI without any token.
+    if (Object.hasOwn(parsed, 'meta')) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: '--no-meta did NOT drop meta on `describe me` success envelope (D-MNT-02 regressed)',
+      }
+    }
+  }
+
   // ─── Assertion 3: --retry N propagates ─────────────────────────────
   // Documented at SKILL.md.tmpl line 164. We're not exercising the retry
   // mechanism end-to-end (that's covered by transport-layer tests); we're
