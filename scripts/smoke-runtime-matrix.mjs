@@ -417,6 +417,19 @@ function runClaudeCodeViaSkillLane({ tarball, skillPath, spawnImpl, fsImpl, env 
         reason: '--vars flag unrecognized (SKILL example at line 117 regressed)',
       }
     }
+    // WR-01: doc-text half of the contract. The runtime check above proves the
+    // CLI accepts `--vars`; this proves SKILL.md.tmpl still TELLS agents to
+    // pass `--vars` (vs the audit-G-02 bad `--variables` form). A future
+    // doc-only regression that flips line 117 back to `--variables` while the
+    // runtime keeps working would still pass the runtime check; this catches
+    // it.
+    if (!/raw\s+\S+\s+--vars\b/i.test(String(skillBody))) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: 'SKILL no longer documents --vars on raw (G-02 audit regressed)',
+      }
+    }
   }
 
   // ─── Assertion 2: --no-meta drops meta on success envelopes ────────
@@ -484,6 +497,18 @@ function runClaudeCodeViaSkillLane({ tarball, skillPath, spawnImpl, fsImpl, env 
         ok: false,
         lane: 'claude-code-via-skill',
         reason: '--retry flag unrecognized (SKILL example at line 164 regressed)',
+      }
+    }
+    // WR-01: doc-text half of the contract. Mirrors the --vars assertion: a
+    // doc-only regression that drops the `--retry` example from SKILL.md.tmpl
+    // (line 164) while leaving runtime acceptance intact would otherwise sail
+    // past CI. 07-07 added this example explicitly; this guard prevents its
+    // silent removal.
+    if (!/--retry\b/i.test(String(skillBody))) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: 'SKILL no longer documents --retry (07-07 fix regressed)',
       }
     }
   }

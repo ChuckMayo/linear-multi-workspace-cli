@@ -341,9 +341,15 @@ describe('runLane() — plain-bash', () => {
 // ───────────────────────── claude-code-via-skill lane ─────────────────────────
 
 describe('runLane() — claude-code-via-skill', () => {
+  // VALID_SKILL_BODY must satisfy the WR-01 doc-text assertions added in Phase 7
+  // (must mention `raw <Op> --vars` AND `--retry`), so the happy-path version-
+  // match test exercises the full lane without tripping the doc-truth gate.
   const VALID_SKILL_BODY = `# linear-agent
 
 Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+
+Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
+Pass \`--retry 2\` for transient-error tolerance.
 `
   const VALID_PKG = JSON.stringify({ name: 'linear-agent', version: '9.9.9' })
 
@@ -624,6 +630,90 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
     expect(result.reason).toMatch(/describe.*errors/i)
   })
 
+  // ─── Test 6 (WR-01): SKILL no longer documents --vars on raw ──────
+  // The runtime check (Assertion 1) only proves the CLI accepts `--vars`. A
+  // doc-only regression that flips SKILL.md.tmpl line 117 back to
+  // `--variables` while keeping runtime acceptance intact would otherwise
+  // sail past CI — this guard catches that exact bug.
+  it('fails when SKILL drops the `raw <Op> --vars` example (WR-01)', async () => {
+    // SKILL_NO_VARS keeps the version invocation, the `--retry` example, and
+    // does NOT mention `describe errors` — but strips the `raw ... --vars`
+    // example. Only the WR-01 --vars doc-text assertion can fire here.
+    const SKILL_NO_VARS = `# linear-agent
+
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+
+Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
+`
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      // Make every spawn pass cleanly so only the doc-text assertion fires.
+      if (Array.isArray(args) && args.includes('--no-meta')) {
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      return SUCCESS_ME
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_NO_VARS),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/--vars/i)
+  })
+
+  // ─── Test 7 (WR-01): SKILL no longer documents --retry ────────────
+  // Symmetric guard for the `--retry 2` example at SKILL.md.tmpl line 164.
+  // 07-07 added this example explicitly; this test prevents its silent
+  // removal in a future doc-only edit.
+  it('fails when SKILL drops the `--retry` example (WR-01)', async () => {
+    const SKILL_NO_RETRY = `# linear-agent
+
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+
+Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
+Pass \`--no-meta\` for token-budget control.
+`
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      if (Array.isArray(args) && args.includes('--no-meta')) {
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      return SUCCESS_ME
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_NO_RETRY),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/--retry/i)
+  })
+
   // ─── Happy path: all 4 assertions pass ────────────────────────────
   // Baseline + --vars + --no-meta (drops meta) + --retry all return clean
   // success envelopes; SKILL body has no forbidden phrase. Lane returns ok.
@@ -770,7 +860,15 @@ describe('runLane() — gemini-cli-via-exec', () => {
 // ───────────────────────── --lane=all aggregation ─────────────────────────
 
 describe('runLane() — lane=all aggregation', () => {
-  const SKILL_BODY = '# linear-agent\nUse `npx -y linear-agent@9.9.9 me --json`.\n'
+  // SKILL_BODY must satisfy WR-01 doc-text assertions for the claude-code-via-
+  // skill lane to pass during aggregation (must mention `raw <Op> --vars` AND
+  // `--retry`). The third aggregation test (advisory failure) likewise relies
+  // on the blocking lane succeeding.
+  const SKILL_BODY = `# linear-agent
+Use \`npx -y linear-agent@9.9.9 me --json\`.
+Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
+Pass \`--retry 2\` for transient-error tolerance.
+`
   const PKG = JSON.stringify({ version: '9.9.9' })
 
   function makeFsImpl() {
