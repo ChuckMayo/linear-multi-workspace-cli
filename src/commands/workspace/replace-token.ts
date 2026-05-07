@@ -26,17 +26,27 @@ export interface RunWorkspaceReplaceTokenArgs {
   name: string
   token: string
   pretty: boolean
-  /** Test-only seam — overrides RetryOpts on the transport wrapper. */
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
+  /**
+   * Test seam — overrides RetryOpts on the transport wrapper. Takes precedence
+   * over the operator's --retry N when both are set, so existing tests that
+   * pass `{ maxAttempts: 1 }` to disable wait still win.
+   */
   retryOptsOverride?: RetryOpts
 }
 
 export async function runWorkspaceReplaceToken(
   args: RunWorkspaceReplaceTokenArgs,
 ): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'workspace replace-token',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (retryOpts) => {
       const config = loadConfig()
       const entry = config.workspaces[args.name]
       if (!entry) {
@@ -56,9 +66,14 @@ export async function runWorkspaceReplaceToken(
       // for retry + classification. The previous try/catch + classifySdkError
       // is gone; thrown errors are already LinearAgentError instances that
       // flow through `runCommand`.
+      //
+      // MNT-03 precedence: `args.retryOptsOverride` is the test seam — if a
+      // test passes it, it wins. Otherwise the operator's `--retry N` (passed
+      // by runCommand as `retryOpts`) is used.
+      const effectiveRetryOpts = args.retryOptsOverride ?? retryOpts
       const actualOrgId = await withFetchInterception(async () => {
-        const viewer = await withRateLimitRetry(() => client.viewer, args.retryOptsOverride)
-        const org = await withRateLimitRetry(() => viewer.organization, args.retryOptsOverride)
+        const viewer = await withRateLimitRetry(() => client.viewer, effectiveRetryOpts)
+        const org = await withRateLimitRetry(() => viewer.organization, effectiveRetryOpts)
         return org.id
       })
 
@@ -81,7 +96,11 @@ export async function runWorkspaceReplaceToken(
         meta: { workspace: args.name },
       }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class WorkspaceReplaceToken extends Command {
@@ -100,11 +119,15 @@ export default class WorkspaceReplaceToken extends Command {
 
   async run(): Promise<unknown> {
     const { args, flags } = await this.parse(WorkspaceReplaceToken)
-    const out = await runWorkspaceReplaceToken({
+    const callArgs: RunWorkspaceReplaceTokenArgs = {
       name: args.name,
       token: flags.token,
       pretty: flags.pretty,
-    })
+    }
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
+    const out = await runWorkspaceReplaceToken(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)

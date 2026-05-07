@@ -27,15 +27,25 @@ export interface RunWorkspaceAddArgs {
   name: string
   token: string
   pretty: boolean
-  /** Test-only seam — overrides RetryOpts on the transport wrapper. */
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
+  /**
+   * Test seam — overrides RetryOpts on the transport wrapper. Takes precedence
+   * over the operator's --retry N when both are set, so existing tests that
+   * pass `{ maxAttempts: 1 }` to disable wait still win.
+   */
   retryOptsOverride?: RetryOpts
 }
 
 export async function runWorkspaceAdd(args: RunWorkspaceAddArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'workspace add',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (retryOpts) => {
       const config = loadConfig()
 
       if (Object.hasOwn(config.workspaces, args.name)) {
@@ -57,10 +67,15 @@ export async function runWorkspaceAdd(args: RunWorkspaceAddArgs): Promise<Comman
       // RatelimitedLinearError / NetworkLinearError; `withFetchInterception`
       // captures complexity headers for `meta.complexity` (no-op here since
       // workspace add doesn't surface meta beyond `workspace`).
+      //
+      // MNT-03 precedence: `args.retryOptsOverride` is the test seam — if a
+      // test passes it, it wins. Otherwise the operator's `--retry N` (passed
+      // by runCommand as `retryOpts`) is used.
+      const effectiveRetryOpts = args.retryOptsOverride ?? retryOpts
       const orgId = await withFetchInterception(async () => {
-        const viewer = await withRateLimitRetry(() => client.viewer, args.retryOptsOverride)
+        const viewer = await withRateLimitRetry(() => client.viewer, effectiveRetryOpts)
         // viewer.organization is itself a Promise/getter in @linear/sdk v83
-        const org = await withRateLimitRetry(() => viewer.organization, args.retryOptsOverride)
+        const org = await withRateLimitRetry(() => viewer.organization, effectiveRetryOpts)
         return org.id
       })
 
@@ -99,7 +114,11 @@ export async function runWorkspaceAdd(args: RunWorkspaceAddArgs): Promise<Comman
         meta: { workspace: args.name },
       }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class WorkspaceAdd extends Command {
@@ -118,11 +137,15 @@ export default class WorkspaceAdd extends Command {
 
   async run(): Promise<unknown> {
     const { args, flags } = await this.parse(WorkspaceAdd)
-    const out = await runWorkspaceAdd({
+    const callArgs: RunWorkspaceAddArgs = {
       name: args.name,
       token: flags.token,
       pretty: flags.pretty,
-    })
+    }
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
+    const out = await runWorkspaceAdd(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)

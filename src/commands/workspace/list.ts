@@ -12,13 +12,19 @@ import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runt
  */
 export interface RunWorkspaceListArgs {
   pretty: boolean
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. No-op for this no-network command. */
+  retry?: number
 }
 
 export async function runWorkspaceList(args: RunWorkspaceListArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'workspace list',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (_retryOpts) => {
       const config = loadConfig()
       const workspaces = Object.values(config.workspaces)
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -35,7 +41,11 @@ export async function runWorkspaceList(args: RunWorkspaceListArgs): Promise<Comm
         meta: {},
       }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class WorkspaceList extends Command {
@@ -47,7 +57,11 @@ export default class WorkspaceList extends Command {
 
   async run(): Promise<unknown> {
     const { flags } = await this.parse(WorkspaceList)
-    const out = await runWorkspaceList({ pretty: flags.pretty })
+    const callArgs: RunWorkspaceListArgs = { pretty: flags.pretty }
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
+    const out = await runWorkspaceList(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)

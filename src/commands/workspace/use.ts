@@ -13,13 +13,19 @@ import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runt
 export interface RunWorkspaceUseArgs {
   name: string
   pretty: boolean
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. No-op for this no-network command. */
+  retry?: number
 }
 
 export async function runWorkspaceUse(args: RunWorkspaceUseArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'workspace use',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (_retryOpts) => {
       const next = updateConfig((current) => {
         if (!Object.hasOwn(current.workspaces, args.name)) {
           throw LinearAgentError.workspace.notFound(args.name)
@@ -31,7 +37,11 @@ export async function runWorkspaceUse(args: RunWorkspaceUseArgs): Promise<Comman
         meta: { workspace: args.name },
       }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class WorkspaceUse extends Command {
@@ -46,7 +56,11 @@ export default class WorkspaceUse extends Command {
 
   async run(): Promise<unknown> {
     const { args, flags } = await this.parse(WorkspaceUse)
-    const out = await runWorkspaceUse({ name: args.name, pretty: flags.pretty })
+    const callArgs: RunWorkspaceUseArgs = { name: args.name, pretty: flags.pretty }
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
+    const out = await runWorkspaceUse(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)
