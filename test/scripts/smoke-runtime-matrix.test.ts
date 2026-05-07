@@ -126,7 +126,8 @@ describe('parseEnvelopeFromStdout()', () => {
       ok: false,
       error: { code: 'WORKSPACE_NOT_RESOLVED', message: 'no key' },
     }
-    const oclifWrapper = '\n{\n  "error": {\n    "code": "EEXIT",\n    "oclif": { "exit": 10 }\n  }\n}'
+    const oclifWrapper =
+      '\n{\n  "error": {\n    "code": "EEXIT",\n    "oclif": { "exit": 10 }\n  }\n}'
     const stdout = JSON.stringify(envelope) + oclifWrapper
     expect(parseEnvelopeFromStdout(stdout)).toEqual(envelope)
   })
@@ -403,6 +404,258 @@ Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --jso
     })
     expect(result.ok).toBe(false)
     expect(result.reason).toMatch(/no .*invocation/i)
+  })
+})
+
+// ───────────── claude-code-via-skill — SKILL example doc-truth (Phase 7 PLAN 07-08) ─────────────
+// Closes audit gap G-03. The four assertions added to runClaudeCodeViaSkillLane
+// in 07-08 enforce that every SKILL.md.tmpl example actually works at the CLI
+// surface, so future doc-vs-code drift fails CI instead of sailing through as
+// the G-02 class of bugs did before this phase.
+//
+// Each test mocks spawnSync to return predetermined responses based on call
+// order, mirroring the existing aggregation tests' `vi.fn().mockImplementation`
+// + `callIdx` pattern. The SKILL body content (forbidden phrase / valid prose)
+// is the only fs-side input that matters for the doc-text assertion.
+
+describe('runLane() — claude-code-via-skill — SKILL example doc-truth', () => {
+  // Template body that contains a valid `npx -y linear-agent@9.9.9 ...` invocation
+  // and DOES NOT mention `describe errors` — the canonical happy-path skill body
+  // for these tests.
+  const SKILL_OK = `# linear-agent
+
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+
+Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
+Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
+`
+  const PKG_OK = JSON.stringify({ name: 'linear-agent', version: '9.9.9' })
+
+  function makeFsImpl(skillBody: string) {
+    return {
+      readFileSync: vi.fn((path: string) =>
+        typeof path === 'string' && path.endsWith('package.json') ? PKG_OK : skillBody,
+      ),
+    }
+  }
+
+  // Helper: a `me`-style success envelope (used as the baseline + filler).
+  const SUCCESS_ME = {
+    status: 0,
+    stdout: JSON.stringify({
+      $apiVersion: '1',
+      ok: true,
+      data: { user: { id: 'u-1' } },
+    }),
+    stderr: '',
+    signal: null as string | null,
+  }
+
+  // ─── Test 1: --vars unrecognized (assertion 1 fires) ──────────────
+  // Spawn sequence: (1) plain-bash baseline succeeds, (2) --vars assertion
+  // gets stderr: "unknown flag --vars" → lane fails.
+  it('fails when raw command rejects --vars as unknown', async () => {
+    let i = 0
+    const spawn = vi.fn().mockImplementation(() => {
+      i++
+      if (i === 1) return SUCCESS_ME // baseline
+      return {
+        status: 2,
+        stdout: '',
+        stderr: ' ›   Error: Nonexistent flag: --vars\n ›   See more help with --help',
+        signal: null,
+      }
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/--vars/i)
+  })
+
+  // ─── Test 2: --no-meta does NOT drop meta (assertion 2 fires) ─────
+  // Spawn sequence: (1) baseline ok, (2) --vars ok, (3) --no-meta returns
+  // success envelope WITH `meta` still present → lane fails. Per Phase 6
+  // D-MNT-02 the success envelope must drop meta under --no-meta; failure
+  // envelopes are exempt.
+  it('fails when --no-meta does not drop meta from success envelope', async () => {
+    let i = 0
+    const spawn = vi.fn().mockImplementation(() => {
+      i++
+      if (i <= 2) return SUCCESS_ME // baseline + --vars: ok
+      // --no-meta call: ok:true but `meta` STILL present (the regression we guard).
+      return {
+        status: 0,
+        stdout: JSON.stringify({
+          $apiVersion: '1',
+          ok: true,
+          data: { issues: [] },
+          meta: { command: 'issue list' },
+        }),
+        stderr: '',
+        signal: null,
+      }
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/no.?meta/i)
+  })
+
+  // ─── Test 3: --no-meta unrecognized (DEF-07-01 regression guard) ──
+  // If a future change drops the `aliases: ['no-meta']` from BASE_FLAGS,
+  // oclif will reject `--no-meta` at parse time. The lane must surface
+  // that as a specific failure reason mentioning the flag (the assertion
+  // catches both "unknown" and "nonexistent" parser-error verbs).
+  it('fails when --no-meta is rejected at parse time (DEF-07-01 guard)', async () => {
+    let i = 0
+    const spawn = vi.fn().mockImplementation(() => {
+      i++
+      if (i <= 2) return SUCCESS_ME
+      return {
+        status: 2,
+        stdout: '',
+        stderr: ' ›   Error: Nonexistent flag: --no-meta\n ›   See more help with --help',
+        signal: null,
+      }
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/no.?meta/i)
+  })
+
+  // ─── Test 4: --retry unrecognized (assertion 3 fires) ─────────────
+  // Spawn sequence: (1) baseline ok, (2) --vars ok, (3) --no-meta ok with
+  // NO meta, (4) --retry stderr: "unknown flag --retry" → lane fails.
+  it('fails when issue list rejects --retry as unknown', async () => {
+    let i = 0
+    const spawn = vi.fn().mockImplementation(() => {
+      i++
+      if (i <= 2) return SUCCESS_ME
+      if (i === 3) {
+        // --no-meta call: success envelope with NO meta key (correct shape).
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      // --retry call: parse error
+      return {
+        status: 2,
+        stdout: '',
+        stderr: ' ›   Error: Nonexistent flag: --retry\n ›   See more help with --help',
+        signal: null,
+      }
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/--retry/i)
+  })
+
+  // ─── Test 5: SKILL still mentions `describe errors` (assertion 4) ─
+  // 07-07 removed this phrase from SKILL.md.tmpl. The doc-text assertion
+  // re-reads the skill body; no spawn is required for it (the spawn
+  // mocks below all succeed). Lane must fail with a reason mentioning the
+  // forbidden phrase.
+  it('fails when SKILL.md still references `describe errors`', async () => {
+    const SKILL_BAD = `${SKILL_OK}\n\nFor full taxonomy run \`describe errors --json\`.\n`
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      // Make every spawn pass cleanly so only the doc-text assertion fires.
+      if (Array.isArray(args) && args.includes('--no-meta')) {
+        // Drop meta on the --no-meta call so assertion 2 doesn't fire first.
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      return SUCCESS_ME
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_BAD),
+      env: {},
+    })
+    expect(result.ok).toBe(false)
+    expect(result.reason).toMatch(/describe.*errors/i)
+  })
+
+  // ─── Happy path: all 4 assertions pass ────────────────────────────
+  // Baseline + --vars + --no-meta (drops meta) + --retry all return clean
+  // success envelopes; SKILL body has no forbidden phrase. Lane returns ok.
+  it('passes when all 4 SKILL examples behave as documented', async () => {
+    const spawn = vi.fn().mockImplementation((_cmd: string, args: string[]) => {
+      if (Array.isArray(args) && args.includes('--no-meta')) {
+        // --no-meta call: ok:true with NO meta key (correct behavior).
+        return {
+          status: 0,
+          stdout: JSON.stringify({
+            $apiVersion: '1',
+            ok: true,
+            data: { issues: [] },
+          }),
+          stderr: '',
+          signal: null,
+        }
+      }
+      // baseline (`me`) and all other invocations: standard success envelope.
+      return SUCCESS_ME
+    })
+
+    const result = await runLane({
+      lane: 'claude-code-via-skill',
+      tarball: './linear-agent-9.9.9.tgz',
+      skillPath: './SKILL.md',
+      spawnImpl: spawn,
+      fsImpl: makeFsImpl(SKILL_OK),
+      env: {},
+    })
+    expect(result.ok).toBe(true)
+    expect(result.lane).toBe('claude-code-via-skill')
   })
 })
 
