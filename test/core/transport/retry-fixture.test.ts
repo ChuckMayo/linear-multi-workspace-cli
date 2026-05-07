@@ -238,16 +238,18 @@ describe('withRateLimitRetry — onRetry observability hook', () => {
       expect(c.code).toBe('RATELIMITED')
     }
 
-    // Sanity: a separate run with no onRetry produces no spy calls (no global state).
+    // WR-06: meaningful coverage for the absence-of-effect on the happy path.
+    // Pass `spy` as `onRetry` to a withRateLimitRetry that NEVER fails — the
+    // hook contract says onRetry fires only on failed attempts, so a clean
+    // run must produce zero invocations. (Pre-WR-06 this asserted on a spy
+    // that was never wired to anything, which was trivially true regardless
+    // of withRateLimitRetry's behavior.)
     const spy = vi.fn()
-    let attempts2 = 0
-    const call2 = vi.fn().mockImplementation(async () => {
-      attempts2 += 1
-      if (attempts2 < 3) throw new NetworkLinearError()
-      return { ok: true } as const
-    })
-    await withRateLimitRetry(call2, makeSeams())
-    expect(spy).toHaveBeenCalledTimes(0)
+    const happyCall = vi.fn().mockResolvedValue({ ok: true } as const)
+    const happyResult = await withRateLimitRetry(happyCall, { ...makeSeams(), onRetry: spy })
+    expect(happyResult).toEqual({ ok: true })
+    expect(spy).not.toHaveBeenCalled()
+    expect(happyCall).toHaveBeenCalledTimes(1)
   })
 
   it('(f) onRetry info objects format into greppable stderr line shape', async () => {
