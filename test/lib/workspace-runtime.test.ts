@@ -10,10 +10,74 @@
  *
  * Tests use a synthetic handler so no Linear SDK / network is touched.
  */
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
+
+vi.mock('@linear/sdk', () => {
+  class LinearError extends Error {
+    constructor(message?: string) {
+      super(message ?? 'mock LinearError')
+      this.name = 'LinearError'
+    }
+  }
+  class RatelimitedLinearError extends LinearError {
+    retryAfter?: number
+    complexityRemaining?: number
+    complexityLimit?: number
+    constructor(opts?: {
+      message?: string
+      retryAfter?: number
+      complexityRemaining?: number
+      complexityLimit?: number
+    }) {
+      super(opts?.message ?? 'rate limited')
+      this.name = 'RatelimitedLinearError'
+      if (opts?.retryAfter !== undefined) this.retryAfter = opts.retryAfter
+      if (opts?.complexityRemaining !== undefined)
+        this.complexityRemaining = opts.complexityRemaining
+      if (opts?.complexityLimit !== undefined) this.complexityLimit = opts.complexityLimit
+    }
+  }
+  class NetworkLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'network error')
+      this.name = 'NetworkLinearError'
+    }
+  }
+  class AuthenticationLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'auth error')
+      this.name = 'AuthenticationLinearError'
+    }
+  }
+  class InvalidInputLinearError extends LinearError {
+    constructor(message?: string) {
+      super(message ?? 'invalid input')
+      this.name = 'InvalidInputLinearError'
+    }
+  }
+  return {
+    LinearError,
+    RatelimitedLinearError,
+    NetworkLinearError,
+    AuthenticationLinearError,
+    InvalidInputLinearError,
+  }
+})
+
+import { RatelimitedLinearError as RealRatelimitedLinearError } from '@linear/sdk'
 import { LinearAgentError } from '@/core/errors/index.js'
-import type { RetryOpts } from '@/core/transport/index.js'
+import { type RetryOpts, withRateLimitRetry } from '@/core/transport/index.js'
 import { type RunCommandArgs, runCommand } from '@/lib/workspace-runtime.js'
+
+// vi.mock above replaces @linear/sdk at module-load with our own classes
+// whose constructors accept a test-friendly options bag. Cast away the
+// real SDK constructor signature.
+const RatelimitedLinearError = RealRatelimitedLinearError as unknown as new (opts?: {
+  message?: string
+  retryAfter?: number
+  complexityRemaining?: number
+  complexityLimit?: number
+}) => Error
 
 beforeAll(() => {
   process.env.NO_COLOR = '1'
@@ -200,5 +264,61 @@ describe('runCommand — retry threading (MNT-03)', () => {
     expect(writes).toHaveLength(1)
     expect(writes[0]).toBe('[retry 2/4] RATELIMITED: backing off 487ms\n')
     expect(writes[0]).toMatch(/^\[retry \d+\/\d+\] [A-Z_]+: backing off \d+ms\n$/)
+  })
+})
+
+describe('runCommand — Phase 2 byte-identity for default-flag transient exhaustion (CR-01, WR-05)', () => {
+  it('(i) default-flag runCommand: transient-exhaustion failure envelope does NOT carry details.attempts', async () => {
+    // Drive a transient-exhaustion through `runCommand` with no flags. The
+    // handler forwards `retryOptsOverride` into `withRateLimitRetry` exactly
+    // the way the production `me`/`whoami` handlers do. Pre-CR-01 this would
+    // tag `details.attempts` because runCommand always wired `onRetry`; now
+    // the override resolves to `{ extraAttempts: 0 }` and the failure shape
+    // matches Phase 2 byte-identity.
+    const handler: RunCommandArgs['handler'] = async (retryOpts) => {
+      // Deterministic seams so the test never sleeps.
+      const seamedOpts: RetryOpts = {
+        ...retryOpts,
+        sleep: () => Promise.resolve(),
+        random: () => 0.5,
+      }
+      const data = await withRateLimitRetry(async () => {
+        throw new RatelimitedLinearError({ complexityRemaining: 99, complexityLimit: 1000 })
+      }, seamedOpts)
+      // Unreachable — the thunk always throws.
+      return { data, meta: { workspace: 'acme', workspaceSource: 'flag' as const } }
+    }
+    const out = await runCommand({ commandPath: 'me', pretty: false, handler })
+    expect(out.exitCode).toBeGreaterThan(0)
+    const env = JSON.parse(out.stdout)
+    expect(env.ok).toBe(false)
+    expect(env.error.code).toBe('RATELIMITED')
+    // Phase 2 byte-identity: attempts MUST NOT be tagged when the operator
+    // did not opt in via --retry. The SDK-derived complexity fields stay.
+    expect(env.error.details).toBeDefined()
+    expect(env.error.details.attempts).toBeUndefined()
+    expect(env.error.details.complexityRemaining).toBe(99)
+    expect(env.error.details.complexityLimit).toBe(1000)
+  })
+
+  it('(i2) runCommand({ retry: 2 }) DOES tag details.attempts on exhaustion (opt-in)', async () => {
+    const handler: RunCommandArgs['handler'] = async (retryOpts) => {
+      const seamedOpts: RetryOpts = {
+        ...retryOpts,
+        sleep: () => Promise.resolve(),
+        random: () => 0.5,
+      }
+      const data = await withRateLimitRetry(async () => {
+        throw new RatelimitedLinearError({ complexityRemaining: 0, complexityLimit: 1000 })
+      }, seamedOpts)
+      return { data, meta: { workspace: 'acme', workspaceSource: 'flag' as const } }
+    }
+    const out = await runCommand({ commandPath: 'me', pretty: false, retry: 2, handler })
+    expect(out.exitCode).toBeGreaterThan(0)
+    const env = JSON.parse(out.stdout)
+    expect(env.ok).toBe(false)
+    expect(env.error.code).toBe('RATELIMITED')
+    // Opt-in path: 3 default + 2 extra = 5 attempts.
+    expect(env.error.details.attempts).toBe(5)
   })
 })
