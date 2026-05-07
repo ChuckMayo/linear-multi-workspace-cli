@@ -114,7 +114,7 @@ When a curated command doesn't expose a field you need, use the raw layer. Workf
 2. **Invoke it via `raw`:**
    ```
    npx -y linear-agent@{{VERSION}} raw IssueBatchCreate \
-     --variables '{"input":{"issues":[{"teamId":"...","title":"..."}]}}' \
+     --vars '{"input":{"issues":[{"teamId":"...","title":"..."}]}}' \
      --json
    ```
    Output is the SAME envelope shape as curated commands.
@@ -140,10 +140,7 @@ The five most-likely failure codes you'll see:
 | `RATELIMITED` | 14 | Linear's rate limit is hit (3M points/hr authenticated). `error.transient: true` — back off and retry. |
 | `NETWORK_ERROR` | 15 | Transport-level failure (DNS, TLS, timeout). `error.transient: true` — retry once before surfacing to the user. |
 
-For the full taxonomy and the complete description of every error code, run:
-```
-npx -y linear-agent@{{VERSION}} describe errors --json
-```
+The table above covers the five most-frequent codes. Other codes follow the same envelope shape — inspect `error.code` to identify the failure and `error.transient` to decide whether to retry (codes 14 and 15 set `transient: true`).
 
 ### Token & Retry Knobs
 
