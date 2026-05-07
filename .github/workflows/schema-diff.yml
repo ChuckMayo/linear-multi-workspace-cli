@@ -82,11 +82,16 @@ jobs:
           # creating a prompt-injection seam from Linear's schema authors into
           # the maintainer's review surface (human + AI reviewers).
           SAFE_OUTPUT=$(printf '%s\n' "${OUTPUT}" | sed 's/```/`` `/g; s|</details>|\&lt;/details\&gt;|gi')
+          # WR-02: derive a heredoc delimiter that cannot collide with any
+          # line in OUTPUT. A fixed `EOF_DIFF` would be misinterpreted by the
+          # GitHub Actions output parser if a degenerate stderr line happened
+          # to be exactly `EOF_DIFF`.
+          DELIM="EOF_$(openssl rand -hex 16)"
           {
             echo "exit_code=${EXIT}"
-            echo 'output<<EOF_DIFF'
+            echo "output<<${DELIM}"
             echo "${SAFE_OUTPUT}"
-            echo 'EOF_DIFF'
+            echo "${DELIM}"
           } >> "$GITHUB_OUTPUT"
           echo "${OUTPUT}"
           # Breaking change -> fail with summary
