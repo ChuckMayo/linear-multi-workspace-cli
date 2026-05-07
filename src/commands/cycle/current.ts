@@ -26,13 +26,19 @@ export interface RunCycleCurrentArgs {
   fields?: string
   team?: string
   pretty: boolean
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
 }
 
 export async function runCycleCurrent(args: RunCycleCurrentArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'cycle current',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (retryOpts) => {
       const runtimeFlags: Parameters<typeof cycleCurrentRuntime>[0]['flags'] = {}
       if (args.workspace !== undefined) runtimeFlags.workspace = args.workspace
       if (args.fields !== undefined) runtimeFlags.fields = args.fields
@@ -41,10 +47,15 @@ export async function runCycleCurrent(args: RunCycleCurrentArgs): Promise<Comman
       const result = await cycleCurrentRuntime({
         flags: runtimeFlags,
         env: process.env,
+        retryOptsOverride: retryOpts,
       })
       return { data: result.data, meta: result.meta }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class CycleCurrent extends Command {
@@ -72,6 +83,9 @@ export default class CycleCurrent extends Command {
     if (flags.workspace !== undefined) callArgs.workspace = flags.workspace
     if (flags.fields !== undefined) callArgs.fields = flags.fields
     if (flags.team !== undefined) callArgs.team = flags.team
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
     const out = await runCycleCurrent(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
