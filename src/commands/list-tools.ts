@@ -12,18 +12,28 @@ import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runt
 
 export interface RunListToolsArgs {
   pretty: boolean
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. No-op for this no-network command. */
+  retry?: number
 }
 
 export async function runListTools(args: RunListToolsArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'list-tools',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (_retryOpts) => {
       const result = await listToolsRuntime({ flags: {} })
       // meta.command is injected by runCommand — return only the non-command meta fields
       return { data: result.data, meta: {} }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }
 
 export default class ListTools extends Command {
@@ -34,7 +44,11 @@ export default class ListTools extends Command {
 
   async run(): Promise<unknown> {
     const { flags } = await this.parse(ListTools)
-    const out = await runListTools({ pretty: flags.pretty })
+    const callArgs: RunListToolsArgs = { pretty: flags.pretty }
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
+    const out = await runListTools(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)
