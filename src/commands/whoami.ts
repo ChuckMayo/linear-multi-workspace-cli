@@ -11,7 +11,7 @@
  * function.
  */
 import { Command, Flags } from '@oclif/core'
-import { meRuntime } from '@/lib/me-runtime.js'
+import { type MeInput, meRuntime } from '@/lib/me-runtime.js'
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 export interface RunWhoamiArgs {
@@ -24,6 +24,10 @@ export interface RunWhoamiArgs {
   quiet?: boolean
   /** MNT-03: extra retry attempts on transient errors. Default 0. */
   retry?: number
+  /** WR-07: test seam — see `RunMeArgs.loadConfigOverride`. */
+  loadConfigOverride?: MeInput['loadConfigOverride']
+  /** WR-07: test seam — see `RunMeArgs.clientFactoryOverride`. */
+  clientFactoryOverride?: MeInput['clientFactoryOverride']
 }
 
 export async function runWhoami(args: RunWhoamiArgs): Promise<CommandOutput> {
@@ -35,7 +39,7 @@ export async function runWhoami(args: RunWhoamiArgs): Promise<CommandOutput> {
       if (args.workspace !== undefined) runtimeFlags.workspace = args.workspace
       if (args.fields !== undefined) runtimeFlags.fields = args.fields
 
-      const result = await meRuntime({
+      const meInput: MeInput = {
         flags: runtimeFlags,
         env: process.env,
         // CR-02: forward the operator's --retry N (and the --quiet-gated
@@ -43,7 +47,11 @@ export async function runWhoami(args: RunWhoamiArgs): Promise<CommandOutput> {
         // and viewer.organization. Mirrors the wiring in `me.ts` so that
         // `whoami` and `me` emit IDENTICAL envelopes except for `meta.command`.
         retryOptsOverride: retryOpts,
-      })
+      }
+      if (args.loadConfigOverride !== undefined) meInput.loadConfigOverride = args.loadConfigOverride
+      if (args.clientFactoryOverride !== undefined)
+        meInput.clientFactoryOverride = args.clientFactoryOverride
+      const result = await meRuntime(meInput)
       return { data: result.data, meta: result.meta }
     },
   }

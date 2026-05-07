@@ -11,7 +11,7 @@
  * function.
  */
 import { Command, Flags } from '@oclif/core'
-import { meRuntime } from '@/lib/me-runtime.js'
+import { type MeInput, meRuntime } from '@/lib/me-runtime.js'
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 export interface RunMeArgs {
@@ -24,6 +24,18 @@ export interface RunMeArgs {
   quiet?: boolean
   /** MNT-03: extra retry attempts on transient errors. Default 0. */
   retry?: number
+  /**
+   * WR-07: test seam — forward an injected config loader into meRuntime so
+   * `runMe` can be exercised end-to-end in unit tests without touching the
+   * real on-disk config. Production callers pass nothing.
+   */
+  loadConfigOverride?: MeInput['loadConfigOverride']
+  /**
+   * WR-07: test seam — forward an injected client factory into meRuntime so
+   * `runMe` can be exercised end-to-end in unit tests without spinning up a
+   * real `LinearClient`. Production callers pass nothing.
+   */
+  clientFactoryOverride?: MeInput['clientFactoryOverride']
 }
 
 export async function runMe(args: RunMeArgs): Promise<CommandOutput> {
@@ -35,14 +47,18 @@ export async function runMe(args: RunMeArgs): Promise<CommandOutput> {
       if (args.workspace !== undefined) runtimeFlags.workspace = args.workspace
       if (args.fields !== undefined) runtimeFlags.fields = args.fields
 
-      const result = await meRuntime({
+      const meInput: MeInput = {
         flags: runtimeFlags,
         env: process.env,
         // MNT-03: forward the operator's --retry N (and the --quiet-gated
         // onRetry writer) into the transport layer that wraps client.viewer
         // and viewer.organization.
         retryOptsOverride: retryOpts,
-      })
+      }
+      if (args.loadConfigOverride !== undefined) meInput.loadConfigOverride = args.loadConfigOverride
+      if (args.clientFactoryOverride !== undefined)
+        meInput.clientFactoryOverride = args.clientFactoryOverride
+      const result = await meRuntime(meInput)
       return { data: result.data, meta: result.meta }
     },
   }

@@ -85,7 +85,6 @@ import type { Config } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import { failure, success } from '@/core/output/index.js'
 import { meRuntime } from '@/lib/me-runtime.js'
-import { runCommand } from '@/lib/workspace-runtime.js'
 
 const STUB_CONFIG: Config = {
   active: 'acme',
@@ -290,30 +289,47 @@ describe('me / whoami runtime sharing', () => {
 
 describe('me --no-meta (Phase 6 PLAN 06-01, MNT-02)', () => {
   it('drops meta from the success envelope when --no-meta is set', async () => {
-    // Run the same pipeline runMe drives -- meRuntime produces { data, meta },
-    // runCommand wraps it. The new --no-meta path is a runCommand-level
-    // concern, so we feed runCommand a handler that returns the exact shape
-    // meRuntime emits for `me --fields=ids`. This pins the no-meta envelope
-    // bytes against any future drift to runCommand without spinning up a
-    // mock client through runMe (whose factory injection seam is internal
-    // to meRuntime tests above).
+    // WR-07: drive runMe end-to-end so the oclif flag-forwarding code in
+    // me.ts is also covered. The factory and config injection seams now
+    // live on RunMeArgs, so we can pin the wire bytes without mocking
+    // process.env or touching the on-disk config.
     const client = makeMockClient()
-    const upstream = await meRuntime({
-      flags: { workspace: 'acme', fields: 'ids' },
-      env: {},
-      loadConfigOverride: () => STUB_CONFIG,
-      clientFactoryOverride: () => client,
-    })
-
-    const out = await runCommand({
-      commandPath: 'me',
+    const out = await runMe({
       pretty: false,
       noMeta: true,
-      handler: async () => ({ data: upstream.data, meta: upstream.meta }),
+      fields: 'ids',
+      workspace: 'acme',
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => client,
     })
 
     const env = JSON.parse(out.stdout)
     expect(env).toMatchSnapshot('me-no-meta-envelope')
     expect('meta' in env).toBe(false) // structural belt-and-suspenders
+  })
+
+  it('runMe and runWhoami both honor --no-meta and emit IDENTICAL envelopes (WR-07, CR-02)', async () => {
+    const client = makeMockClient()
+    const meOut = await runMe({
+      pretty: false,
+      noMeta: true,
+      fields: 'ids',
+      workspace: 'acme',
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => client,
+    })
+    const whoamiOut = await runWhoami({
+      pretty: false,
+      noMeta: true,
+      fields: 'ids',
+      workspace: 'acme',
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => client,
+    })
+    // With --no-meta, NEITHER envelope carries `meta.command`, so the
+    // bytes are byte-identical (no `me` vs `whoami` divergence).
+    expect(meOut.stdout).toBe(whoamiOut.stdout)
+    const meEnv = JSON.parse(meOut.stdout)
+    expect('meta' in meEnv).toBe(false)
   })
 })
