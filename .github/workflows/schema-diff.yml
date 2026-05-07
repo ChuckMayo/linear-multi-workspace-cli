@@ -75,10 +75,17 @@ jobs:
             --header "Authorization: ${LINEAR_API_KEY}" 2>&1)
           EXIT=$?
           set -e
+          # WR-01: sanitize OUTPUT before it lands in the PR body. The PR body
+          # interpolates `${{ steps.diff.outputs.output }}` inside a markdown
+          # `<details>` + triple-backtick fence. Adversarial schema content
+          # containing ``` or </details> would break out of those wrappers,
+          # creating a prompt-injection seam from Linear's schema authors into
+          # the maintainer's review surface (human + AI reviewers).
+          SAFE_OUTPUT=$(printf '%s\n' "${OUTPUT}" | sed 's/```/`` `/g; s|</details>|\&lt;/details\&gt;|gi')
           {
             echo "exit_code=${EXIT}"
             echo 'output<<EOF_DIFF'
-            echo "${OUTPUT}"
+            echo "${SAFE_OUTPUT}"
             echo 'EOF_DIFF'
           } >> "$GITHUB_OUTPUT"
           echo "${OUTPUT}"
@@ -88,7 +95,7 @@ jobs:
               echo "## Breaking changes detected"
               echo
               echo '```'
-              echo "${OUTPUT}"
+              echo "${SAFE_OUTPUT}"
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
