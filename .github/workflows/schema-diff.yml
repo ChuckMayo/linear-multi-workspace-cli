@@ -68,6 +68,16 @@ jobs:
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_TEST_API_KEY }}
         run: |
+          # WR-03: guard against empty/missing LINEAR_TEST_API_KEY (forked PR,
+          # secret rotation, removed from repo settings). Without this guard
+          # `graphql-inspector` would send `Authorization: ` to Linear, get
+          # 401, exit non-zero, and we'd misclassify the auth failure as a
+          # breaking-change. Surface the infra issue and exit 0 instead.
+          if [ -z "${LINEAR_API_KEY:-}" ]; then
+            echo "LINEAR_TEST_API_KEY is unset; skipping schema diff." >> "$GITHUB_STEP_SUMMARY"
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           set +e
           OUTPUT=$(npx -y @graphql-inspector/cli@6.0.8 diff \
             schema.graphql \
@@ -94,10 +104,25 @@ jobs:
             echo "${DELIM}"
           } >> "$GITHUB_OUTPUT"
           echo "${OUTPUT}"
-          # Breaking change -> fail with summary
+          # WR-03: disambiguate "true breaking change" from "auth/network
+          # failure" by inspecting OUTPUT for graphql-inspector's breaking
+          # banner before falling into the breaking-change branch. Any other
+          # non-zero exit (401, DNS, timeout) surfaces as an infra failure.
           if [ "${EXIT}" -ne 0 ]; then
+            if echo "${OUTPUT}" | grep -qE "Detected the following changes.*Breaking|❌"; then
+              {
+                echo "## Breaking changes detected"
+                echo
+                echo '```'
+                echo "${SAFE_OUTPUT}"
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
             {
-              echo "## Breaking changes detected"
+              echo "## Schema diff failed (non-breaking-change failure)"
+              echo
+              echo "graphql-inspector exited ${EXIT}. Output:"
               echo
               echo '```'
               echo "${SAFE_OUTPUT}"
