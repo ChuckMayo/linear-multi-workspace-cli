@@ -176,8 +176,10 @@ export async function withRateLimitRetry<T>(call: () => Promise<T>, opts?: Retry
   }
   // Phase 6 MNT-03: tag final-exhaustion attempt count onto error.details
   // ONLY when the caller opts into retry observability (passes
-  // `extraAttempts > 0` or `onRetry`). Default callers get the Phase 2
-  // byte-identical failure shape — `attempts` is not tagged unless asked
+  // `extraAttempts > 0` or `onRetry`). Default callers — including
+  // `runCommand` invocations with no `--retry` flag (post-CR-01: gated on
+  // `extraAttempts > 0` in `workspace-runtime.ts`) — get the Phase 2
+  // byte-identical failure shape: `attempts` is not tagged unless asked
   // for, so the existing transport snapshot tests stay green and the
   // Phase 1 envelope contract is unchanged for the 99% case.
   //
