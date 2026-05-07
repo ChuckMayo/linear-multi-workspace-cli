@@ -40,6 +40,7 @@ import type { Config } from '@/core/config/index.js'
 import { loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
+import type { RetryOpts } from '@/core/transport/index.js'
 import { resolveWorkspace } from '@/core/workspace/index.js'
 import { requireExplicitWorkspaceForWrite } from '@/core/workspace/write-guard.js'
 import { OPERATION_REGISTRY } from '@/generated/operations.js'
@@ -93,6 +94,14 @@ export interface RunRawBatchInput {
   flags: RunRawBatchFlags
   env?: NodeJS.ProcessEnv
   loadConfigOverride?: () => Config
+  /**
+   * MNT-03: extra retry attempts + onRetry observability hook plumbed in
+   * from `runCommand`. Threaded verbatim into each per-entry `runRaw`
+   * call so a transient rate-limit on one entry can be retried per the
+   * operator's `--retry N` choice. Default callers (no override) are
+   * byte-identical to the previous behavior.
+   */
+  retryOptsOverride?: RetryOpts
 }
 
 // ---------------------------------------------------------------------------
@@ -242,6 +251,10 @@ export async function runRawBatch(input: RunRawBatchInput): Promise<RunRawBatchO
 
   for (const entry of enriched) {
     try {
+      // MNT-03: forward the operator's --retry N (and the --quiet-gated
+      // onRetry writer) to each per-entry runRaw call so a transient
+      // rate-limit on a single entry can be retried per the operator's
+      // choice. `undefined` (the default-flag case) preserves byte-identity.
       const result = await runRaw({
         args: { operation: entry.operation },
         flags: {
@@ -252,6 +265,7 @@ export async function runRawBatch(input: RunRawBatchInput): Promise<RunRawBatchO
         },
         env,
         loadConfigOverride: input.loadConfigOverride,
+        retryOptsOverride: input.retryOptsOverride,
       })
       results.push({ ok: true, operation: entry.operation, data: result.data })
     } catch (err) {

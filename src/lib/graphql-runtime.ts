@@ -39,6 +39,7 @@ import type { Meta } from '@/core/output/index.js'
 import { redact } from '@/core/redact/index.js'
 import {
   getLastComplexity,
+  type RetryOpts,
   withFetchInterception,
   withRateLimitRetry,
 } from '@/core/transport/index.js'
@@ -61,6 +62,14 @@ export interface RunGraphqlInput {
   loadConfigOverride?: () => Config
   /** Test seam: override the LinearClient's rawRequest method for unit testing. */
   mockRawRequest?: (query: string, vars: Record<string, unknown>) => Promise<unknown>
+  /**
+   * MNT-03: extra retry attempts + onRetry observability hook plumbed in
+   * from `runCommand`. Threads into `withRateLimitRetry` at the dispatch
+   * site (Step 8). Default callers (no override) are byte-identical to
+   * the previous behavior because `withRateLimitRetry(fn)` and
+   * `withRateLimitRetry(fn, undefined)` are equivalent.
+   */
+  retryOptsOverride?: RetryOpts
 }
 
 export interface RunGraphqlOutput {
@@ -185,8 +194,12 @@ export async function runGraphql(input: RunGraphqlInput): Promise<RunGraphqlOutp
 
   const client = createLinearClient(resolved)
   return withFetchInterception(async () => {
-    const response = (await withRateLimitRetry(() =>
-      client.client.rawRequest(queryText, vars as Record<string, unknown>),
+    // MNT-03: thread the operator's --retry N (and the --quiet-gated onRetry
+    // writer) into the transport wrapper. `undefined` (the default-flag case)
+    // preserves byte-identity with the prior single-arg signature.
+    const response = (await withRateLimitRetry(
+      () => client.client.rawRequest(queryText, vars as Record<string, unknown>),
+      input.retryOptsOverride,
     )) as { data?: unknown; error?: string }
     if (response.error !== undefined || response.data === undefined) {
       // WR-05: scrub token-shaped substrings before constructing the
