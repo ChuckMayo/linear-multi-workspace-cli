@@ -62,7 +62,16 @@ export const BASE_FLAGS = {
       'Suppress meta block from success envelopes and pretty-mode banners (implies --no-meta).',
   }),
   noMeta: Flags.boolean({
+    // DEF-07-01: oclif uses the OBJECT KEY (`noMeta`) as the parser key, NOT
+    // the `name` field. Without `aliases`, the documented `--no-meta` form in
+    // SKILL.md.tmpl (line 152) and the `--quiet`-implies-`--no-meta` prose
+    // would fail with `Error: Nonexistent flag: --no-meta` at the CLI surface
+    // even though every runtime call site reads `noMeta: true` correctly.
+    // Adding `aliases: ['no-meta']` makes BOTH `--no-meta` (documented form)
+    // and `--noMeta` (camelCase fallback) parse cleanly without renaming the
+    // read-site key on 38 command shims. See deferred-items.md (DEF-07-01).
     name: 'no-meta',
+    aliases: ['no-meta'],
     description:
       'Omit the meta block from success envelopes (smaller token footprint; failure envelopes unchanged).',
   }),

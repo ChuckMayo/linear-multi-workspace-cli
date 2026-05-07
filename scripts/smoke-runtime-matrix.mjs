@@ -304,6 +304,21 @@ function runPlainBashLane({ tarball, spawnImpl, env }) {
  * reuse plain-bash's tarball-based invocation. The lane is still meaningful
  * because it proves (a) the skill body's command literal is well-formed
  * and (b) the stamped version is consistent with package.json.
+ *
+ * Phase 7 PLAN 07-08 — G-03 SKILL doc-truth gate (D-04). After the
+ * version-match + plain-bash baseline, the lane runs FOUR additional
+ * assertions that exercise the four documented SKILL.md.tmpl examples
+ * end-to-end against the packaged tarball. Without these, the entire G-02
+ * class of bugs (broken `--variables` flag, broken `--no-meta` parsing,
+ * broken `--retry`, unsupported `describe errors`) would sail past CI as
+ * it did in the v1.0 audit. Future doc-vs-code drift now fails this lane.
+ *
+ * Each assertion is small and targeted (flag-recognition / envelope shape /
+ * doc text) — NO Linear API calls, NO real network. Failure modes are:
+ *   1. `unknown flag --vars`        → SKILL example at line 117 broken
+ *   2. `--no-meta` did NOT drop meta → SKILL example at line 152 broken
+ *   3. `unknown flag --retry`       → SKILL example at line 164 broken
+ *   4. `describe errors` still in SKILL → 07-07 fix regressed
  */
 function runClaudeCodeViaSkillLane({ tarball, skillPath, spawnImpl, fsImpl, env }) {
   let skillBody
@@ -352,9 +367,141 @@ function runClaudeCodeViaSkillLane({ tarball, skillPath, spawnImpl, fsImpl, env 
       reason: `skill version mismatch: skill=${skillVersion}, pkg=${pkgVersion}`,
     }
   }
-  // Re-use plain-bash's envelope assertions, but report under this lane name.
-  const inner = runPlainBashLane({ tarball, spawnImpl, env })
-  return { ...inner, lane: 'claude-code-via-skill' }
+  // Baseline: re-use plain-bash's envelope assertions for `me --json`. If the
+  // baseline fails, the four SKILL-example assertions below are moot — bail
+  // early so the failure reason points at the actual root cause.
+  const baseline = runPlainBashLane({ tarball, spawnImpl, env })
+  if (!baseline.ok) {
+    return { ...baseline, lane: 'claude-code-via-skill' }
+  }
+
+  // ─── SKILL doc-truth gate (Phase 7 PLAN 07-08, D-04) ────────────────
+  // Build child env once; same shape as runPlainBashLane so redaction stays
+  // symmetric with what the child saw.
+  const childEnv = { ...env, LINEAR_API_KEY: env.LINEAR_TEST_API_KEY ?? '' }
+
+  // ─── Assertion 1: --vars (not --variables) ─────────────────────────
+  // Documented at SKILL.md.tmpl line 117 (the `raw IssueBatchCreate --vars
+  // '{...}'` example). Audit G-02 found this used to say `--variables`,
+  // which oclif rejects. We assert the flag is RECOGNIZED — the underlying
+  // call may still fail downstream (auth / validation), but a failure-
+  // envelope with WORKSPACE_NOT_RESOLVED proves the parser saw `--vars`.
+  // Detection: if stdout/stderr complains "unknown flag --vars", fail.
+  {
+    const r = spawnImpl(
+      'npx',
+      [
+        '--yes',
+        `file:${tarball}`,
+        'raw',
+        'IssueQuery',
+        '--vars',
+        '{"id":"abc"}',
+        '--json',
+      ],
+      {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        env: childEnv,
+        timeout: 60_000,
+      },
+    )
+    const combined = redact(`${r.stdout ?? ''}\n${r.stderr ?? ''}`, childEnv)
+    if (
+      /(?:unknown|nonexistent|unrecognized).*--?vars\b/i.test(combined) ||
+      /--?vars.*(?:unknown|nonexistent|unrecognized)/i.test(combined)
+    ) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: '--vars flag unrecognized (SKILL example at line 117 regressed)',
+      }
+    }
+  }
+
+  // ─── Assertion 2: --no-meta drops meta on success envelopes ────────
+  // Documented at SKILL.md.tmpl line 152. Per Phase 6 D-MNT-02, `--no-meta`
+  // drops the meta block from SUCCESS envelopes only — failure envelopes
+  // are unchanged for debuggability. So:
+  //   - if env.ok === true:  meta MUST NOT be present
+  //   - if env.ok === false: meta is allowed (failure path is exempt)
+  // In CI this typically lands on the failure path (no test token), which
+  // means the assertion exercises the parse path — without DEF-07-01's
+  // `aliases: ['no-meta']` fix on BASE_FLAGS.noMeta, oclif rejects the
+  // flag at parse time and the spawn returns a parse error rather than an
+  // envelope, which would also fail this assertion (no envelope parsed).
+  {
+    const r = spawnImpl(
+      'npx',
+      ['--yes', `file:${tarball}`, 'issue', 'list', '--json', '--no-meta'],
+      {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        env: childEnv,
+        timeout: 60_000,
+      },
+    )
+    const combined = redact(`${r.stdout ?? ''}\n${r.stderr ?? ''}`, childEnv)
+    if (/(?:unknown|nonexistent|unrecognized).*--?no-?meta\b/i.test(combined)) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: '--no-meta flag unrecognized (DEF-07-01 regression — see workspace-runtime BASE_FLAGS aliases)',
+      }
+    }
+    const parsed = parseEnvelopeFromStdout(String(r.stdout ?? ''))
+    // A success envelope MUST NOT carry `meta` under --no-meta. A failure
+    // envelope MAY carry `meta` (Phase 6 D-MNT-02 makes failure exempt).
+    if (parsed && parsed.ok === true && Object.hasOwn(parsed, 'meta')) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: '--no-meta did NOT drop meta on success envelope (SKILL example at line 152 regressed)',
+      }
+    }
+  }
+
+  // ─── Assertion 3: --retry N propagates ─────────────────────────────
+  // Documented at SKILL.md.tmpl line 164. We're not exercising the retry
+  // mechanism end-to-end (that's covered by transport-layer tests); we're
+  // asserting the doc's `--retry 2` invocation is RECOGNIZED at the parse
+  // layer. If 07-07's BASE_FLAGS retry threading regresses on `issue list`,
+  // this fails with "unknown flag --retry".
+  {
+    const r = spawnImpl(
+      'npx',
+      ['--yes', `file:${tarball}`, 'issue', 'list', '--json', '--retry', '2'],
+      {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf8',
+        env: childEnv,
+        timeout: 60_000,
+      },
+    )
+    const combined = redact(`${r.stdout ?? ''}\n${r.stderr ?? ''}`, childEnv)
+    if (/(?:unknown|nonexistent|unrecognized).*--?retry\b/i.test(combined)) {
+      return {
+        ok: false,
+        lane: 'claude-code-via-skill',
+        reason: '--retry flag unrecognized (SKILL example at line 164 regressed)',
+      }
+    }
+  }
+
+  // ─── Assertion 4: SKILL no longer references `describe errors` ─────
+  // 07-07 removed the `describe errors --json` example because the curated
+  // registry has no `errors` entry — the example would error with
+  // UNKNOWN_OPERATION. This assertion guards against the doc resurrecting
+  // the broken phrasing in a future edit.
+  if (/describe\s+errors/i.test(String(skillBody))) {
+    return {
+      ok: false,
+      lane: 'claude-code-via-skill',
+      reason: 'SKILL still references unsupported `describe errors` command (07-07 fix regressed)',
+    }
+  }
+
+  return { ok: true, lane: 'claude-code-via-skill', output: baseline.output }
 }
 
 /**
