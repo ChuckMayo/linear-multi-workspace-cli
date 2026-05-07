@@ -118,14 +118,20 @@ export async function runCommand(args: RunCommandArgs): Promise<CommandOutput> {
   const dropMeta = args.quiet === true || args.noMeta === true
   const effectivePretty = args.pretty && !dropMeta
   // PLAN-06-02 MNT-03: build the retry override threaded into the handler.
-  // `onRetry` writer is gated on !quiet — the transport layer is unaware of
-  // presentation; runCommand owns the gating decision per CONTEXT D-MNT-03.
-  // The greppable line shape is `[retry K/M] CODE: backing off Xms\n`.
+  // The `onRetry` writer is wired ONLY when the operator opts into retry
+  // observability (i.e. `--retry N > 0`) AND `--quiet` is not set. With
+  // `--retry 0` (the default), the override carries `extraAttempts: 0`
+  // and NO `onRetry`, which preserves Phase 2 byte-identity for
+  // transient-exhaustion failure envelopes (CR-01: no `details.attempts`
+  // tag without opt-in -- `wantsAttemptsTag` in rate-limit.ts requires
+  // `extraAttempts > 0` OR a defined `onRetry`). The transport layer is
+  // unaware of presentation; runCommand owns the gating decision per
+  // CONTEXT D-MNT-03. The greppable line shape is
+  // `[retry K/M] CODE: backing off Xms\n`.
   const extraAttempts = args.retry ?? 0
   const retryOptsOverride: RetryOpts =
-    args.quiet === true
-      ? { extraAttempts }
-      : {
+    extraAttempts > 0 && args.quiet !== true
+      ? {
           extraAttempts,
           onRetry: (info) => {
             process.stderr.write(
@@ -133,6 +139,7 @@ export async function runCommand(args: RunCommandArgs): Promise<CommandOutput> {
             )
           },
         }
+      : { extraAttempts }
   try {
     const { data, meta } = await args.handler(retryOptsOverride)
     const env: Envelope = dropMeta
