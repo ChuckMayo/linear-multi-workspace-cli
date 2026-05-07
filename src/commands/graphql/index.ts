@@ -58,14 +58,19 @@ export default class GraphqlCommand extends Command {
 
   async run(): Promise<unknown> {
     const { flags } = await this.parse(GraphqlCommand)
-    const out = await runGraphqlCommand({
+    const callArgs: GraphqlCommandArgs = {
       query: flags.query,
-      workspace: flags.workspace,
-      allowActiveWorkspaceWrite: flags['allow-active-workspace-write'],
-      allowMutations: flags['allow-mutations'],
-      vars: flags.vars,
       pretty: flags.pretty,
-    })
+    }
+    if (flags.workspace !== undefined) callArgs.workspace = flags.workspace
+    if (flags['allow-active-workspace-write'] !== undefined)
+      callArgs.allowActiveWorkspaceWrite = flags['allow-active-workspace-write']
+    if (flags['allow-mutations'] !== undefined) callArgs.allowMutations = flags['allow-mutations']
+    if (flags.vars !== undefined) callArgs.vars = flags.vars
+    if (flags.quiet !== undefined) callArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) callArgs.retry = flags.retry
+    const out = await runGraphqlCommand(callArgs)
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
     if (out.exitCode !== 0) this.exit(out.exitCode)
@@ -80,13 +85,19 @@ interface GraphqlCommandArgs {
   allowMutations?: boolean
   vars?: string
   pretty: boolean
+  /** MNT-02: omit meta from success envelope. Failure envelope unchanged. */
+  noMeta?: boolean
+  /** MNT-02: imply --no-meta AND mute pretty-mode banner. */
+  quiet?: boolean
+  /** MNT-03: extra retry attempts on transient errors. Default 0. */
+  retry?: number
 }
 
 async function runGraphqlCommand(args: GraphqlCommandArgs): Promise<CommandOutput> {
-  return runCommand({
+  const runArgs: Parameters<typeof runCommand>[0] = {
     commandPath: 'graphql',
     pretty: args.pretty,
-    handler: async () => {
+    handler: async (retryOpts) => {
       const runtimeFlags: Parameters<typeof graphqlRuntime>[0]['flags'] = {
         query: args.query,
       }
@@ -102,8 +113,15 @@ async function runGraphqlCommand(args: GraphqlCommandArgs): Promise<CommandOutpu
       const result = await graphqlRuntime({
         flags: runtimeFlags,
         env: process.env,
+        // MNT-03: forward the operator's --retry N (and the --quiet-gated
+        // onRetry writer) into the transport wrapper at the dispatch site.
+        retryOptsOverride: retryOpts,
       })
       return { data: result.data, meta: result.meta }
     },
-  })
+  }
+  if (args.noMeta !== undefined) runArgs.noMeta = args.noMeta
+  if (args.quiet !== undefined) runArgs.quiet = args.quiet
+  if (args.retry !== undefined) runArgs.retry = args.retry
+  return runCommand(runArgs)
 }

@@ -82,15 +82,20 @@ export default class RawBatchCommand extends Command {
     }
     if (flags.workspace !== undefined) batchFlags.workspace = flags.workspace
 
-    const out = await runCommand({
+    const runArgs: Parameters<typeof runCommand>[0] = {
       commandPath: 'raw batch',
       pretty: flags.pretty ?? false,
-      handler: () =>
+      handler: (retryOpts) =>
         runRawBatch({
           flags: batchFlags,
           env: process.env,
+          retryOptsOverride: retryOpts,
         }),
-    })
+    }
+    if (flags.quiet !== undefined) runArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) runArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) runArgs.retry = flags.retry
+    const out = await runCommand(runArgs)
 
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)

@@ -78,16 +78,21 @@ export default class RawCommand extends Command {
     if (flags['allow-mutations']) rawFlags['allow-mutations'] = flags['allow-mutations']
     if (flags.vars !== undefined) rawFlags.vars = flags.vars
 
-    const out = await runCommand({
+    const runArgs: Parameters<typeof runCommand>[0] = {
       commandPath: 'raw',
       pretty: flags.pretty ?? false,
-      handler: () =>
+      handler: (retryOpts) =>
         runRaw({
           args: args as RunRawArgs,
           flags: rawFlags,
           env: process.env,
+          retryOptsOverride: retryOpts,
         }),
-    })
+    }
+    if (flags.quiet !== undefined) runArgs.quiet = flags.quiet
+    if (flags.noMeta !== undefined) runArgs.noMeta = flags.noMeta
+    if (flags.retry !== undefined) runArgs.retry = flags.retry
+    const out = await runCommand(runArgs)
 
     process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
