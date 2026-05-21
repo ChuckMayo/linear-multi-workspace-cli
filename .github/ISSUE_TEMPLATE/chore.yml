@@ -1,0 +1,93 @@
+name: Chore
+description: Maintenance work with no user-visible behavior change — refactors, deps, tests, docs, CI, infra.
+title: "[chore] "
+labels: ["chore", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Chores are invisible to end users. If a user could notice the change, it's a Feature or an Enhancement, not a Chore.
+
+  - type: checkboxes
+    id: pre-submission
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+          required: true
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This work has no user-visible behavior change (no new flag, no output shape change, no new error message).
+          required: true
+
+  - type: textarea
+    id: task
+    attributes:
+      label: Maintenance task
+      description: One sentence describing what needs doing.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of maintenance
+      options:
+        - Dependency bump (manual)
+        - Refactor
+        - Test coverage / test infrastructure
+        - Docs (internal — not user-facing)
+        - Build / bundling
+        - CI / GitHub Actions
+        - Codegen / schema sync
+        - Repo hygiene (linting, formatting, file moves)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-state
+    attributes:
+      label: Current state
+      description: Specifics. Files, versions, scripts, behaviors — name them.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-work
+    attributes:
+      label: Proposed work
+      description: Concrete steps. Best guess is fine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: How will we know it's done? Tests still green, no output changes, etc.
+      placeholder: |
+        - [ ] All existing tests pass
+        - [ ] No change to `--json` output snapshots
+        - [ ] No new runtime dependencies
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area affected
+      options:
+        - Workspace registry / multi-workspace
+        - Raw GraphQL surface (codegen / raw command)
+        - Curated commands
+        - Output / JSON envelope
+        - Introspection (describe / schema)
+        - Auth / token handling
+        - Agent skills
+        - Docs / CONTRIBUTING
+        - Build / release / CI
+        - Tests
+        - Other
+    validations:
+      required: true

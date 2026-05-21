@@ -1,0 +1,100 @@
+name: Enhancement
+description: Improve an existing command, flag, output, or behavior — not a new feature and not a bug.
+title: "[enhancement] "
+labels: ["enhancement", "needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Enhancements tweak existing behavior. If it's broken, file a Bug. If it doesn't exist yet, file a Feature.
+
+  - type: checkboxes
+    id: pre-submission
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+          required: true
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: The thing I'm improving already exists in the CLI (otherwise this is a Feature).
+          required: true
+        - label: Current behavior isn't broken — it's just suboptimal (otherwise this is a Bug).
+          required: true
+
+  - type: input
+    id: target
+    attributes:
+      label: What existing feature
+      description: Which command, flag, output mode, or behavior is being improved.
+      placeholder: "e.g. linear-agent issues list --json envelope"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+      description: How it works today, with a concrete example (command + output).
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-behavior
+    attributes:
+      label: Proposed behavior
+      description: How it should work, with a concrete example (command + output).
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason and benefit
+      description: Why is this worth the change? "It feels better" isn't enough — name the user pain or agent-consumer impact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope of changes
+      description: Best guess at files / subsystems affected. "Unknown" is acceptable.
+    validations:
+      required: true
+
+  - type: textarea
+    id: breaking-changes
+    attributes:
+      label: Breaking changes
+      description: Does this change observable output, exit codes, or flag semantics? If "none", say "none".
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other ways to address the same pain. Why is this the right one?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area affected
+      options:
+        - Workspace registry / multi-workspace
+        - Raw GraphQL surface (codegen / raw command)
+        - Curated commands
+        - Output / JSON envelope / contract
+        - Introspection (describe / schema)
+        - Auth / token handling
+        - Agent skills (Claude Code, Codex, etc.)
+        - Docs / CONTRIBUTING
+        - Build / release / CI
+        - Other
+    validations:
+      required: true

@@ -1,0 +1,133 @@
+name: Feature request
+description: Propose a new capability — a curated command, a new flag, a new output mode, a new auth path, etc.
+title: "[feature] "
+labels: ["feature-request", "needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing — most missing Linear operations are already callable via `linear-agent raw <Operation>`.
+        Use this template only for *curated* surface additions or non-GraphQL features (auth, output, runtime integration, etc.).
+
+  - type: checkboxes
+    id: pre-submission
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+          required: true
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This is not already callable via `linear-agent raw <Operation>` (or, if it is, I explain why a curated wrapper is warranted).
+          required: true
+        - label: This is a new capability — not a tweak to an existing one (that's an Enhancement).
+          required: true
+
+  - type: input
+    id: feature-name
+    attributes:
+      label: Feature name
+      description: Short, descriptive. Will become the issue title prefix.
+      placeholder: "e.g. linear-agent comments list"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: addition-type
+    attributes:
+      label: Type of addition
+      options:
+        - New curated command
+        - New flag on existing command
+        - New output mode (e.g. NDJSON, CSV)
+        - New auth method (e.g. OAuth)
+        - New runtime/skill integration
+        - New introspection capability (describe, schema, etc.)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What's currently impossible or painful? Concrete, not abstract.
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-is-being-added
+    attributes:
+      label: What is being added
+      description: Describe the proposed behavior with example invocations and (if relevant) example JSON output.
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Full scope of changes
+      description: Files created, files modified, subsystems touched. Best guess is fine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: User stories
+      description: At least 2. Format "As an X, I want Y so that Z."
+      placeholder: |
+        - As a Claude Code user with two Linear workspaces, I want to ... so that ...
+        - As an agent script, I want to ... so that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Testable conditions that define "done". Each should be objectively verifiable.
+      placeholder: |
+        - [ ] `linear-agent comments list --issue ABC-123 --json` returns `{ok:true, data:[...]}` with N>=1 records
+        - [ ] `--describe` reflects the new command's flags and JSON schema
+        - [ ] Snapshot test for the JSON envelope passes
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: applicable-runtimes
+    attributes:
+      label: Applicable runtimes
+      description: Which runtimes need to be able to use this.
+      options:
+        - label: Claude Code
+        - label: OpenAI Codex CLI
+        - label: Gemini CLI
+        - label: Cursor
+        - label: GitHub Copilot CLI
+        - label: Plain shell
+
+  - type: textarea
+    id: breaking-changes
+    attributes:
+      label: Breaking changes
+      description: Does this change any existing command's flags, output shape, or exit codes? If "none", say "none".
+    validations:
+      required: true
+
+  - type: textarea
+    id: maintenance-burden
+    attributes:
+      label: Maintenance burden
+      description: What's the ongoing cost of shipping this? (Codegen churn, runtime quirks, schema sensitivity, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you weigh? Why is this the right one?
+    validations:
+      required: true
