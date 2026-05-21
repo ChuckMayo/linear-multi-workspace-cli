@@ -55,7 +55,8 @@ export async function runMe(args: RunMeArgs): Promise<CommandOutput> {
         // and viewer.organization.
         retryOptsOverride: retryOpts,
       }
-      if (args.loadConfigOverride !== undefined) meInput.loadConfigOverride = args.loadConfigOverride
+      if (args.loadConfigOverride !== undefined)
+        meInput.loadConfigOverride = args.loadConfigOverride
       if (args.clientFactoryOverride !== undefined)
         meInput.clientFactoryOverride = args.clientFactoryOverride
       const result = await meRuntime(meInput)

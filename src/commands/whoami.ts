@@ -48,7 +48,8 @@ export async function runWhoami(args: RunWhoamiArgs): Promise<CommandOutput> {
         // `whoami` and `me` emit IDENTICAL envelopes except for `meta.command`.
         retryOptsOverride: retryOpts,
       }
-      if (args.loadConfigOverride !== undefined) meInput.loadConfigOverride = args.loadConfigOverride
+      if (args.loadConfigOverride !== undefined)
+        meInput.loadConfigOverride = args.loadConfigOverride
       if (args.clientFactoryOverride !== undefined)
         meInput.clientFactoryOverride = args.clientFactoryOverride
       const result = await meRuntime(meInput)
