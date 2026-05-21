@@ -54,21 +54,24 @@ describe('.github/workflows/ci.yml is a valid GitHub Actions workflow', () => {
     expect(triggerKeys).toContain('pull_request')
   })
 
-  it('uses Node 22 via actions/setup-node@v4 with npm cache', () => {
+  it('uses Node 22 via actions/setup-node pinned to a specific major, with npm cache', () => {
     const wf = yaml.load(readFileSync(CI, 'utf8')) as CiWorkflow
     const job = Object.values(wf.jobs ?? {})[0]
     expect(job).toBeDefined()
     const setupNode = job?.steps?.find((s) => s.uses?.startsWith('actions/setup-node@'))
-    expect(setupNode?.uses).toBe('actions/setup-node@v4')
+    // Pinned to a major version (vN), not floating @main/@master/@latest. The
+    // specific N is allowed to advance via Dependabot without breaking this
+    // test; the intent is "we never float to a moving ref."
+    expect(setupNode?.uses).toMatch(/^actions\/setup-node@v\d+$/)
     expect(String(setupNode?.with?.['node-version'])).toBe('22')
     expect(setupNode?.with?.cache).toBe('npm')
   })
 
-  it('uses actions/checkout@v4', () => {
+  it('uses actions/checkout pinned to a specific major', () => {
     const wf = yaml.load(readFileSync(CI, 'utf8')) as CiWorkflow
     const job = Object.values(wf.jobs ?? {})[0]
     const checkout = job?.steps?.find((s) => s.uses?.startsWith('actions/checkout@'))
-    expect(checkout?.uses).toBe('actions/checkout@v4')
+    expect(checkout?.uses).toMatch(/^actions\/checkout@v\d+$/)
   })
 
   it('runs npm ci, lint, typecheck, test, build (in that order)', () => {

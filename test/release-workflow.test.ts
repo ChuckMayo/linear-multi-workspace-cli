@@ -131,21 +131,23 @@ describe('release.yml has the four jobs in the documented needs: chain', () => {
   })
 })
 
-describe('release.yml jobs: every job uses the same Node 22 + checkout@v4 setup', () => {
-  it('every job uses actions/checkout@v4', () => {
+describe('release.yml jobs: every job uses the same Node 22 + pinned-major checkout setup', () => {
+  it('every job uses actions/checkout pinned to a specific major', () => {
     const wf = loadRelease()
     for (const [name, job] of Object.entries(wf.jobs ?? {})) {
       const checkout = job?.steps?.find((s) => s.uses?.startsWith('actions/checkout@'))
-      expect(checkout?.uses, `job ${name}: actions/checkout@v4 missing`).toBe('actions/checkout@v4')
+      expect(checkout?.uses, `job ${name}: actions/checkout pin missing`).toMatch(
+        /^actions\/checkout@v\d+$/,
+      )
     }
   })
 
-  it("every job uses actions/setup-node@v4 with node-version '22' and cache 'npm'", () => {
+  it("every job uses actions/setup-node (pinned major) with node-version '22' and cache 'npm'", () => {
     const wf = loadRelease()
     for (const [name, job] of Object.entries(wf.jobs ?? {})) {
       const setupNode = job?.steps?.find((s) => s.uses?.startsWith('actions/setup-node@'))
-      expect(setupNode?.uses, `job ${name}: actions/setup-node@v4 missing`).toBe(
-        'actions/setup-node@v4',
+      expect(setupNode?.uses, `job ${name}: actions/setup-node pin missing`).toMatch(
+        /^actions\/setup-node@v\d+$/,
       )
       expect(String(setupNode?.with?.['node-version']), `job ${name}: node-version`).toBe('22')
       expect(setupNode?.with?.cache, `job ${name}: cache`).toBe('npm')

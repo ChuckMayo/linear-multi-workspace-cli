@@ -84,8 +84,12 @@ describe('.github/workflows/schema-diff.yml structural contract', () => {
     const uses = getSteps(job)
       .map((s) => s.uses)
       .filter((u): u is string => Boolean(u))
-    expect(uses).toContain('actions/checkout@v4')
-    expect(uses).toContain('actions/setup-node@v4')
+    // Actions/checkout and actions/setup-node are allowed to advance majors
+    // via Dependabot; we only assert they are pinned to a specific major (not
+    // floating @main/@master/@latest). peter-evans/create-pull-request stays
+    // pinned to v8 per RESEARCH §3 (v6 has a known regression we must avoid).
+    expect(uses.some((u) => /^actions\/checkout@v\d+$/.test(u))).toBe(true)
+    expect(uses.some((u) => /^actions\/setup-node@v\d+$/.test(u))).toBe(true)
     expect(uses).toContain('peter-evans/create-pull-request@v8')
     // Anti-regression: never v6 (RESEARCH §3 correction).
     const prAction = uses.find((u) => u.startsWith('peter-evans/create-pull-request@'))
@@ -179,8 +183,9 @@ describe('.github/workflows/schema-diff.yml structural contract', () => {
 
   it('node setup uses Node 22 LTS with npm cache', () => {
     const job = getDiffJob(loadWorkflow())
-    const nodeStep = getSteps(job).find((s) => s.uses === 'actions/setup-node@v4')
+    const nodeStep = getSteps(job).find((s) => s.uses?.startsWith('actions/setup-node@'))
     expect(nodeStep).toBeDefined()
+    expect(nodeStep?.uses).toMatch(/^actions\/setup-node@v\d+$/)
     expect(String(nodeStep?.with?.['node-version'])).toBe('22')
     expect(nodeStep?.with?.cache).toBe('npm')
   })
