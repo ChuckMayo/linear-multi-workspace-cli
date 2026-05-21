@@ -94,9 +94,9 @@ export default class RawCommand extends Command {
     if (flags.retry !== undefined) runArgs.retry = flags.retry
     const out = await runCommand(runArgs)
 
-    process.stdout.write(out.stdout)
+    if (!flags.json) process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
-    if (out.exitCode !== 0) this.exit(out.exitCode)
+    if (out.exitCode !== 0) process.exitCode = out.exitCode
     return JSON.parse(out.stdout)
   }
 }

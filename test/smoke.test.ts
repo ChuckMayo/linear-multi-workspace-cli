@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -36,22 +36,33 @@ describe('phase-1 smoke test', () => {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     })
-    // The CLI writes the envelope to stdout. oclif's --json shim re-emits the
-    // returned object as a second JSON line; we accept either the first or
-    // last parseable JSON.
-    const parsed = (() => {
-      const trimmed = out.trim()
-      // Try parsing the whole thing first.
-      try {
-        return JSON.parse(trimmed)
-      } catch {}
-      // Fall back to the first line (our envelope is always one line of JSON + \n).
-      const firstLine = trimmed.split('\n')[0]
-      return JSON.parse(firstLine ?? '{}')
-    })()
+    // Regression: stdout under --json MUST be a single JSON document.
+    // Earlier the CLI emitted both the envelope (direct stdout write) AND
+    // oclif's framework re-emission, producing two documents that broke
+    // every agent-side JSON.parse pipeline.
+    const parsed = JSON.parse(out)
     expect(parsed.$apiVersion).toBe('1')
     expect(parsed.ok).toBe(true)
     expect(parsed.data.workspaces).toEqual([])
     expect(parsed.meta.command).toBe('workspace list')
+  })
+
+  it('--json failure envelope is the canonical shape, NOT oclif EEXIT shim', () => {
+    // Regression: `this.exit(N)` under --json mode used to surface as
+    // `{ error: { code: "EEXIT", oclif: { exit: N } } }` instead of the
+    // canonical failure envelope. The fix sets `process.exitCode` and
+    // returns the envelope so oclif's --json printer emits it directly.
+    const res = spawnSync('node', [BIN, 'workspace', 'use', 'does-not-exist', '--json'], {
+      env: { ...process.env, XDG_CONFIG_HOME: tmpHome },
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    expect(res.status).not.toBe(0)
+    const parsed = JSON.parse(res.stdout)
+    expect(parsed.$apiVersion).toBe('1')
+    expect(parsed.ok).toBe(false)
+    expect(parsed.error.code).toBeTypeOf('string')
+    expect(parsed.error.code).not.toBe('EEXIT')
+    expect(parsed.meta.command).toBe('workspace use')
   })
 })

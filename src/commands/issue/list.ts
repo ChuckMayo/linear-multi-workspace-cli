@@ -108,9 +108,9 @@ export default class IssueList extends Command {
     if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
     if (flags.retry !== undefined) callArgs.retry = flags.retry
     const out = await runIssueList(callArgs)
-    process.stdout.write(out.stdout)
+    if (!flags.json) process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
-    if (out.exitCode !== 0) this.exit(out.exitCode)
+    if (out.exitCode !== 0) process.exitCode = out.exitCode
     // Re-emit the parsed envelope for oclif's --json mode.
     return JSON.parse(out.stdout)
   }

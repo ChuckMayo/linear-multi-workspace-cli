@@ -61,9 +61,9 @@ export default class WorkspaceUse extends Command {
     if (flags.noMeta !== undefined) callArgs.noMeta = flags.noMeta
     if (flags.retry !== undefined) callArgs.retry = flags.retry
     const out = await runWorkspaceUse(callArgs)
-    process.stdout.write(out.stdout)
+    if (!flags.json) process.stdout.write(out.stdout)
     if (out.stderr) process.stderr.write(out.stderr)
-    if (out.exitCode !== 0) this.exit(out.exitCode)
+    if (out.exitCode !== 0) process.exitCode = out.exitCode
     return JSON.parse(out.stdout)
   }
 }
