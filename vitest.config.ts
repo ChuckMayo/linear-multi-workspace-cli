@@ -9,6 +9,7 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
     environment: 'node',
     testTimeout: 30000,
+    setupFiles: ['./test/setup.ts'],
   },
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
