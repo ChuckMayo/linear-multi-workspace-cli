@@ -1,8 +1,33 @@
 {
   "name": "linear-agent",
   "version": "0.0.0",
-  "description": "Agent-runtime-agnostic Linear CLI",
+  "description": "Agent-runtime-agnostic Linear CLI — drive Linear from Claude Code, Codex CLI, Gemini CLI, Cursor, or any agent that can shell out. Works across multiple Linear workspaces in one session.",
   "type": "module",
+  "license": "MIT",
+  "author": "Charlie Helman",
+  "homepage": "https://github.com/ChuckMayo/linear-multi-workspace-cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChuckMayo/linear-multi-workspace-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ChuckMayo/linear-multi-workspace-cli/issues"
+  },
+  "keywords": [
+    "linear",
+    "linear-app",
+    "cli",
+    "agent",
+    "agents",
+    "ai-agent",
+    "claude",
+    "claude-code",
+    "codex",
+    "gemini",
+    "cursor",
+    "graphql",
+    "issue-tracker"
+  ],
   "engines": {
     "node": ">=22"
   },
@@ -15,7 +40,8 @@
     "schema.graphql",
     "oclif.manifest.json",
     "skills",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "main": "./dist/index.js",
   "scripts": {
