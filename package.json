@@ -74,7 +74,7 @@
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
     "@linear/sdk": "^84.0.0",
-    "@oclif/core": "^4.11.3",
+    "@oclif/core": "^4.11.4",
     "conf": "^15.1.0",
     "graphql": "^16.14.0",
     "picocolors": "^1.1.0",
