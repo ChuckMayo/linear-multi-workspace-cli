@@ -1,5 +1,5 @@
 /**
- * `linear-agent graphql` — free-form GraphQL escape hatch for Phase 3 RAW-03.
+ * `linmux graphql` — free-form GraphQL escape hatch for Phase 3 RAW-03.
  *
  * Execute any GraphQL query/mutation against the Linear API. The query is
  * locally validated against the vendored schema before dispatch — syntax

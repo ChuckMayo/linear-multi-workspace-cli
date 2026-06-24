@@ -30,19 +30,19 @@ import { installSkillRuntime } from '@/lib/install-skill-runtime.js'
 // byte-stable across machines. The `beforeEach` for snapshot tests creates
 // these as real paths under tmpdir so reads/writes work without injecting
 // fsOverride.
-const STABLE_HOME = '/tmp/linear-agent-install-skill-test-home'
-const STABLE_SOURCE_DIR = '/tmp/linear-agent-install-skill-test-source'
+const STABLE_HOME = '/tmp/linmux-install-skill-test-home'
+const STABLE_SOURCE_DIR = '/tmp/linmux-install-skill-test-source'
 const STABLE_SOURCE = path.join(STABLE_SOURCE_DIR, 'SKILL.md')
 
 // Sample SKILL.md body — version "9.9.9" so snapshots are deterministic.
 const FIXTURE_BODY = `---
-name: linear-agent
+name: linmux
 description: Test fixture
 metadata:
   version: "9.9.9"
 ---
 
-# linear-agent
+# linmux
 
 Stable test fixture body.
 `
@@ -86,7 +86,7 @@ describe('installSkillRuntime — happy path', () => {
     })
 
     expect(out.data.source).toBe(source)
-    expect(out.data.target).toBe(path.join(home, '.claude', 'skills', 'linear-agent', 'SKILL.md'))
+    expect(out.data.target).toBe(path.join(home, '.claude', 'skills', 'linmux', 'SKILL.md'))
     expect(out.data.version).toBe('9.9.9')
     expect(out.data.bytes_written).toBe(Buffer.byteLength(FIXTURE_BODY, 'utf8'))
     expect(out.data.overwritten).toBe(false)
@@ -103,7 +103,7 @@ describe('installSkillRuntime — happy path', () => {
     writeFileSync(source, FIXTURE_BODY, 'utf8')
 
     // Pre-create target with stale content so overwritten=true and parent exists
-    const targetDir = path.join(home, '.claude', 'skills', 'linear-agent')
+    const targetDir = path.join(home, '.claude', 'skills', 'linmux')
     mkdirSync(targetDir, { recursive: true })
     const target = path.join(targetDir, 'SKILL.md')
     writeFileSync(target, 'STALE CONTENT', 'utf8')
@@ -124,7 +124,7 @@ describe('installSkillRuntime — happy path', () => {
     const { home, source } = makeScratch()
     writeFileSync(source, FIXTURE_BODY, 'utf8')
 
-    // Pre-create the parent skills dir (but NOT the linear-agent subdir)
+    // Pre-create the parent skills dir (but NOT the linmux subdir)
     mkdirSync(path.join(home, '.claude', 'skills'), { recursive: true })
 
     const out = await installSkillRuntime({
@@ -140,7 +140,7 @@ describe('installSkillRuntime — happy path', () => {
     const { home, source } = makeScratch()
     writeFileSync(source, FIXTURE_BODY, 'utf8')
 
-    const targetDir = path.join(home, '.claude', 'skills', 'linear-agent')
+    const targetDir = path.join(home, '.claude', 'skills', 'linmux')
     mkdirSync(targetDir, { recursive: true })
     const target = path.join(targetDir, 'SKILL.md')
     // Pre-write byte-identical content
@@ -187,7 +187,7 @@ describe('installSkillRuntime — INSTALL_SKILL_BUNDLE_NOT_FOUND', () => {
   it('Test 5: frontmatter unparseable → BUNDLE_NOT_FOUND reason=frontmatter_invalid', async () => {
     const { home, source } = makeScratch()
     // No frontmatter markers at all
-    writeFileSync(source, '# linear-agent\n\nplain body, no frontmatter\n', 'utf8')
+    writeFileSync(source, '# linmux\n\nplain body, no frontmatter\n', 'utf8')
 
     expect.assertions(3)
     try {
@@ -208,11 +208,11 @@ describe('installSkillRuntime — INSTALL_SKILL_BUNDLE_NOT_FOUND', () => {
     writeFileSync(
       source,
       `---
-name: linear-agent
+name: linmux
 description: no version field anywhere
 ---
 
-# linear-agent
+# linmux
 `,
       'utf8',
     )
@@ -261,9 +261,7 @@ describe('installSkillRuntime — INSTALL_SKILL_WRITE_FAILED', () => {
       const e = err as LinearAgentError
       expect(e.code).toBe('INSTALL_SKILL_WRITE_FAILED')
       expect(e.details?.errno).toBe('EACCES')
-      expect(e.details?.target).toBe(
-        path.join(home, '.claude', 'skills', 'linear-agent', 'SKILL.md'),
-      )
+      expect(e.details?.target).toBe(path.join(home, '.claude', 'skills', 'linmux', 'SKILL.md'))
     }
   })
 
@@ -319,7 +317,7 @@ describe('installSkillRuntime — snapshots', () => {
   })
 
   it('Test 10: snapshot — failure envelope INSTALL_SKILL_BUNDLE_NOT_FOUND', async () => {
-    const missing = '/tmp/linear-agent-missing-bundle/SKILL.md'
+    const missing = '/tmp/linmux-missing-bundle/SKILL.md'
     expect.assertions(2)
     try {
       await installSkillRuntime({

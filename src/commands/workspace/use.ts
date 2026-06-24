@@ -4,7 +4,7 @@ import { LinearAgentError } from '@/core/errors/index.js'
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
- * `linear-agent workspace use <name>`
+ * `linmux workspace use <name>`
  *
  * Per WSP-03: sets `active` to the named workspace; throws
  * `WORKSPACE_NOT_FOUND` if not registered. Idempotent — re-running with the

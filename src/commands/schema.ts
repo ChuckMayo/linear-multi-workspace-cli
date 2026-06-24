@@ -1,5 +1,5 @@
 /**
- * `linear-agent schema` — Phase 4 PLAN 04-04, INT-03.
+ * `linmux schema` — Phase 4 PLAN 04-04, INT-03.
  *
  * Returns the Linear GraphQL schema without making any network calls.
  * Sources the vendored `schema.graphql` via schema-loader.ts (lazy-cached).

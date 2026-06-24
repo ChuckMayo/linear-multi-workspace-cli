@@ -104,7 +104,7 @@ exports[`listToolsRuntime > INT-04 snapshot: full data object > list-tools-full 
         "pretty",
       ],
       "id": "install-skill",
-      "summary": "Copy the bundled Claude Code skill to ~/.claude/skills/linear-agent/SKILL.md.",
+      "summary": "Copy the bundled Claude Code skill to ~/.claude/skills/linmux/SKILL.md.",
     },
     {
       "flags": [

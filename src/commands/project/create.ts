@@ -1,5 +1,5 @@
 /**
- * `linear-agent project create` -- Phase 2 PLAN 02-07 Task 2, PRJ-01.create.
+ * `linmux project create` -- Phase 2 PLAN 02-07 Task 2, PRJ-01.create.
  *
  * Write command. Required: `--name` + `--teams` (comma-separated team
  * keys/UUIDs/names; >=1). Optional: --description, --state, --lead,

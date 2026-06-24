@@ -152,9 +152,9 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          tarballs=( linear-agent-*.tgz )
+          tarballs=( linmux-*.tgz )
           if [ ${#tarballs[@]} -eq 0 ]; then
-            echo "no linear-agent-*.tgz tarball found" >&2
+            echo "no linmux-*.tgz tarball found" >&2
             exit 1
           fi
           TARBALL="${tarballs[0]}"

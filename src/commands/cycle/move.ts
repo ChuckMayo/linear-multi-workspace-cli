@@ -1,5 +1,5 @@
 /**
- * `linear-agent cycle move <issue-ref> --to <cycle-ref>` --
+ * `linmux cycle move <issue-ref> --to <cycle-ref>` --
  * Phase 2 PLAN 02-08 Task 2, CYC-01.move.
  *
  * Write command. Moves a Linear issue to a different cycle. Linear has NO

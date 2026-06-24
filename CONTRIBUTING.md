@@ -28,7 +28,7 @@ A perfect issue includes:
 1. **What you ran** — the exact command line.
 2. **What you saw** — the stdout + stderr (use a fenced ```` ``` ```` block).
 3. **What you expected.**
-4. **`node --version` and the CLI version** (`npx -y linear-agent --version`).
+4. **`node --version` and the CLI version** (`npx -y linmux --version`).
 5. **Your agent runtime**, if relevant (Claude Code, Codex CLI, etc.).
 
 Redact your `LINEAR_API_KEY` before pasting anything. The CLI itself never prints it; if you see one in output, please tell us — that's a bug we want to fix immediately.

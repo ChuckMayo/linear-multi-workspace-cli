@@ -1,5 +1,5 @@
 /**
- * `linear-agent comment list` -- Phase 2 PLAN 02-06 Task 1, CMT-01.list.
+ * `linmux comment list` -- Phase 2 PLAN 02-06 Task 1, CMT-01.list.
  *
  * Read command. Lists comments either workspace-wide or scoped to a single
  * issue (--issue ENG-123 or UUID). NO WSP-06 enforcement -- reads are

@@ -1,5 +1,5 @@
 /**
- * `linear-agent list-tools` — Phase 4 PLAN 04-02, INT-01.
+ * `linmux list-tools` — Phase 4 PLAN 04-02, INT-01.
  *
  * Enumerates every curated and raw command, marking curated→raw mappings.
  * Zero network calls — all data is assembled from static registries.

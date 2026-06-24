@@ -1,5 +1,5 @@
 /**
- * `linear-agent team list` -- Phase 2 PLAN 02-09 Task 1, TEM-01.list.
+ * `linmux team list` -- Phase 2 PLAN 02-09 Task 1, TEM-01.list.
  *
  * Read command. Lists workspace-scoped teams. Implementation lives in
  * `src/lib/team-list-runtime.ts` per the Phase 1 PLAN-04 invariant (oclif

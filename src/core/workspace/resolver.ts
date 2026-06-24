@@ -67,13 +67,13 @@ export function resolveWorkspace(input: ResolveInput): ResolvedWorkspace {
   throw new LinearAgentError({
     code: 'WORKSPACE_NOT_RESOLVED',
     message:
-      'no workspace selected: pass --workspace <name>, set LINEAR_WORKSPACE, or run `linear-agent workspace use <name>`',
+      'no workspace selected: pass --workspace <name>, set LINEAR_WORKSPACE, or run `linmux workspace use <name>`',
     details: {
       configuredWorkspaces: names,
       remediation:
         names.length === 0
-          ? 'run `linear-agent workspace add <name> --token <api-key>` to register a workspace'
-          : 'run `linear-agent workspace use <name>` to set an active default, or pass --workspace <name>',
+          ? 'run `linmux workspace add <name> --token <api-key>` to register a workspace'
+          : 'run `linmux workspace use <name>` to set an active default, or pass --workspace <name>',
     },
   })
 }

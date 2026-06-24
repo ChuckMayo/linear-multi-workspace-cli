@@ -1,49 +1,60 @@
 ---
-name: linear-agent
-description: Operate Linear from any agent. Use when the user asks about Linear issues, projects, cycles, comments, teams, labels, workflow states, or wants to query/mutate Linear via CLI. Single-CLI surface for any Linear workspace; works across multiple workspaces in one session. JSON-by-default output for agent consumption.
-compatibility: Requires Node 22+ and a Linear API key (LINEAR_API_KEY env var or `linear-agent workspace add`).
+name: linmux
+description: Operate Linear across all your workspaces from any agent that can shell out — the full GraphQL surface (~500 ops), multiple workspaces in one session, and stable versioned JSON. Use when the user asks about Linear issues, projects, cycles, comments, teams, labels, or workflow states, or wants to query/mutate Linear via CLI — especially when more than one Linear workspace is in play.
+compatibility: Requires Node 22+ and a Linear API key (LINEAR_API_KEY env var or `linmux workspace add`).
 metadata:
   version: "{{VERSION}}"
   homepage: "https://github.com/ChuckMayo/linear-multi-workspace-cli"
 ---
 
-# linear-agent
+# linmux
 
-Pinned version: `{{VERSION}}`. Always invoke as `npx -y linear-agent@{{VERSION}} <command>`. Never the floating dist-tag — agents must pin so a registry update doesn't silently change the contract mid-session.
+One CLI that drives **every** Linear operation across **all** your workspaces — the full GraphQL surface (~500 ops), multiple workspaces in a single session, JSON by default for agents.
+
+Pinned version: `{{VERSION}}`. Always invoke as `npx -y linmux@{{VERSION}} <command>`. Never the floating dist-tag — agents must pin so a registry update doesn't silently change the contract mid-session.
 
 ## When to invoke
 
-Invoke `linear-agent` when the user wants to read or write Linear data and you can shell out. Trigger phrases include:
+Invoke `linmux` when the user wants to read or write Linear data and you can shell out. It shines when more than one Linear workspace is in play — each command resolves its workspace independently, so a single session can touch several. Trigger phrases include:
 
 - "create / update / archive / list / search / get an issue"
 - "add a comment", "find issues in <team>", "what's in cycle <n>"
 - "create / update a project", "set project status"
 - "list teams / labels / workflow states / cycles"
 - "who am I" / "what workspace am I in" (use `me` or `whoami`)
+- Anything spanning two workspaces ("compare my open issues in acme vs personal")
 - Any GraphQL query a curated command doesn't cover — fall back to the raw layer
 
 You do NOT need to ask the user for permission to call a read-only command (`*list*`, `*get*`, `*search*`, `me`, `whoami`, `describe`, `list-tools`, `schema`). For write commands (create/update/delete/archive/trash/transition/purge), confirm intent first unless the user has clearly asked for the write.
 
 ## Auth setup
 
-`linear-agent` reads its Linear API key from one of two sources, in this order:
+`linmux` reads its Linear API key from one of two sources, in this order:
 
 1. **Per-shell env var** (preferred for CI / one-shot invocations):
    ```
    export LINEAR_API_KEY=lin_api_...
-   npx -y linear-agent@{{VERSION}} me --json
+   npx -y linmux@{{VERSION}} me --json
    ```
 
 2. **Persistent workspace registry** (preferred for interactive use, supports multiple workspaces):
    ```
-   npx -y linear-agent@{{VERSION}} workspace add --name acme --token lin_api_...
-   npx -y linear-agent@{{VERSION}} workspace use acme
-   npx -y linear-agent@{{VERSION}} me --json
+   npx -y linmux@{{VERSION}} workspace add acme --token lin_api_...
+   npx -y linmux@{{VERSION}} workspace add personal --token lin_api_...
+   npx -y linmux@{{VERSION}} workspace use acme
+   npx -y linmux@{{VERSION}} me --json
    ```
 
-If the user has multiple Linear workspaces, every command accepts `--workspace <name>` to override the active one. Tokens are stored under `conf`'s platform-conventional config dir (XDG on Linux, `~/Library/Preferences/...` on macOS, `%APPDATA%\...` on Windows). Personal API keys only — no OAuth in v1.
+The workspace name is a positional argument (`workspace add <name> --token ...`). Every command accepts `--workspace <name>` to target a specific registered workspace without changing the active default — that is how one session drives several workspaces:
 
-If neither source is set, every command exits with `WORKSPACE_NOT_RESOLVED` (exit 10). Run `linear-agent workspace list` to see what's registered.
+```
+npx -y linmux@{{VERSION}} issue list --workspace acme --team ENG --json
+npx -y linmux@{{VERSION}} issue list --workspace personal --team SIDE --json
+```
+
+Tokens are stored at `$XDG_CONFIG_HOME/linear-agent/config.json`, default `~/.config/linear-agent/config.json` (the directory name predates the `linmux` rename), written with mode 0600. Personal API keys only — no OAuth in v1.
+
+If neither source is set, every command exits with `WORKSPACE_NOT_RESOLVED` (exit 10). Run `linmux workspace list` to see what's registered.
 
 ## JSON-by-default contract
 
@@ -74,11 +85,11 @@ Failure envelope:
 }
 ```
 
-`ok: true` ⇒ exit 0. `ok: false` ⇒ exit > 0 (taxonomy below). The `data` payload shape is stable per command — pin tests against `data.*` paths, not human prose.
+`ok: true` ⇒ exit 0. `ok: false` ⇒ exit > 0 (taxonomy below). The `data` payload shape is stable per command — pin tests against `data.*` paths, not human prose. The `meta.workspace` field tells you which workspace served the call — check it when working across several.
 
 ## Curated commands quick-reference
 
-Top-of-funnel commands (one line each). Run `npx -y linear-agent@{{VERSION}} describe <command>` for full flag schema, or `npx -y linear-agent@{{VERSION}} list-tools` for the full inventory.
+Top-of-funnel commands (one line each). Run `npx -y linmux@{{VERSION}} describe <command>` for full flag schema, or `npx -y linmux@{{VERSION}} list-tools` for the full inventory.
 
 | Command | Purpose |
 |---------|---------|
@@ -99,7 +110,7 @@ Top-of-funnel commands (one line each). Run `npx -y linear-agent@{{VERSION}} des
 | `cycle list --team <slug> --json` | List cycles for a team. |
 | `team list --json` / `label list --team <slug> --json` / `state list --team <slug> --json` | Read-only catalogs. |
 
-Every write command short-circuits to a `CONFIRMATION_REQUIRED` error if it looks destructive without `--yes`. Pass `--yes` only when the user has explicitly approved the write.
+Any command above accepts `--workspace <name>` to target a specific workspace. Every write command short-circuits to a `CONFIRMATION_REQUIRED` error if it looks destructive without `--yes`. Pass `--yes` only when the user has explicitly approved the write.
 
 ## Raw GraphQL escape hatch
 
@@ -107,13 +118,13 @@ When a curated command doesn't expose a field you need, use the raw layer. Workf
 
 1. **Discover the operation:**
    ```
-   npx -y linear-agent@{{VERSION}} describe IssueBatchCreate --json
+   npx -y linmux@{{VERSION}} describe IssueBatchCreate --json
    ```
    `describe` returns a Zod-derived schema with required + optional fields.
 
 2. **Invoke it via `raw`:**
    ```
-   npx -y linear-agent@{{VERSION}} raw IssueBatchCreate \
+   npx -y linmux@{{VERSION}} raw IssueBatchCreate \
      --vars '{"input":{"issues":[{"teamId":"...","title":"..."}]}}' \
      --json
    ```
@@ -121,12 +132,12 @@ When a curated command doesn't expose a field you need, use the raw layer. Workf
 
 3. **Or run an arbitrary GraphQL query string:**
    ```
-   npx -y linear-agent@{{VERSION}} graphql \
+   npx -y linmux@{{VERSION}} graphql \
      --query 'query { viewer { id } }' \
      --json
    ```
 
-The raw layer covers Linear's full GraphQL surface (~500+ operations). Use it when the user asks for something a curated command doesn't expose; otherwise prefer the curated command for cleaner UX and snapshot-stable output.
+The raw layer covers Linear's full GraphQL surface (~500+ operations) — this is the part the official Linear MCP doesn't reach. Use it when the user asks for something a curated command doesn't expose; otherwise prefer the curated command for cleaner UX and snapshot-stable output.
 
 ## Common error envelopes
 
@@ -134,7 +145,7 @@ The five most-likely failure codes you'll see:
 
 | Code | Exit | Meaning |
 |------|------|---------|
-| `WORKSPACE_NOT_RESOLVED` | 10 | No `LINEAR_API_KEY` and no active workspace. Tell the user to run `linear-agent workspace add` or set `LINEAR_API_KEY`. |
+| `WORKSPACE_NOT_RESOLVED` | 10 | No `LINEAR_API_KEY` and no active workspace. Tell the user to run `linmux workspace add` or set `LINEAR_API_KEY`. |
 | `AUTH_INVALID` | 11 | Token is malformed or has been revoked. Tell the user to regenerate at <https://linear.app/settings/api>. |
 | `VALIDATION_FAILED` | 12 | A required field is missing or malformed. Inspect `error.details.field`. |
 | `RATELIMITED` | 14 | Linear's rate limit is hit (3M points/hr authenticated). `error.transient: true` — back off and retry. |
@@ -149,27 +160,27 @@ Three flags help shave bytes or control retries in high-volume agent sessions.
 - `--no-meta`: drop the `meta` block from success envelopes (failure envelopes unchanged for debuggability). Saves ~150–250 bytes per call.
 
   ```
-  npx -y linear-agent@{{VERSION}} issue list --json --no-meta
+  npx -y linmux@{{VERSION}} issue list --json --no-meta
   ```
 
 - `--quiet`: implies `--no-meta` AND suppresses pretty-mode banners. Useful for human pipelines and CI scripts that just want the data.
 
   ```
-  npx -y linear-agent@{{VERSION}} me --json --quiet
+  npx -y linmux@{{VERSION}} me --json --quiet
   ```
 
 - `--retry N`: add N additional retries on top of the per-error-type defaults (3 for rate-limit, 3 for network). Only retries `transient: true` errors; auth and validation errors fail immediately regardless. Each retry attempt is logged to stderr unless `--quiet` is set.
 
   ```
-  npx -y linear-agent@{{VERSION}} issue list --json --retry 2
+  npx -y linmux@{{VERSION}} issue list --json --retry 2
   ```
 
 ## Self-discovery (introspection)
 
 The CLI ships with three introspection commands that let an agent learn the surface without external docs:
 
-- `npx -y linear-agent@{{VERSION}} list-tools --json` — every command (curated + raw) with its one-line description.
-- `npx -y linear-agent@{{VERSION}} describe <command-or-operation> --json` — flag schema, JSON output schema, examples.
-- `npx -y linear-agent@{{VERSION}} schema --json` — the full Linear GraphQL schema (cached) for arbitrary queries.
+- `npx -y linmux@{{VERSION}} list-tools --json` — every command (curated + raw) with its one-line description.
+- `npx -y linmux@{{VERSION}} describe <command-or-operation> --json` — flag schema, JSON output schema, examples.
+- `npx -y linmux@{{VERSION}} schema --json` — the full Linear GraphQL schema (cached) for arbitrary queries.
 
 Always prefer `describe` over reading source. The `describe` output is generated from the same Zod schemas that drive command parsing, so it's the canonical contract for what a command accepts and returns.

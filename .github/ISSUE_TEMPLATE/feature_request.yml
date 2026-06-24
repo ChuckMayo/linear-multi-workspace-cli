@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing — most missing Linear operations are already callable via `linear-agent raw <Operation>`.
+        Before filing — most missing Linear operations are already callable via `linmux raw <Operation>`.
         Use this template only for *curated* surface additions or non-GraphQL features (auth, output, runtime integration, etc.).
 
   - type: checkboxes
@@ -18,7 +18,7 @@ body:
           required: true
         - label: I searched existing issues and this is not a duplicate.
           required: true
-        - label: This is not already callable via `linear-agent raw <Operation>` (or, if it is, I explain why a curated wrapper is warranted).
+        - label: This is not already callable via `linmux raw <Operation>` (or, if it is, I explain why a curated wrapper is warranted).
           required: true
         - label: This is a new capability — not a tweak to an existing one (that's an Enhancement).
           required: true
@@ -28,7 +28,7 @@ body:
     attributes:
       label: Feature name
       description: Short, descriptive. Will become the issue title prefix.
-      placeholder: "e.g. linear-agent comments list"
+      placeholder: "e.g. linmux comments list"
     validations:
       required: true
 
@@ -89,7 +89,7 @@ body:
       label: Acceptance criteria
       description: Testable conditions that define "done". Each should be objectively verifiable.
       placeholder: |
-        - [ ] `linear-agent comments list --issue ABC-123 --json` returns `{ok:true, data:[...]}` with N>=1 records
+        - [ ] `linmux comments list --issue ABC-123 --json` returns `{ok:true, data:[...]}` with N>=1 records
         - [ ] `--describe` reflects the new command's flags and JSON schema
         - [ ] Snapshot test for the JSON envelope passes
     validations:

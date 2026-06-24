@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
- * smoke-runtime-matrix.mjs — Cross-runtime smoke matrix for `linear-agent`.
+ * smoke-runtime-matrix.mjs — Cross-runtime smoke matrix for `linmux`.
  *
  * Phase 5 PLAN 05-04 — DST-02 + DST-07. Same script invoked locally and from
  * release.yml's matrix; eliminates "works locally, fails in CI" drift.
  *
  * Lanes:
  *   - plain-bash             (release-blocking) — `npx --yes file:./<tarball> me --json`
- *   - claude-code-via-skill  (release-blocking) — extracts the literal `npx -y linear-agent@<v>`
+ *   - claude-code-via-skill  (release-blocking) — extracts the literal `npx -y linmux@<v>`
  *                             from the stamped SKILL.md and runs the equivalent local invocation;
  *                             asserts skill version == package.json#version (proves stamp ran)
  *   - codex-cli-via-exec     (advisory)         — `npx --yes @openai/codex@... exec ...` (RESEARCH §5)
  *   - gemini-cli-via-exec    (advisory)         — `npx --yes @google/gemini-cli@... -p ... --output-format json`
  *
  * Usage:
- *   node scripts/smoke-runtime-matrix.mjs --lane=<lane> [--tarball=./linear-agent-X.Y.Z.tgz] [--skill-path=./skills/linear-agent/SKILL.md]
+ *   node scripts/smoke-runtime-matrix.mjs --lane=<lane> [--tarball=./linmux-X.Y.Z.tgz] [--skill-path=./skills/linmux/SKILL.md]
  *   # lane ∈ { plain-bash, claude-code-via-skill, codex-cli-via-exec, gemini-cli-via-exec, all }
  *
  * Stdout: a single JSON line per invocation. For --lane=all, an aggregate object with `lanes: [...]`.
@@ -188,17 +188,17 @@ export function parseEnvelopeFromStdout(stdout) {
 }
 
 /**
- * Auto-discover the most-recently-modified `linear-agent-*.tgz` in `cwd`.
+ * Auto-discover the most-recently-modified `linmux-*.tgz` in `cwd`.
  *
  * Why mtime (not lex sort): lex sort breaks for SemVer (e.g.,
- * `linear-agent-0.1.10.tgz` sorts before `linear-agent-0.1.2.tgz`) and
+ * `linmux-0.1.10.tgz` sorts before `linmux-0.1.2.tgz`) and
  * disagrees with `measure-cold-start.mjs:findTarball` when multiple
  * tarballs coexist locally (e.g., `0.1.0-rc.1.tgz` and `0.1.0.tgz`).
  * Cold-start times the just-packed tarball; this script must agree, or
  * a maintainer running both back-to-back gets inconsistent measurements.
  *
  * Returns the absolute path, or null on no match. Files not matching
- * `^linear-agent-.*\.tgz$` are filtered out.
+ * `^linmux-.*\.tgz$` are filtered out.
  *
  * @param {string} cwd
  */
@@ -209,7 +209,7 @@ export function findTarball(cwd) {
   } catch {
     return null
   }
-  const matches = entries.filter((f) => /^linear-agent-.*\.tgz$/.test(f))
+  const matches = entries.filter((f) => /^linmux-.*\.tgz$/.test(f))
   if (matches.length === 0) return null
   let best = null
   let bestMtime = -Infinity
@@ -296,7 +296,7 @@ function runPlainBashLane({ tarball, spawnImpl, env }) {
 
 /**
  * `claude-code-via-skill` lane. Reads the stamped SKILL.md, extracts the
- * literal `npx -y linear-agent@<version>` invocation, asserts the version
+ * literal `npx -y linmux@<version>` invocation, asserts the version
  * matches package.json#version (proves the stamp ran), then runs the
  * equivalent local invocation via `runPlainBashLane`.
  *
@@ -331,12 +331,12 @@ function runClaudeCodeViaSkillLane({ tarball, skillPath, spawnImpl, fsImpl, env 
       reason: `could not read skill at ${skillPath}: ${err.message ?? err}`,
     }
   }
-  const match = String(skillBody).match(/npx -y linear-agent@(\S+)/)
+  const match = String(skillBody).match(/npx -y linmux@(\S+)/)
   if (!match) {
     return {
       ok: false,
       lane: 'claude-code-via-skill',
-      reason: 'skill body has no `npx -y linear-agent@<version>` invocation',
+      reason: 'skill body has no `npx -y linmux@<version>` invocation',
     }
   }
   const skillVersion = match[1]
@@ -734,10 +734,10 @@ export async function runLane({
 
 function usage() {
   return [
-    'smoke-runtime-matrix.mjs — Cross-runtime smoke matrix for linear-agent.',
+    'smoke-runtime-matrix.mjs — Cross-runtime smoke matrix for linmux.',
     '',
     'Usage:',
-    '  node scripts/smoke-runtime-matrix.mjs --lane=<lane> [--tarball=./linear-agent-X.Y.Z.tgz] [--skill-path=./skills/linear-agent/SKILL.md]',
+    '  node scripts/smoke-runtime-matrix.mjs --lane=<lane> [--tarball=./linmux-X.Y.Z.tgz] [--skill-path=./skills/linmux/SKILL.md]',
     '',
     'Lanes:',
     '  plain-bash             release-blocking — npx --yes file:./<tarball> me --json',
@@ -771,7 +771,7 @@ async function main() {
   }
 
   // Resolve --skill-path (default relative to cwd)
-  const skillPath = parsed.skillPath ?? resolve(process.cwd(), 'skills/linear-agent/SKILL.md')
+  const skillPath = parsed.skillPath ?? resolve(process.cwd(), 'skills/linmux/SKILL.md')
 
   // Resolve --tarball
   let tarball = parsed.tarball
@@ -779,7 +779,7 @@ async function main() {
     tarball = findTarball(process.cwd())
     if (!tarball) {
       process.stderr.write(
-        'error: --tarball=<path> not provided and no linear-agent-*.tgz found in cwd. ' +
+        'error: --tarball=<path> not provided and no linmux-*.tgz found in cwd. ' +
           'Run `npm pack` first.\n',
       )
       return 1

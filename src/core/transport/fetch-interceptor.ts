@@ -65,8 +65,8 @@ export function getLastComplexity(): ComplexityMeta | undefined {
  * wraps — so each patch sits between the **real** fetch and exactly the
  * `fn` call tree it was created for.
  */
-const PATCH_MARKER = Symbol.for('linear-agent.fetch-interceptor.patch')
-const RAW_FETCH_KEY = Symbol.for('linear-agent.fetch-interceptor.rawFetch')
+const PATCH_MARKER = Symbol.for('linmux.fetch-interceptor.patch')
+const RAW_FETCH_KEY = Symbol.for('linmux.fetch-interceptor.rawFetch')
 
 interface PatchedFetch {
   (...args: Parameters<typeof fetch>): ReturnType<typeof fetch>

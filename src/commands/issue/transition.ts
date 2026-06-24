@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue transition <identifier> <state>` — Phase 2 PLAN 02-03
+ * `linmux issue transition <identifier> <state>` — Phase 2 PLAN 02-03
  * Task 2, ISS-05.
  *
  * Write command. Resolves the issue (identifier or UUID), reads its team,

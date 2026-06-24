@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue update <identifier>` -- Phase 2 PLAN 02-04 Task 2,
+ * `linmux issue update <identifier>` -- Phase 2 PLAN 02-04 Task 2,
  * ISS-04.
  *
  * Write command. Resolves the issue (identifier or UUID), reads its team

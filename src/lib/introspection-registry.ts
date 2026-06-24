@@ -109,7 +109,7 @@ export const CURATED_REGISTRY: CuratedEntry[] = [
   },
   {
     id: 'install-skill',
-    summary: 'Copy the bundled Claude Code skill to ~/.claude/skills/linear-agent/SKILL.md.',
+    summary: 'Copy the bundled Claude Code skill to ~/.claude/skills/linmux/SKILL.md.',
     flags: ['pretty'],
     inputSchema: z.object({}),
     examples: [],

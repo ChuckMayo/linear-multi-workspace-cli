@@ -1,5 +1,5 @@
 /**
- * `linear-agent raw batch --plan=@file.json` — Phase 3 PLAN 03-05, RAW-05.
+ * `linmux raw batch --plan=@file.json` — Phase 3 PLAN 03-05, RAW-05.
  *
  * Safety-gated batch dispatcher. Defaults to --dry-run; requires --yes to execute.
  * Implementation lives in `src/lib/raw-batch-runtime.ts` (two-export pattern S1).
@@ -11,7 +11,7 @@
  * Gate ordering (enforced in runtime):
  *   Plan validation → WSP-06 (if mutations) → --allow-mutations → dry-run/yes intent
  *
- * oclif resolves `src/commands/raw/batch.ts` → `linear-agent raw batch` automatically
+ * oclif resolves `src/commands/raw/batch.ts` → `linmux raw batch` automatically
  * via topic-tree convention.
  */
 import { Command, Flags } from '@oclif/core'

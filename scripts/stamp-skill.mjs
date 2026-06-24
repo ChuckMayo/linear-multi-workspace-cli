@@ -2,9 +2,9 @@
 /**
  * stamp-skill.mjs — Pack-time stamper for the Claude Code skill bundle.
  *
- * Reads the checked-in template `skills/linear-agent/SKILL.md.tmpl`, replaces
+ * Reads the checked-in template `skills/linmux/SKILL.md.tmpl`, replaces
  * every `{{VERSION}}` literal with `package.json#version`, and writes the
- * result to `skills/linear-agent/SKILL.md`. The stamped output is gitignored
+ * result to `skills/linmux/SKILL.md`. The stamped output is gitignored
  * and only ever exists during `npm pack` (between `prepack` and `postpack`).
  *
  * Why a stamp instead of a hardcoded version: hardcoding would force a commit
@@ -27,8 +27,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
-const TEMPLATE_REL = 'skills/linear-agent/SKILL.md.tmpl'
-const OUTPUT_REL = 'skills/linear-agent/SKILL.md'
+const TEMPLATE_REL = 'skills/linmux/SKILL.md.tmpl'
+const OUTPUT_REL = 'skills/linmux/SKILL.md'
 const PACKAGE_JSON_REL = 'package.json'
 const PLACEHOLDER = '{{VERSION}}'
 

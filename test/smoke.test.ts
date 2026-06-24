@@ -13,7 +13,7 @@ describe('phase-1 smoke test', () => {
 
   let tmpHome: string
   beforeEach(() => {
-    tmpHome = mkdtempSync(join(tmpdir(), 'linear-agent-smoke-'))
+    tmpHome = mkdtempSync(join(tmpdir(), 'linmux-smoke-'))
   })
   afterEach(() => {
     rmSync(tmpHome, { recursive: true, force: true })
@@ -24,7 +24,7 @@ describe('phase-1 smoke test', () => {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     })
-    expect(out).toMatch(/linear-agent/i)
+    expect(out).toMatch(/linmux/i)
     // The `workspace` topic is registered automatically because oclif sees
     // commands under `dist/commands/workspace/`. Help output mentions it.
     expect(out).toMatch(/workspace/)

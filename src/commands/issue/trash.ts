@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue trash <identifier>` -- Phase 2 PLAN 02-05 Task 1,
+ * `linmux issue trash <identifier>` -- Phase 2 PLAN 02-05 Task 1,
  * ISS-06.trash.
  *
  * Soft 30-day delete (calls `client.deleteIssue(uuid)`, default

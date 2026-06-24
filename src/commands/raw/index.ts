@@ -1,5 +1,5 @@
 /**
- * `linear-agent raw <Operation>` — Phase 3 PLAN 03-02.
+ * `linmux raw <Operation>` — Phase 3 PLAN 03-02.
  *
  * Dispatches any operation in the generated GraphQL registry.
  * Implementation lives in `src/lib/raw-runtime.ts` (two-export pattern S1 —

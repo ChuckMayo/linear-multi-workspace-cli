@@ -1,5 +1,5 @@
 /**
- * `linear-agent label create` -- Phase 2 PLAN 02-09 Task 2, LBL-01.create.
+ * `linmux label create` -- Phase 2 PLAN 02-09 Task 2, LBL-01.create.
  *
  * Write command -- the only write in plan 02-09. Creates a Linear issue label
  * scoped to a team. RESEARCH § Pitfall 13: every label gets a `teamId`; the

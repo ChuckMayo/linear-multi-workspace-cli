@@ -8,7 +8,7 @@ import { findViolations, SIZE_BUDGET_BYTES, topNLargest } from '../scripts/verif
 const ROOT = process.cwd()
 const VERIFY_SCRIPT = resolve(ROOT, 'scripts/verify-pack.mjs')
 const STAMP_SCRIPT = resolve(ROOT, 'scripts/stamp-skill.mjs')
-const STAMPED_SKILL = resolve(ROOT, 'skills/linear-agent/SKILL.md')
+const STAMPED_SKILL = resolve(ROOT, 'skills/linmux/SKILL.md')
 
 function runStamp(): void {
   execFileSync('node', [STAMP_SCRIPT], { stdio: 'pipe' })
@@ -109,19 +109,19 @@ describe('npm pack contract', () => {
     }
     const postpack = pkg.scripts?.postpack ?? ''
     expect(postpack).toMatch(/oclif\.manifest\.json/)
-    expect(postpack).toMatch(/skills\/linear-agent\/SKILL\.md/)
+    expect(postpack).toMatch(/skills\/linmux\/SKILL\.md/)
   })
 
-  it('verify-pack lists skills/linear-agent/SKILL.md as required', () => {
+  it('verify-pack lists skills/linmux/SKILL.md as required', () => {
     // Soft check on the script source: the prefix must be in REQUIRED_PREFIXES.
     // (The end-to-end "verify-pack exits 0" test above already proves it works
     // when the file is present; this one pins the contract textually so a
     // future refactor of verify-pack.mjs that drops the prefix is caught.)
     const verifySrc = readFileSync(VERIFY_SCRIPT, 'utf8')
-    expect(verifySrc).toMatch(/skills\/linear-agent\/SKILL\.md/)
+    expect(verifySrc).toMatch(/skills\/linmux\/SKILL\.md/)
   })
 
-  it('verify-pack rejects when skills/linear-agent/SKILL.md is missing', () => {
+  it('verify-pack rejects when skills/linmux/SKILL.md is missing', () => {
     // Delete the stamped file (template stays). verify-pack must fail.
     rmSync(STAMPED_SKILL, { force: true })
     let exitCode = 0
@@ -145,7 +145,7 @@ describe('npm pack contract', () => {
     // Phase 5 review WR-03) — surfaces an actionable "run stamp-skill first"
     // message instead of letting --ignore-scripts silently produce a tarball
     // that diverges from what `npm publish` would pack.
-    expect(stderr).toMatch(/skills\/linear-agent\/SKILL\.md/)
+    expect(stderr).toMatch(/skills\/linmux\/SKILL\.md/)
     expect(stderr).toMatch(/stamp-skill\.mjs/)
   }, 60_000)
 })
@@ -188,7 +188,7 @@ describe('size budget enforcement (DST-04)', () => {
         { path: 'src/generated/index.ts' },
         { path: 'README.md' },
         { path: 'package.json' },
-        { path: 'skills/linear-agent/SKILL.md' },
+        { path: 'skills/linmux/SKILL.md' },
         ...files,
       ],
     }
@@ -220,7 +220,7 @@ describe('size budget enforcement (DST-04)', () => {
   })
 
   it('findViolations: still detects existing allowlist violations alongside size', () => {
-    // Pkg missing skills/linear-agent/SKILL.md AND over-budget — both must surface.
+    // Pkg missing skills/linmux/SKILL.md AND over-budget — both must surface.
     const pkg = {
       unpackedSize: 6_000_000,
       size: 1_500_000,

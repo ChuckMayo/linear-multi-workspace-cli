@@ -1,5 +1,5 @@
 /**
- * `linear-agent state list` -- Phase 2 PLAN 02-09 Task 1, STA-01.
+ * `linmux state list` -- Phase 2 PLAN 02-09 Task 1, STA-01.
  *
  * Read command. Lists workflow states either across all teams the viewer can
  * see (no filter) OR scoped to one team via `--team` (UUID, key, or name).

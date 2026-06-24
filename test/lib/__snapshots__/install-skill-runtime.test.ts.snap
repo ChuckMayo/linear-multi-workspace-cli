@@ -4,11 +4,11 @@ exports[`installSkillRuntime — snapshots > Test 9: snapshot — success envelo
 {
   "$apiVersion": "1",
   "data": {
-    "bytes_written": 125,
+    "bytes_written": 113,
     "hint": "Restart Claude Code if your session predates ~/.claude/skills/.",
     "overwritten": false,
-    "source": "/tmp/linear-agent-install-skill-test-source/SKILL.md",
-    "target": "/tmp/linear-agent-install-skill-test-home/.claude/skills/linear-agent/SKILL.md",
+    "source": "/tmp/linmux-install-skill-test-source/SKILL.md",
+    "target": "/tmp/linmux-install-skill-test-home/.claude/skills/linmux/SKILL.md",
     "version": "9.9.9",
   },
   "meta": {
@@ -25,10 +25,10 @@ exports[`installSkillRuntime — snapshots > Test 10: snapshot — failure envel
     "code": "INSTALL_SKILL_BUNDLE_NOT_FOUND",
     "details": {
       "errno": "ENOENT",
-      "expected_path": "/tmp/linear-agent-missing-bundle/SKILL.md",
+      "expected_path": "/tmp/linmux-missing-bundle/SKILL.md",
       "resolved_install_path": Any<String>,
     },
-    "message": "Could not locate bundled SKILL.md at /tmp/linear-agent-missing-bundle/SKILL.md. This usually means linear-agent was run from a source checkout without a build, or the published tarball is corrupt.",
+    "message": "Could not locate bundled SKILL.md at /tmp/linmux-missing-bundle/SKILL.md. This usually means linmux was run from a source checkout without a build, or the published tarball is corrupt.",
     "transient": false,
   },
   "meta": {
@@ -45,9 +45,9 @@ exports[`installSkillRuntime — snapshots > Test 11: snapshot — failure envel
     "code": "INSTALL_SKILL_WRITE_FAILED",
     "details": {
       "errno": "EACCES",
-      "target": "/tmp/linear-agent-install-skill-test-home/.claude/skills/linear-agent/SKILL.md",
+      "target": "/tmp/linmux-install-skill-test-home/.claude/skills/linmux/SKILL.md",
     },
-    "message": "Could not write SKILL.md to /tmp/linear-agent-install-skill-test-home/.claude/skills/linear-agent/SKILL.md. Check directory permissions.",
+    "message": "Could not write SKILL.md to /tmp/linmux-install-skill-test-home/.claude/skills/linmux/SKILL.md. Check directory permissions.",
     "transient": false,
   },
   "meta": {

@@ -73,9 +73,9 @@ exports[`issueListRuntime — failure envelopes (KRN-09) > Test 9: WORKSPACE_NOT
     "code": "WORKSPACE_NOT_RESOLVED",
     "details": {
       "configuredWorkspaces": [],
-      "remediation": "run \`linear-agent workspace add <name> --token <api-key>\` to register a workspace",
+      "remediation": "run \`linmux workspace add <name> --token <api-key>\` to register a workspace",
     },
-    "message": "no workspace selected: pass --workspace <name>, set LINEAR_WORKSPACE, or run \`linear-agent workspace use <name>\`",
+    "message": "no workspace selected: pass --workspace <name>, set LINEAR_WORKSPACE, or run \`linmux workspace use <name>\`",
     "transient": false,
   },
   "meta": {

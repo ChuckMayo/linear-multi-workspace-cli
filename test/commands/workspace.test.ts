@@ -149,7 +149,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  tmpHome = mkdtempSync(join(tmpdir(), 'linear-agent-cmd-'))
+  tmpHome = mkdtempSync(join(tmpdir(), 'linmux-cmd-'))
   process.env.XDG_CONFIG_HOME = tmpHome
   configFile = configPath()
   clearMockViewer()
