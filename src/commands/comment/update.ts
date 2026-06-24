@@ -1,5 +1,5 @@
 /**
- * `linear-agent comment update <id>` -- Phase 2 PLAN 02-06 Task 2, CMT-01.update.
+ * `linmux comment update <id>` -- Phase 2 PLAN 02-06 Task 2, CMT-01.update.
  *
  * Write command. Updates a Linear comment's body. WSP-06 enforcement and
  * VALIDATION_NO_FIELDS guard both run in the runtime BEFORE any SDK call.

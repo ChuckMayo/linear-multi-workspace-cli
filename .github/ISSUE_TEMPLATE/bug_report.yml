@@ -27,7 +27,7 @@ body:
     id: cli-version
     attributes:
       label: CLI version
-      description: Output of `npx -y linear-agent --version`.
+      description: Output of `npx -y linmux --version`.
       placeholder: "e.g. 0.4.2"
     validations:
       required: true

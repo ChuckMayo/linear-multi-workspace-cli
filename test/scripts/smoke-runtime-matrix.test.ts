@@ -204,7 +204,7 @@ describe('runLane() — plain-bash', () => {
   function plainBashInputs(spawn: ReturnType<typeof vi.fn>) {
     return {
       lane: 'plain-bash',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: { readFileSync: () => '' },
@@ -344,14 +344,14 @@ describe('runLane() — claude-code-via-skill', () => {
   // VALID_SKILL_BODY must satisfy the WR-01 doc-text assertions added in Phase 7
   // (must mention `raw <Op> --vars` AND `--retry`), so the happy-path version-
   // match test exercises the full lane without tripping the doc-truth gate.
-  const VALID_SKILL_BODY = `# linear-agent
+  const VALID_SKILL_BODY = `# linmux
 
-Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linmux@9.9.9 me --json\`.
 
 Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
 Pass \`--retry 2\` for transient-error tolerance.
 `
-  const VALID_PKG = JSON.stringify({ name: 'linear-agent', version: '9.9.9' })
+  const VALID_PKG = JSON.stringify({ name: 'linmux', version: '9.9.9' })
 
   function makeFsImpl(skillBody: string, pkgJson: string) {
     return {
@@ -375,7 +375,7 @@ Pass \`--retry 2\` for transient-error tolerance.
     })
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(VALID_SKILL_BODY, VALID_PKG),
@@ -388,7 +388,7 @@ Pass \`--retry 2\` for transient-error tolerance.
   it('fails with reason /version mismatch/ when versions disagree', async () => {
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: vi.fn(),
       fsImpl: makeFsImpl(VALID_SKILL_BODY, JSON.stringify({ version: '9.9.8' })),
@@ -398,11 +398,11 @@ Pass \`--retry 2\` for transient-error tolerance.
     expect(result.reason).toMatch(/version mismatch/i)
   })
 
-  it('fails when skill body has no `npx -y linear-agent@<v>` invocation', async () => {
-    const noInvocation = '# linear-agent\n\nThis skill body has no proper invocation.\n'
+  it('fails when skill body has no `npx -y linmux@<v>` invocation', async () => {
+    const noInvocation = '# linmux\n\nThis skill body has no proper invocation.\n'
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: vi.fn(),
       fsImpl: makeFsImpl(noInvocation, VALID_PKG),
@@ -425,17 +425,17 @@ Pass \`--retry 2\` for transient-error tolerance.
 // is the only fs-side input that matters for the doc-text assertion.
 
 describe('runLane() — claude-code-via-skill — SKILL example doc-truth', () => {
-  // Template body that contains a valid `npx -y linear-agent@9.9.9 ...` invocation
+  // Template body that contains a valid `npx -y linmux@9.9.9 ...` invocation
   // and DOES NOT mention `describe errors` — the canonical happy-path skill body
   // for these tests.
-  const SKILL_OK = `# linear-agent
+  const SKILL_OK = `# linmux
 
-Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linmux@9.9.9 me --json\`.
 
 Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
 Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 `
-  const PKG_OK = JSON.stringify({ name: 'linear-agent', version: '9.9.9' })
+  const PKG_OK = JSON.stringify({ name: 'linmux', version: '9.9.9' })
 
   function makeFsImpl(skillBody: string) {
     return {
@@ -475,7 +475,7 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -511,7 +511,7 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -541,7 +541,7 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -588,7 +588,7 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -625,7 +625,7 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_BAD),
@@ -644,9 +644,9 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
     // SKILL_NO_VARS keeps the version invocation, the `--retry` example, and
     // does NOT mention `describe errors` — but strips the `raw ... --vars`
     // example. Only the WR-01 --vars doc-text assertion can fire here.
-    const SKILL_NO_VARS = `# linear-agent
+    const SKILL_NO_VARS = `# linmux
 
-Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linmux@9.9.9 me --json\`.
 
 Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 `
@@ -669,7 +669,7 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_NO_VARS),
@@ -684,9 +684,9 @@ Pass \`--no-meta\` or \`--retry 2\` for token-budget control.
   // 07-07 added this example explicitly; this test prevents its silent
   // removal in a future doc-only edit.
   it('fails when SKILL drops the `--retry` example (WR-01)', async () => {
-    const SKILL_NO_RETRY = `# linear-agent
+    const SKILL_NO_RETRY = `# linmux
 
-Pinned version: \`9.9.9\`. Always invoke as \`npx -y linear-agent@9.9.9 me --json\`.
+Pinned version: \`9.9.9\`. Always invoke as \`npx -y linmux@9.9.9 me --json\`.
 
 Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
 Pass \`--no-meta\` for token-budget control.
@@ -709,7 +709,7 @@ Pass \`--no-meta\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_NO_RETRY),
@@ -765,7 +765,7 @@ Pass \`--no-meta\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -809,7 +809,7 @@ Pass \`--no-meta\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -845,7 +845,7 @@ Pass \`--no-meta\` for token-budget control.
 
     const result = await runLane({
       lane: 'claude-code-via-skill',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(SKILL_OK),
@@ -863,7 +863,7 @@ describe('runLane() — codex-cli-via-exec', () => {
     const spawn = vi.fn()
     const result = await runLane({
       lane: 'codex-cli-via-exec',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: { readFileSync: () => '' },
@@ -879,7 +879,7 @@ describe('runLane() — codex-cli-via-exec', () => {
     const spawn = vi.fn()
     const result = await runLane({
       lane: 'codex-cli-via-exec',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: { readFileSync: () => '' },
@@ -899,7 +899,7 @@ describe('runLane() — codex-cli-via-exec', () => {
     })
     const result = await runLane({
       lane: 'codex-cli-via-exec',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: { readFileSync: () => '' },
@@ -928,7 +928,7 @@ describe('runLane() — gemini-cli-via-exec', () => {
     const spawn = vi.fn()
     const result = await runLane({
       lane: 'gemini-cli-via-exec',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: { readFileSync: () => '' },
@@ -947,7 +947,7 @@ describe('runLane() — gemini-cli-via-exec', () => {
     })
     const result = await runLane({
       lane: 'gemini-cli-via-exec',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: { readFileSync: () => '' },
@@ -971,8 +971,8 @@ describe('runLane() — lane=all aggregation', () => {
   // skill lane to pass during aggregation (must mention `raw <Op> --vars` AND
   // `--retry`). The third aggregation test (advisory failure) likewise relies
   // on the blocking lane succeeding.
-  const SKILL_BODY = `# linear-agent
-Use \`npx -y linear-agent@9.9.9 me --json\`.
+  const SKILL_BODY = `# linmux
+Use \`npx -y linmux@9.9.9 me --json\`.
 Use \`raw IssueBatchCreate --vars '{...}'\` for batch operations.
 Pass \`--retry 2\` for transient-error tolerance.
 `
@@ -1000,7 +1000,7 @@ Pass \`--retry 2\` for transient-error tolerance.
     })
     const result = await runLane({
       lane: 'all',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(),
@@ -1027,7 +1027,7 @@ Pass \`--retry 2\` for transient-error tolerance.
     })
     const result = await runLane({
       lane: 'all',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(),
@@ -1078,7 +1078,7 @@ Pass \`--retry 2\` for transient-error tolerance.
     })
     const result = await runLane({
       lane: 'all',
-      tarball: './linear-agent-9.9.9.tgz',
+      tarball: './linmux-9.9.9.tgz',
       skillPath: './SKILL.md',
       spawnImpl: spawn,
       fsImpl: makeFsImpl(),

@@ -3,7 +3,7 @@
  * 05-01 Task 2, DST-05).
  *
  * These run AFTER `node scripts/stamp-skill.mjs` produces the stamped
- * `skills/linear-agent/SKILL.md` from the checked-in `.tmpl`. They pin the
+ * `skills/linmux/SKILL.md` from the checked-in `.tmpl`. They pin the
  * invariants that the published bundle must satisfy:
  *
  *   - File exists at the expected path
@@ -11,7 +11,7 @@
  *   - Body contains the literal version pulled from package.json (proves the
  *     stamper actually ran AND used the real version)
  *   - Body contains zero `@latest` substrings (case-sensitive — DST-05 ban)
- *   - YAML frontmatter parses, has `name === 'linear-agent'`, has
+ *   - YAML frontmatter parses, has `name === 'linmux'`, has
  *     `metadata.version === package.json#version`, has `description ≤ 500`
  *     chars (Claude Code listing truncates at 1,536; we cap at 500 per
  *     RESEARCH §10 P9)
@@ -27,8 +27,8 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 const ROOT = process.cwd()
 const STAMP_SCRIPT = resolve(ROOT, 'scripts/stamp-skill.mjs')
-const TEMPLATE = resolve(ROOT, 'skills/linear-agent/SKILL.md.tmpl')
-const STAMPED = resolve(ROOT, 'skills/linear-agent/SKILL.md')
+const TEMPLATE = resolve(ROOT, 'skills/linmux/SKILL.md.tmpl')
+const STAMPED = resolve(ROOT, 'skills/linmux/SKILL.md')
 
 interface SkillFrontmatter {
   name?: string
@@ -50,7 +50,7 @@ function parseFrontmatter(body: string): SkillFrontmatter {
   return yaml.load(frontmatter) as SkillFrontmatter
 }
 
-describe('skills/linear-agent/SKILL.md contract (DST-05)', () => {
+describe('skills/linmux/SKILL.md contract (DST-05)', () => {
   let pkgVersion: string
 
   beforeAll(() => {
@@ -84,7 +84,7 @@ describe('skills/linear-agent/SKILL.md contract (DST-05)', () => {
   it('stamped body contains the package.json version literal', () => {
     const text = readFileSync(STAMPED, 'utf8')
     expect(text).toContain(pkgVersion)
-    expect(text).toContain(`linear-agent@${pkgVersion}`)
+    expect(text).toContain(`linmux@${pkgVersion}`)
   })
 
   it('stamped body contains zero {{VERSION}} placeholders', () => {
@@ -102,9 +102,9 @@ describe('skills/linear-agent/SKILL.md contract (DST-05)', () => {
     expect(() => parseFrontmatter(text)).not.toThrow()
   })
 
-  it('frontmatter.name === "linear-agent"', () => {
+  it('frontmatter.name === "linmux"', () => {
     const fm = parseFrontmatter(readFileSync(STAMPED, 'utf8'))
-    expect(fm.name).toBe('linear-agent')
+    expect(fm.name).toBe('linmux')
   })
 
   it('frontmatter.metadata.version === package.json#version', () => {

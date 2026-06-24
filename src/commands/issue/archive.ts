@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue archive <identifier>` -- Phase 2 PLAN 02-05 Task 1,
+ * `linmux issue archive <identifier>` -- Phase 2 PLAN 02-05 Task 1,
  * ISS-06.archive.
  *
  * Reversible archive (Linear preserves the issue and lets it be unarchived).

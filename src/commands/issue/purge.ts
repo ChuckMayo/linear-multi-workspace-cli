@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue purge <identifier> --yes` -- Phase 2 PLAN 02-05
+ * `linmux issue purge <identifier> --yes` -- Phase 2 PLAN 02-05
  * Task 1, ISS-06.purge.
  *
  * PERMANENT delete (calls `client.deleteIssue(uuid, { permanentlyDelete:

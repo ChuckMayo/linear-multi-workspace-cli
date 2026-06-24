@@ -179,7 +179,7 @@ export interface DescribeResult {
 }
 
 /**
- * Core runtime for `linear-agent describe <command>`.
+ * Core runtime for `linmux describe <command>`.
  *
  * @throws {LinearAgentError} with code DESCRIBE_COMMAND_NOT_FOUND when target is not found
  */

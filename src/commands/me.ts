@@ -1,5 +1,5 @@
 /**
- * `linear-agent me` -- Phase 2 PLAN 02-09 Task 1, WHO-01.
+ * `linmux me` -- Phase 2 PLAN 02-09 Task 1, WHO-01.
  *
  * Read command. Prints the resolved viewer (current user) and their
  * organization for the active workspace. Shares `src/lib/me-runtime.ts`

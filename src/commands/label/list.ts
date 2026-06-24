@@ -1,5 +1,5 @@
 /**
- * `linear-agent label list` -- Phase 2 PLAN 02-09 Task 2, LBL-01.list.
+ * `linmux label list` -- Phase 2 PLAN 02-09 Task 2, LBL-01.list.
  *
  * Read command. Lists issue labels either workspace-wide or scoped to one
  * team via `--team` (UUID, key, or name). Implementation lives in

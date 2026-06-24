@@ -1,9 +1,9 @@
 /**
- * `linear-agent project update-status <ref> <status>` --
+ * `linmux project update-status <ref> <status>` --
  * Phase 2 PLAN 02-07 Task 2, PRJ-01.update-status.
  *
  * **Multi-word command file**: oclif resolves
- * `src/commands/project/update-status.ts` to `linear-agent project update-status`
+ * `src/commands/project/update-status.ts` to `linmux project update-status`
  * (filename-to-command separator is space; the dash inside the filename is
  * preserved verbatim per RESEARCH 02-07 line 252).
  *

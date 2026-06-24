@@ -10,7 +10,7 @@ import {
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
- * `linear-agent workspace replace-token <name> --token <new-key>`
+ * `linmux workspace replace-token <name> --token <new-key>`
  *
  * Per WSP-05 / CONTEXT § Workspace Management Commands:
  *   1. `WORKSPACE_NOT_FOUND` if `<name>` isn't registered.

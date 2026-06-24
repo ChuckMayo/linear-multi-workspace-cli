@@ -1,5 +1,5 @@
 /**
- * `linear-agent cycle list` -- Phase 2 PLAN 02-08 Task 1, CYC-01.list.
+ * `linmux cycle list` -- Phase 2 PLAN 02-08 Task 1, CYC-01.list.
  *
  * Read command. Lists Linear cycles with optional --team filter, --fields,
  * --limit, --cursor. NO WSP-06 enforcement -- reads are allowed against the

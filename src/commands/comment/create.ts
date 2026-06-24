@@ -1,5 +1,5 @@
 /**
- * `linear-agent comment create` -- Phase 2 PLAN 02-06 Task 1, CMT-01.create.
+ * `linmux comment create` -- Phase 2 PLAN 02-06 Task 1, CMT-01.create.
  *
  * Write command. Creates a Linear comment with `--issue` (UUID or ENG-123)
  * + `--body`. Optional `--parent <comment-uuid>` for threaded replies.

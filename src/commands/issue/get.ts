@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue get <identifier>` — Phase 2 PLAN 02-03 Task 1, ISS-02.
+ * `linmux issue get <identifier>` — Phase 2 PLAN 02-03 Task 1, ISS-02.
  *
  * Single-entity read. Accepts a Linear identifier (`ENG-123`) OR a UUID;
  * shape detection lives in `issue-get-runtime.ts`. Implementation lives in

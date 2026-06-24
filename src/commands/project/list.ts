@@ -1,5 +1,5 @@
 /**
- * `linear-agent project list` -- Phase 2 PLAN 02-07 Task 1, PRJ-01.list.
+ * `linmux project list` -- Phase 2 PLAN 02-07 Task 1, PRJ-01.list.
  *
  * Read command. Lists workspace-wide projects with --fields, --limit, and
  * --cursor. NO WSP-06 enforcement -- reads are allowed against the active

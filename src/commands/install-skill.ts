@@ -1,8 +1,8 @@
 /**
- * `linear-agent install-skill` — Phase 5 PLAN 05-02 Task 3, DST-06.
+ * `linmux install-skill` — Phase 5 PLAN 05-02 Task 3, DST-06.
  *
  * Top-level command. Copies the bundled SKILL.md into
- * `~/.claude/skills/linear-agent/SKILL.md`. No flags in v1; deterministic
+ * `~/.claude/skills/linmux/SKILL.md`. No flags in v1; deterministic
  * overwrite is the contract.
  *
  * Two-export pattern (S1): default oclif `Command` class + named
@@ -44,7 +44,7 @@ export async function runInstallSkill(args: RunInstallSkillArgs): Promise<Comman
 
 export default class InstallSkill extends Command {
   static override description =
-    'Copy the bundled Claude Code skill to ~/.claude/skills/linear-agent/SKILL.md.'
+    'Copy the bundled Claude Code skill to ~/.claude/skills/linmux/SKILL.md.'
   static override enableJsonFlag = true
   static override flags = { ...BASE_FLAGS }
   // NO workspace flag — install-skill makes zero network calls

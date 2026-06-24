@@ -3,7 +3,7 @@
  *
  * Lives in `src/lib/` (not `src/commands/workspace/`) because oclif's manifest
  * generator scans every file under `src/commands/` as a command — a helper
- * file there would surface as `linear-agent workspace _shared`. The lib path
+ * file there would surface as `linmux workspace _shared`. The lib path
  * also matches `tsdown.config.ts`'s entry globs (commands + lib double-star
  * patterns) so the bundle layout stays predictable.
  *

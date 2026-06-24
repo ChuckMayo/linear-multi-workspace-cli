@@ -1,5 +1,5 @@
 /**
- * `linear-agent team get <ref>` -- Phase 2 PLAN 02-09 Task 1, TEM-01.get.
+ * `linmux team get <ref>` -- Phase 2 PLAN 02-09 Task 1, TEM-01.get.
  *
  * Single-entity read. Accepts a UUID, team key (e.g. `ENG`), or team name.
  * Implementation lives in `src/lib/team-get-runtime.ts`.

@@ -1,5 +1,5 @@
 /**
- * `linear-agent comment delete <id>` -- Phase 2 PLAN 02-06 Task 2,
+ * `linmux comment delete <id>` -- Phase 2 PLAN 02-06 Task 2,
  * CMT-01.delete.
  *
  * Write command. Deletes a Linear comment. WSP-06 enforced. NO `--yes` gate

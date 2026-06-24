@@ -4,7 +4,7 @@ import { LinearAgentError } from '@/core/errors/index.js'
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
- * `linear-agent workspace remove <name>`
+ * `linmux workspace remove <name>`
  *
  * Per WSP-04 / CONTEXT § Workspace Management Commands:
  *   - Deletes the workspace from config.

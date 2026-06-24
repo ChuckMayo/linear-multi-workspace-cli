@@ -4,7 +4,7 @@
  * Coverage matrix:
  *   - Stamping replaces every `{{VERSION}}` literal with `package.json#version`.
  *   - Re-running the stamper produces a byte-identical output (deterministic).
- *   - Output contains the literal `npx -y linear-agent@<version>` substring
+ *   - Output contains the literal `npx -y linmux@<version>` substring
  *     (DST-05 contract: "never @latest").
  *   - Output contains zero `{{VERSION}}` placeholders post-stamp.
  *   - Output contains zero `@latest` substrings (case-sensitive).
@@ -45,14 +45,14 @@ interface Fixture {
 
 function makeFixture(opts: FixtureOptions = {}): Fixture {
   const dir = mkdtempSync(join(tmpdir(), 'stamp-skill-test-'))
-  const skillDir = join(dir, 'skills', 'linear-agent')
+  const skillDir = join(dir, 'skills', 'linmux')
   mkdirSync(skillDir, { recursive: true })
   const templatePath = join(skillDir, 'SKILL.md.tmpl')
   const outputPath = join(skillDir, 'SKILL.md')
   const packageJsonPath = join(dir, 'package.json')
   if (!opts.omitPackageJson) {
     const version = opts.version === undefined ? '9.9.9' : opts.version
-    const pkg: Record<string, unknown> = { name: 'linear-agent' }
+    const pkg: Record<string, unknown> = { name: 'linmux' }
     if (version !== null) pkg.version = version
     writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2))
   }
@@ -61,15 +61,15 @@ function makeFixture(opts: FixtureOptions = {}): Fixture {
       opts.template ??
       [
         '---',
-        'name: linear-agent',
+        'name: linmux',
         'description: Test skill body',
         'metadata:',
         '  version: "{{VERSION}}"',
         '---',
         '',
-        '# linear-agent',
+        '# linmux',
         '',
-        'Pinned: `{{VERSION}}`. Always use `npx -y linear-agent@{{VERSION}}`.',
+        'Pinned: `{{VERSION}}`. Always use `npx -y linmux@{{VERSION}}`.',
         '',
       ].join('\n')
     writeFileSync(templatePath, template)
@@ -124,7 +124,7 @@ describe('scripts/stamp-skill.mjs', () => {
     const out = readFileSync(fx.outputPath, 'utf8')
     expect(out).not.toContain('{{VERSION}}')
     expect(out).toContain('Pinned: `9.9.9`')
-    expect(out).toContain('npx -y linear-agent@9.9.9')
+    expect(out).toContain('npx -y linmux@9.9.9')
   })
 
   it('produces byte-identical output on re-run (deterministic)', () => {
@@ -138,12 +138,12 @@ describe('scripts/stamp-skill.mjs', () => {
     expect(second).toBe(first)
   })
 
-  it('output contains "npx -y linear-agent@<version>" literal (DST-05)', () => {
+  it('output contains "npx -y linmux@<version>" literal (DST-05)', () => {
     const fx = makeFixture({ version: '0.1.0' })
     fixtures.push(fx)
     runStamp(fx.dir)
     const out = readFileSync(fx.outputPath, 'utf8')
-    expect(out).toContain('npx -y linear-agent@0.1.0')
+    expect(out).toContain('npx -y linmux@0.1.0')
   })
 
   it('output contains zero {{VERSION}} placeholders post-stamp', () => {
@@ -161,7 +161,7 @@ describe('scripts/stamp-skill.mjs', () => {
   it('output contains zero "@latest" substrings (DST-05 hard ban)', () => {
     const fx = makeFixture({
       version: '4.5.6',
-      template: '# T\n\nUse `npx -y linear-agent@{{VERSION}}` always — never `@latest`.\n',
+      template: '# T\n\nUse `npx -y linmux@{{VERSION}}` always — never `@latest`.\n',
     })
     fixtures.push(fx)
     // The template (intentionally) mentions @latest in prose to mirror our
@@ -171,7 +171,7 @@ describe('scripts/stamp-skill.mjs', () => {
     // stamped output preserves prose verbatim.
     runStamp(fx.dir)
     const out = readFileSync(fx.outputPath, 'utf8')
-    expect(out).toContain('npx -y linear-agent@4.5.6')
+    expect(out).toContain('npx -y linmux@4.5.6')
   })
 
   it('exits 1 with stderr naming the template path when missing', () => {

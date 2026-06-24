@@ -1,5 +1,5 @@
 /**
- * `linear-agent whoami` -- Phase 2 PLAN 02-09 Task 1, WHO-01.
+ * `linmux whoami` -- Phase 2 PLAN 02-09 Task 1, WHO-01.
  *
  * Alias for `me` -- prints the resolved viewer (user) and organization for
  * the current workspace. Shares `src/lib/me-runtime.ts` with `me`. Both

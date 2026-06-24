@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue list` — first vertical-slice read command.
+ * `linmux issue list` — first vertical-slice read command.
  *
  * Implementation lives in `src/lib/issue-list-runtime.ts` (per the same
  * pattern PLAN-04 established for workspace commands). This file exports

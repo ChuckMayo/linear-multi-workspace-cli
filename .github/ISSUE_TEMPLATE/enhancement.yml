@@ -27,7 +27,7 @@ body:
     attributes:
       label: What existing feature
       description: Which command, flag, output mode, or behavior is being improved.
-      placeholder: "e.g. linear-agent issues list --json envelope"
+      placeholder: "e.g. linmux issues list --json envelope"
     validations:
       required: true
 

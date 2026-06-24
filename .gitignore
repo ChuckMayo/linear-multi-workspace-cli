@@ -9,4 +9,4 @@ coverage/
 .env.local
 
 # Stamped skill bundle (only .tmpl is checked in; SKILL.md is generated at pack time)
-skills/linear-agent/SKILL.md
+skills/linmux/SKILL.md

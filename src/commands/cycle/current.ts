@@ -1,5 +1,5 @@
 /**
- * `linear-agent cycle current --team <ref>` -- Phase 2 PLAN 02-08 Task 1,
+ * `linmux cycle current --team <ref>` -- Phase 2 PLAN 02-08 Task 1,
  * CYC-01.current.
  *
  * Single-entity read. Fetches the active cycle for a specific team. The

@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue search <query>` -- Phase 2 PLAN 02-05 Task 2, ISS-07.
+ * `linmux issue search <query>` -- Phase 2 PLAN 02-05 Task 2, ISS-07.
  *
  * Full-text search via `client.searchIssues(term, vars)`. Read command, no
  * WSP-06. Filter parity with `issue list` (state / assignee / team / label

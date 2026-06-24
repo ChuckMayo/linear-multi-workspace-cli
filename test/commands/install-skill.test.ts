@@ -61,7 +61,7 @@ describe('runInstallSkill — runtime mocking', () => {
     mocked.mockResolvedValueOnce({
       data: {
         source: '/test/source/SKILL.md',
-        target: '/test/home/.claude/skills/linear-agent/SKILL.md',
+        target: '/test/home/.claude/skills/linmux/SKILL.md',
         bytes_written: 42,
         version: '0.0.1',
         overwritten: false,

@@ -95,12 +95,13 @@ describe('.github/workflows/release.yml is a valid GitHub Actions workflow', () 
     expect(wf.concurrency?.group).toBeTruthy()
   })
 
-  it('contains a YAML comment about the post-milestone repo-public flip', () => {
+  it('documents that publishing uses OIDC trusted publishing (no token)', () => {
     const text = readFileSync(RELEASE, 'utf8')
-    const hasFlipComment = text.includes('flip repo public') || text.includes('post-milestone')
+    const hasOidcComment =
+      text.toLowerCase().includes('trusted publishing') || text.includes('OIDC')
     expect(
-      hasFlipComment,
-      'release.yml must reference the post-milestone flip-public follow-up',
+      hasOidcComment,
+      'release.yml must document the OIDC trusted-publishing approach',
     ).toBe(true)
   })
 })
@@ -253,7 +254,7 @@ describe('release.yml smoke-matrix job exercises the 4-lane runtime matrix', () 
   })
 })
 
-describe('release.yml publish job: provenance, OIDC, npm token wiring', () => {
+describe('release.yml publish job: provenance, OIDC trusted publishing (no token)', () => {
   it('has id-token: write (MANDATORY for OIDC provenance)', () => {
     const wf = loadRelease()
     expect(wf.jobs?.publish?.permissions?.['id-token']).toBe('write')
@@ -276,12 +277,20 @@ describe('release.yml publish job: provenance, OIDC, npm token wiring', () => {
     expect(step, 'publish step missing `npm publish --provenance --access public`').toBeDefined()
   })
 
-  it('publish step env contains NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}', () => {
+  it('publish step sets NO NODE_AUTH_TOKEN (OIDC trusted publishing replaces the token)', () => {
     const wf = loadRelease()
     const step = (wf.jobs?.publish?.steps ?? []).find(
       (s) => typeof s.run === 'string' && s.run.includes('npm publish'),
     )
-    expect(step?.env?.NODE_AUTH_TOKEN).toBe('${{ secrets.NPM_TOKEN }}')
+    expect(step?.env?.NODE_AUTH_TOKEN).toBeUndefined()
+  })
+
+  it('upgrades npm to >= 11.5.1 before publishing (OIDC trusted-publishing requirement)', () => {
+    const wf = loadRelease()
+    const step = (wf.jobs?.publish?.steps ?? []).find(
+      (s) => typeof s.run === 'string' && s.run.includes('npm install -g npm'),
+    )
+    expect(step, 'publish job missing the npm upgrade step required for OIDC').toBeDefined()
   })
 
   it("setup-node@v4 in publish job uses registry-url 'https://registry.npmjs.org'", () => {

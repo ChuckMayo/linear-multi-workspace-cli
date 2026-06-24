@@ -9,7 +9,7 @@
  *
  * Why install-once-then-time (vs `npx --yes file:` per run): the original
  * methodology measured `install + boot` per invocation, which is ~2.5–3s and
- * dominated by the install. Real-world `npx -y linear-agent@<v>` invocations
+ * dominated by the install. Real-world `npx -y linmux@<v>` invocations
  * are install-cached after first run; the 500ms budget targets the steady-state
  * boot cost (Node startup + dist/ load + oclif manifest), NOT the first-time
  * install cost.
@@ -41,7 +41,7 @@
  *
  * SAFETY: Subprocess invocation uses `spawnSync` with arg arrays. Tarball path
  * is admitted only via flag (no env-var, no shell substring), and findTarball
- * filters via `^linear-agent-.*\.tgz$` regex — no shell metacharacters can
+ * filters via `^linmux-.*\.tgz$` regex — no shell metacharacters can
  * survive into the spawn call. (Threat T-05-03-T mitigation.)
  */
 import { spawnSync } from 'node:child_process'
@@ -51,7 +51,7 @@ import { join, resolve } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { fileURLToPath } from 'node:url'
 
-const TARBALL_PATTERN = /^linear-agent-.*\.tgz$/
+const TARBALL_PATTERN = /^linmux-.*\.tgz$/
 const MAX_RUNS = 100 // T-05-03-D: clamp to prevent runaway spawns.
 
 /**
@@ -87,10 +87,10 @@ export function buildResult({ runs_ms, budget_ms, tarball }) {
 }
 
 /**
- * Discover the most-recently-modified `linear-agent-*.tgz` in `cwd`. Returns
+ * Discover the most-recently-modified `linmux-*.tgz` in `cwd`. Returns
  * the absolute path, or `null` if no matching file exists. Files not matching
- * `^linear-agent-.*\.tgz$` are ignored (so `linear-agent.tgz` and
- * `linear-agent-0.0.0.tgz.bak` are ignored).
+ * `^linmux-.*\.tgz$` are ignored (so `linmux.tgz` and
+ * `linmux-0.0.0.tgz.bak` are ignored).
  */
 export function findTarball(cwd) {
   let entries
@@ -178,7 +178,7 @@ export function parseArgs(argv) {
  * returned `prefixDir`. Install cost is paid once and excluded from timed runs.
  */
 function installTarball(tarballPath) {
-  const prefixDir = mkdtempSync(join(tmpdir(), 'linear-agent-cs-'))
+  const prefixDir = mkdtempSync(join(tmpdir(), 'linmux-cs-'))
   const result = spawnSync(
     'npm',
     ['install', '--no-audit', '--no-fund', '--silent', '--prefix', prefixDir, tarballPath],
@@ -194,8 +194,8 @@ function installTarball(tarballPath) {
   // npm install --prefix <dir> places the package at <dir>/lib/node_modules/<name>
   // on POSIX, or <dir>/node_modules/<name> on Windows. We try both.
   const candidates = [
-    join(prefixDir, 'lib', 'node_modules', 'linear-agent', 'bin', 'run.js'),
-    join(prefixDir, 'node_modules', 'linear-agent', 'bin', 'run.js'),
+    join(prefixDir, 'lib', 'node_modules', 'linmux', 'bin', 'run.js'),
+    join(prefixDir, 'node_modules', 'linmux', 'bin', 'run.js'),
   ]
   for (const candidate of candidates) {
     try {
@@ -263,7 +263,7 @@ async function main() {
     const found = findTarball(cwd)
     if (!found) {
       process.stderr.write(
-        `measure-cold-start: no linear-agent-*.tgz found in ${cwd}; run 'npm pack' first\n`,
+        `measure-cold-start: no linmux-*.tgz found in ${cwd}; run 'npm pack' first\n`,
       )
       process.exit(1)
     }

@@ -1,5 +1,5 @@
 /**
- * `linear-agent issue create` — Phase 2 PLAN 02-04 Task 1, ISS-03.
+ * `linmux issue create` — Phase 2 PLAN 02-04 Task 1, ISS-03.
  *
  * Write command. Mints a Linear issue with `--title` + `--team` (the only
  * required flags per CONTEXT line 47) and any of 9 optional fields. WSP-06

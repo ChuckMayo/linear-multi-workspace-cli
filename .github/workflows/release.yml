@@ -152,37 +152,36 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          tarballs=( linear-agent-*.tgz )
+          tarballs=( linmux-*.tgz )
           if [ ${#tarballs[@]} -eq 0 ]; then
-            echo "no linear-agent-*.tgz tarball found" >&2
+            echo "no linmux-*.tgz tarball found" >&2
             exit 1
           fi
           TARBALL="${tarballs[0]}"
           node scripts/smoke-runtime-matrix.mjs --lane="$LANE" --tarball="./$TARBALL"
 
   # ─────────────────────────────────────────────────────────────────────
-  # TODO (post-milestone): once the repo is flipped public, `--provenance`
-  # will actually generate an OIDC-signed attestation. Until then, the flag
-  # is passed but silently skipped per RESEARCH §1 / GitHub Community
-  # Discussion #127011 — `npm publish` exits 0 either way.
-  # Plan to publish a patch version (e.g. v0.1.1) after the flip-public flip
-  # so consumers get a real attestation.
+  # Publishing uses npm Trusted Publishing (OIDC) — there is NO NPM_TOKEN
+  # secret. The trusted publisher is configured on npmjs.com for the
+  # `linmux` package: GitHub Actions -> ChuckMayo/linear-multi-workspace-cli
+  # -> release.yml. npm authenticates via the GitHub OIDC id-token, and
+  # `--provenance` produces a signed attestation automatically (the repo is
+  # public). The FIRST publish of a brand-new package cannot use OIDC (npm
+  # requires the package to already exist), so v0.1.0 was published with a
+  # one-time token; every release from here is token-free.
   # ─────────────────────────────────────────────────────────────────────
   publish:
-    name: npm publish --provenance
+    name: npm publish (trusted publishing / OIDC)
     runs-on: ubuntu-latest
     needs: [ci, cold-start, smoke-matrix]
     timeout-minutes: 10
     permissions:
       contents: read
-      id-token: write          # MANDATORY for OIDC provenance (RESEARCH §1).
+      id-token: write          # MANDATORY for OIDC trusted publishing.
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # `registry-url:` is what writes the auth-aware `.npmrc` line that
-      # reads `${NODE_AUTH_TOKEN}` from env. Do NOT add `npm config set`
-      # steps — they conflict with this (RESEARCH §10 P4).
       - name: Setup Node 22
         uses: actions/setup-node@v6
         with:
@@ -190,13 +189,15 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
+      # Trusted publishing (OIDC) requires npm >= 11.5.1; Node 22 ships npm 10.x.
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
       # `npm publish` triggers `prepack` (build + oclif manifest + stamp)
-      # automatically, then uploads, then `postpack` cleans the stamped
-      # artifacts. No explicit stamp step needed here.
+      # automatically, then uploads via OIDC, then `postpack` cleans the
+      # stamped artifacts. No token env — the trusted publisher authorizes it.
       - name: Publish to npm
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

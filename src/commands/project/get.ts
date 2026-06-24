@@ -1,5 +1,5 @@
 /**
- * `linear-agent project get <ref>` -- Phase 2 PLAN 02-07 Task 1, PRJ-01.get.
+ * `linmux project get <ref>` -- Phase 2 PLAN 02-07 Task 1, PRJ-01.get.
  *
  * Single-entity read. Accepts a project name or UUID. UUIDs short-circuit
  * resolveProjectId; names go through the workspace-scoped resolver from

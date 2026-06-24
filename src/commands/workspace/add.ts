@@ -10,7 +10,7 @@ import {
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
- * `linear-agent workspace add <name> --token <api-key>`
+ * `linmux workspace add <name> --token <api-key>`
  *
  * Per WSP-01 / CONTEXT § Workspace Management Commands:
  *   1. Refuses if `<name>` already exists (use `replace-token` to rotate).

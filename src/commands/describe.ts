@@ -1,5 +1,5 @@
 /**
- * `linear-agent describe <command>` — Phase 4 PLAN 04-03, INT-02.
+ * `linmux describe <command>` — Phase 4 PLAN 04-03, INT-02.
  *
  * Returns input JSON Schema (from Zod) + examples for curated commands,
  * and input JSON Schema + SDL fragment for raw GraphQL operations.

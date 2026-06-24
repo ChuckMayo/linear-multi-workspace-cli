@@ -1,17 +1,17 @@
 /**
  * `install-skill` runtime — Phase 5 PLAN 05-02 Task 2, DST-06.
  *
- * Pure async function: copies the bundled `skills/linear-agent/SKILL.md` from
- * the package install path to `~/.claude/skills/linear-agent/SKILL.md`. No
+ * Pure async function: copies the bundled `skills/linmux/SKILL.md` from
+ * the package install path to `~/.claude/skills/linmux/SKILL.md`. No
  * network calls, no workspace resolution.
  *
  * Source resolution: walks two levels up from this file's directory (via
- * `import.meta.url`) and into `skills/linear-agent/SKILL.md`. Works in BOTH
+ * `import.meta.url`) and into `skills/linmux/SKILL.md`. Works in BOTH
  * source-checkout layouts (`src/lib/install-skill-runtime.ts` → `../../skills/...`)
  * AND published-tarball layouts (`dist/lib/install-skill-runtime.js` →
  * `../../skills/...`). The `skills/` dir sits at the package root in both.
  *
- * Target resolution: `path.join(os.homedir(), '.claude', 'skills', 'linear-agent', 'SKILL.md')`
+ * Target resolution: `path.join(os.homedir(), '.claude', 'skills', 'linmux', 'SKILL.md')`
  * — uniform across macOS, Linux, and Windows. Claude Code uses `os.homedir()`
  * everywhere; no `%APPDATA%` branching, no `~` shell expansion.
  *
@@ -50,9 +50,9 @@ import type { Meta } from '@/core/output/index.js'
 
 // `dirname(fileURLToPath(import.meta.url))` resolves to the directory containing
 // THIS module. In dev that's `src/lib/`, in the published tarball it's `dist/lib/`.
-// Both layouts have `skills/linear-agent/SKILL.md` two levels up.
+// Both layouts have `skills/linmux/SKILL.md` two levels up.
 const HERE = path.dirname(fileURLToPath(import.meta.url))
-const DEFAULT_SOURCE = path.resolve(HERE, '..', '..', 'skills', 'linear-agent', 'SKILL.md')
+const DEFAULT_SOURCE = path.resolve(HERE, '..', '..', 'skills', 'linmux', 'SKILL.md')
 
 const HINT_PARENT_CREATED = 'Restart Claude Code if your session predates ~/.claude/skills/.'
 
@@ -100,7 +100,7 @@ export interface InstallSkillData {
    * True when the existing target was byte-identical to the source bundle
    * and the write was skipped (mtime preserved). Mutually exclusive with
    * `overwritten: true`-and-bytes-written: when this is true, no write
-   * occurred. Repeated `linear-agent install-skill` invocations after a
+   * occurred. Repeated `linmux install-skill` invocations after a
    * version bump will set `unchanged: true` from the second call onward.
    */
   unchanged?: boolean
@@ -125,7 +125,7 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
     statSync: fs.statSync,
   }
 
-  const targetDir = path.join(home, '.claude', 'skills', 'linear-agent')
+  const targetDir = path.join(home, '.claude', 'skills', 'linmux')
   const target = path.join(targetDir, 'SKILL.md')
   const parentSkillsDir = path.join(home, '.claude', 'skills')
 
@@ -137,7 +137,7 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
     const errno = (err as NodeJS.ErrnoException | undefined)?.code ?? 'UNKNOWN'
     throw new LinearAgentError({
       code: 'INSTALL_SKILL_BUNDLE_NOT_FOUND',
-      message: `Could not locate bundled SKILL.md at ${sourcePath}. This usually means linear-agent was run from a source checkout without a build, or the published tarball is corrupt.`,
+      message: `Could not locate bundled SKILL.md at ${sourcePath}. This usually means linmux was run from a source checkout without a build, or the published tarball is corrupt.`,
       transient: false,
       details: {
         expected_path: sourcePath,
@@ -251,7 +251,7 @@ export async function installSkillRuntime(input?: InstallSkillInput): Promise<In
  * shape is fully under our control:
  *
  *     ---
- *     name: linear-agent
+ *     name: linmux
  *     description: ...
  *     metadata:
  *       version: "0.1.0"

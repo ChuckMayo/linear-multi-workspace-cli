@@ -3,7 +3,7 @@ import { loadConfig } from '@/core/config/index.js'
 import { BASE_FLAGS, type CommandOutput, runCommand } from '@/lib/workspace-runtime.js'
 
 /**
- * `linear-agent workspace list`
+ * `linmux workspace list`
  *
  * Per WSP-02 / CONTEXT § Workspace Management Commands:
  *   - Returns `{ workspaces: [{ name, organizationId, isActive, createdAt, lastUsedAt? }] }`.

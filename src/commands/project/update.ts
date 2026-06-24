@@ -1,5 +1,5 @@
 /**
- * `linear-agent project update <ref>` -- Phase 2 PLAN 02-07 Task 2,
+ * `linmux project update <ref>` -- Phase 2 PLAN 02-07 Task 2,
  * PRJ-01.update.
  *
  * Write command. Resolves a project ref (name or UUID) and applies any subset
@@ -7,7 +7,7 @@
  * VALIDATION_NO_FIELDS guard both run BEFORE any SDK call.
  *
  * NOTE: To change a project's CURRENT status, use the dedicated
- * `linear-agent project update-status <ref> <status>` sub-command -- it
+ * `linmux project update-status <ref> <status>` sub-command -- it
  * routes through the same `updateProject({ statusId })` mutation, but the
  * dedicated command keeps the load-bearing operation discoverable + the input
  * shape un-ambiguous (per RESEARCH § Pitfall 5).

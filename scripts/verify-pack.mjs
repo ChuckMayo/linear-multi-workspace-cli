@@ -5,7 +5,7 @@
  * Runs `npm pack --dry-run --json`, parses the file list, and asserts:
  *   - Allowlist: every required path prefix is present (bin/, dist/,
  *     schema.graphql, src/generated/, README.md, package.json, and the
- *     stamped Phase-5 skill bundle skills/linear-agent/SKILL.md)
+ *     stamped Phase-5 skill bundle skills/linmux/SKILL.md)
  *   - Denylist: no forbidden path patterns appear (node_modules, src/*.ts except
  *     src/generated/, test/, codegen/, .planning/, .github/, dotfiles, *.tgz, etc.)
  *   - Runtime deps allowlist: @oclif/core, @linear/sdk, zod, conf, picocolors,
@@ -43,7 +43,7 @@ export const REQUIRED_PREFIXES = [
   // checked in but excluded from the published tarball; the prepack pipeline
   // produces SKILL.md from the template. If this prefix isn't in the pack,
   // the skill never reaches users.
-  'skills/linear-agent/SKILL.md',
+  'skills/linmux/SKILL.md',
 ]
 
 export const FORBIDDEN_PATTERNS = [
@@ -233,7 +233,7 @@ export function topNLargest(files, n = 10) {
 /**
  * Preconditions for `--ignore-scripts` mode (which is what we always use):
  * the prepack lifecycle is intentionally NOT executed, so the build output
- * (dist/) AND the stamped Phase-5 skill bundle (skills/linear-agent/SKILL.md)
+ * (dist/) AND the stamped Phase-5 skill bundle (skills/linmux/SKILL.md)
  * must already exist on disk. Without this guard, a developer running
  * `node scripts/verify-pack.mjs` without first running `npm run build` and
  * `node scripts/stamp-skill.mjs` would see a misleading MISSING REQUIRED
@@ -242,7 +242,7 @@ export function topNLargest(files, n = 10) {
  */
 function assertPrepackArtifacts() {
   const cwd = process.cwd()
-  const stampedSkill = resolve(cwd, 'skills/linear-agent/SKILL.md')
+  const stampedSkill = resolve(cwd, 'skills/linmux/SKILL.md')
   // tsdown's `unbundle: true` config emits per-file outputs under dist/ —
   // dist/commands/ is the load-bearing directory the published `main`
   // and oclif manifest both reference, so its presence is the cheapest
@@ -251,7 +251,7 @@ function assertPrepackArtifacts() {
   const missing = []
   if (!existsSync(distCommands)) missing.push('dist/commands/ (run `npm run build`)')
   if (!existsSync(stampedSkill)) {
-    missing.push('skills/linear-agent/SKILL.md (run `node scripts/stamp-skill.mjs`)')
+    missing.push('skills/linmux/SKILL.md (run `node scripts/stamp-skill.mjs`)')
   }
   if (missing.length > 0) {
     process.stderr.write(

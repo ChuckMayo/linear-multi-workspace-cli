@@ -10,8 +10,8 @@
  *   - `buildResult({...})` returns the shape `{ ok, runs_ms, median_ms, budget_ms, tarball }`
  *     with `ok` derived from `median_ms <= budget_ms`.
  *   - `findTarball(cwd)` with 0 matching `.tgz` files returns `null`.
- *   - `findTarball(cwd)` with 2 `linear-agent-*.tgz` files returns the most-recently-modified one.
- *   - `findTarball(cwd)` ignores files not matching `^linear-agent-.*\.tgz$`.
+ *   - `findTarball(cwd)` with 2 `linmux-*.tgz` files returns the most-recently-modified one.
+ *   - `findTarball(cwd)` ignores files not matching `^linmux-.*\.tgz$`.
  *   - `parseArgs(...)` handles `--key=value` and `--key value` forms; numeric flags coerce; runs is clamped.
  *   - CLI: invoking with `--tarball=./does-not-exist.tgz` exits 1 with stderr mentioning the missing tarball.
  *   - CLI integration test (opt-in via SKIP_COLDSTART_INTEGRATION env): with a real tarball, exits 0 or 1 cleanly
@@ -117,21 +117,21 @@ describe('scripts/measure-cold-start.mjs — pure logic', () => {
       rmSync(tmpDir, { recursive: true, force: true })
     })
 
-    it('returns null when no linear-agent-*.tgz files exist', () => {
+    it('returns null when no linmux-*.tgz files exist', () => {
       writeFileSync(join(tmpDir, 'README.md'), '# nothing')
       expect(findTarball(tmpDir)).toBeNull()
     })
 
     it('returns the only matching tarball when one exists', () => {
-      const tgz = join(tmpDir, 'linear-agent-0.0.0.tgz')
+      const tgz = join(tmpDir, 'linmux-0.0.0.tgz')
       writeFileSync(tgz, 'fake')
       const found = findTarball(tmpDir)
       expect(found).toBe(tgz)
     })
 
     it('returns the most-recently-modified tarball when multiple match', () => {
-      const a = join(tmpDir, 'linear-agent-0.0.1.tgz')
-      const b = join(tmpDir, 'linear-agent-0.0.2.tgz')
+      const a = join(tmpDir, 'linmux-0.0.1.tgz')
+      const b = join(tmpDir, 'linmux-0.0.2.tgz')
       writeFileSync(a, 'fake-a')
       writeFileSync(b, 'fake-b')
       // Force `a` to be older than `b`.
@@ -146,12 +146,12 @@ describe('scripts/measure-cold-start.mjs — pure logic', () => {
       expect(findTarball(tmpDir)).toBe(a)
     })
 
-    it('ignores files that do not match linear-agent-*.tgz', () => {
+    it('ignores files that do not match linmux-*.tgz', () => {
       writeFileSync(join(tmpDir, 'other-package-1.0.0.tgz'), 'noise')
-      writeFileSync(join(tmpDir, 'linear-agent-0.0.0.tgz.bak'), 'noise')
-      writeFileSync(join(tmpDir, 'linear-agent.tgz'), 'noise') // no version suffix between dashes
+      writeFileSync(join(tmpDir, 'linmux-0.0.0.tgz.bak'), 'noise')
+      writeFileSync(join(tmpDir, 'linmux.tgz'), 'noise') // no version suffix between dashes
       // Only this one should be discovered:
-      const real = join(tmpDir, 'linear-agent-9.9.9.tgz')
+      const real = join(tmpDir, 'linmux-9.9.9.tgz')
       writeFileSync(real, 'real')
       expect(findTarball(tmpDir)).toBe(real)
     })
@@ -234,7 +234,7 @@ describe('scripts/measure-cold-start.mjs — CLI', () => {
       rmSync(tmpDir, { recursive: true, force: true })
     }
     expect(exitCode).toBe(1)
-    expect(stderr).toMatch(/linear-agent-.*\.tgz/)
+    expect(stderr).toMatch(/linmux-.*\.tgz/)
   })
 
   // Real-tarball integration: gated on env so unit-test-only runs are fast.
@@ -246,7 +246,7 @@ describe('scripts/measure-cold-start.mjs — CLI', () => {
       execFileSync('node', [resolve(REPO_ROOT, 'scripts/stamp-skill.mjs')], { stdio: 'pipe' })
       execFileSync('npm', ['pack', '--ignore-scripts'], { stdio: 'pipe' })
 
-      const matches = readdirSync(REPO_ROOT).filter((f) => /^linear-agent-.*\.tgz$/.test(f))
+      const matches = readdirSync(REPO_ROOT).filter((f) => /^linmux-.*\.tgz$/.test(f))
       expect(matches.length).toBeGreaterThan(0)
       const sorted = matches
         .map((f) => ({ f, mtime: statSync(join(REPO_ROOT, f)).mtimeMs }))
