@@ -52,6 +52,14 @@ function getSteps(job: Job): Step[] {
   return job.steps ?? []
 }
 
+function githubExpression(expression: string): string {
+  return '$' + '{{ ' + expression + ' }}'
+}
+
+function shellVariable(name: string): string {
+  return '$' + '{' + name + '}'
+}
+
 describe('.github/workflows/schema-diff.yml structural contract', () => {
   it('file exists', () => {
     expect(existsSync(WORKFLOW_PATH)).toBe(true)
@@ -116,7 +124,7 @@ describe('.github/workflows/schema-diff.yml structural contract', () => {
       .map((s) => s.run)
       .filter((r): r is string => Boolean(r))
       .join('\n')
-    expect(allRuns).toContain('Authorization: ${LINEAR_API_KEY}')
+    expect(allRuns).toContain(`Authorization: ${shellVariable('LINEAR_API_KEY')}`)
     expect(allRuns).not.toMatch(/Authorization:\s*Bearer/)
     expect(allRuns).not.toContain('--token ')
   })
@@ -126,7 +134,9 @@ describe('.github/workflows/schema-diff.yml structural contract', () => {
     const envs = getSteps(job)
       .map((s) => s.env)
       .filter((e): e is Record<string, string> => Boolean(e))
-    const hasLinearKey = envs.some((e) => e.LINEAR_API_KEY === '${{ secrets.LINEAR_TEST_API_KEY }}')
+    const hasLinearKey = envs.some(
+      (e) => e.LINEAR_API_KEY === githubExpression('secrets.LINEAR_TEST_API_KEY'),
+    )
     expect(hasLinearKey).toBe(true)
   })
 
