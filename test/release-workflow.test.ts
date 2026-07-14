@@ -63,6 +63,10 @@ function collectNpmRunNames(runText: string): string[] {
   return names
 }
 
+function githubExpression(expression: string): string {
+  return '$' + '{{ ' + expression + ' }}'
+}
+
 describe('.github/workflows/release.yml is a valid GitHub Actions workflow', () => {
   it('file exists', () => {
     expect(existsSync(RELEASE)).toBe(true)
@@ -99,10 +103,9 @@ describe('.github/workflows/release.yml is a valid GitHub Actions workflow', () 
     const text = readFileSync(RELEASE, 'utf8')
     const hasOidcComment =
       text.toLowerCase().includes('trusted publishing') || text.includes('OIDC')
-    expect(
-      hasOidcComment,
-      'release.yml must document the OIDC trusted-publishing approach',
-    ).toBe(true)
+    expect(hasOidcComment, 'release.yml must document the OIDC trusted-publishing approach').toBe(
+      true,
+    )
   })
 })
 
@@ -234,18 +237,18 @@ describe('release.yml smoke-matrix job exercises the 4-lane runtime matrix', () 
       'smoke-matrix: step running smoke-runtime-matrix.mjs with --lane="$LANE" missing',
     ).toBeDefined()
     // matrix.lane MUST be passed via env block, not interpolated directly into run:
-    expect(laneStep?.env?.LANE).toBe('${{ matrix.lane }}')
-    // The run: block must NOT contain `${{ matrix.lane }}` — that's the
+    expect(laneStep?.env?.LANE).toBe(githubExpression('matrix.lane'))
+    // The run: block must NOT contain the matrix lane expression — that's the
     // GitHub Actions script-injection sink we're avoiding.
-    expect(laneStep?.run).not.toContain('${{ matrix.lane }}')
+    expect(laneStep?.run).not.toContain(githubExpression('matrix.lane'))
   })
 
   it('wires LINEAR_TEST_API_KEY, CODEX_TEST_API_KEY, GEMINI_TEST_API_KEY from secrets.*', () => {
     const wf = loadRelease()
     const env = wf.jobs?.['smoke-matrix']?.env ?? {}
-    expect(env.LINEAR_TEST_API_KEY).toBe('${{ secrets.LINEAR_TEST_API_KEY }}')
-    expect(env.CODEX_TEST_API_KEY).toBe('${{ secrets.CODEX_TEST_API_KEY }}')
-    expect(env.GEMINI_TEST_API_KEY).toBe('${{ secrets.GEMINI_TEST_API_KEY }}')
+    expect(env.LINEAR_TEST_API_KEY).toBe(githubExpression('secrets.LINEAR_TEST_API_KEY'))
+    expect(env.CODEX_TEST_API_KEY).toBe(githubExpression('secrets.CODEX_TEST_API_KEY'))
+    expect(env.GEMINI_TEST_API_KEY).toBe(githubExpression('secrets.GEMINI_TEST_API_KEY'))
   })
 
   it('smoke-matrix has read-only contents permission', () => {
