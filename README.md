@@ -142,6 +142,21 @@ npx -y linmux@latest issue list --workspace oss  --team CORE --json
 
 Workspace resolution order: `--workspace <name>` flag → `LINEAR_WORKSPACE` env var → registry's active workspace → sole registered workspace → `LINEAR_API_KEY` env var (bypasses the registry entirely; useful in CI).
 
+### In the wild: vibery.gg
+
+[Vibery](https://vibery.gg) — a game where an AI crew does your actual work — drives its whole agent-facing Linear integration through `linmux`. In its Settings, connecting a workspace is just pasting a personal API key: the app probes `viewer { organization }` to validate the key and resolve the one workspace it's scoped to, then registers it under the org's `urlKey` slug. Connecting another workspace is adding another key.
+
+![Vibery's Linear settings card: two workspaces (session-zero and vibery) each connected from a single pasted personal API key](./docs/vibery-linear-workspaces.png)
+
+Because the registry is a plain, documented JSON file, Vibery doesn't even shell out `workspace add` — at every agent-session bootstrap it regenerates the file from its own credential store (so removals in Settings actually disappear) under a sandboxed `XDG_CONFIG_HOME` its agent subprocesses inherit. From there any crew agent addresses any workspace by name, per command:
+
+```bash
+npx -y linmux@0.1.0 issue list --workspace session-zero --json
+npx -y linmux@0.1.0 issue create --workspace vibery --team VIB --title "…" --json
+```
+
+The pattern generalizes to any product embedding agents: one pasted key per workspace, auto-detect the name, write the registry (or shell out `workspace add`), and let agents route with `--workspace`. No Linear server-side app, no OAuth flow, no MCP server per workspace.
+
 ---
 
 ## Agent integrations
