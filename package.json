@@ -88,12 +88,12 @@
     "@graphql-codegen/cli": "^7.0.0",
     "@graphql-codegen/client-preset": "*",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.1.1",
     "fast-check": "^4.7.0",
     "oclif": "^4.23.0",
     "tsdown": "*",
     "tsx": "*",
-    "typescript": "^5.0.0",
-    "vitest": "^3.0.0"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }
