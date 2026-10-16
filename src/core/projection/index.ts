@@ -1,3 +1,4 @@
+export { hydrateRelations } from './hydrate.js'
 export {
   COMMENT_PRESETS,
   CYCLE_PRESETS,

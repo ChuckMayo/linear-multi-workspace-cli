@@ -158,7 +158,7 @@ const ALLOWED_FIELDS: Record<EntityName, ReadonlySet<string>> = {
     'color',
     'icon',
     'private',
-    'cycleEnabled',
+    'cyclesEnabled',
     'cycleDuration',
     'cycleStartDay',
     'cycleCooldownTime',

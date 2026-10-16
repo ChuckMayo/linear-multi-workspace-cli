@@ -7,7 +7,7 @@ exports[`teamListRuntime -- default pagination > Test 1: default pagination -> c
     {
       "color": "#000",
       "createdAt": "2026-01-01T00:00:00Z",
-      "cycleEnabled": true,
+      "cyclesEnabled": true,
       "description": "eng team",
       "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
       "key": "ENG",
@@ -17,7 +17,7 @@ exports[`teamListRuntime -- default pagination > Test 1: default pagination -> c
     {
       "color": "#fff",
       "createdAt": "2026-01-02T00:00:00Z",
-      "cycleEnabled": false,
+      "cyclesEnabled": false,
       "description": null,
       "id": "bbbbbbbb-cccc-dddd-eeee-ffffffffffff",
       "key": "DSGN",

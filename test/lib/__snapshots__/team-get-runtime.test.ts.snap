@@ -6,7 +6,7 @@ exports[`teamGetRuntime -- UUID input > Test 5: UUID -> client.team(uuid) direct
   "data": {
     "color": "#000",
     "createdAt": "2026-01-01T00:00:00Z",
-    "cycleEnabled": true,
+    "cyclesEnabled": true,
     "description": "eng team",
     "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
     "key": "ENG",

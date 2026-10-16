@@ -3,6 +3,20 @@
 All notable changes to this project are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow semver.
 
+## Unreleased
+
+### Fixed
+- Read commands returned `null` for every related field (`state.name`, `assignee.email`,
+  `team.key` on issues; `lead.email` on projects; `team.key` on labels and states). The
+  SDK exposes relations as prototype getters, and hydration walked only own properties.
+  All runtimes now share one `hydrateRelations` helper that reads them by property access.
+- Date fields (`updatedAt`, `createdAt`, ...) printed as `{}`. They now print as ISO strings.
+- The team `cycleEnabled` field never matched Linear's schema and was always `null`. It is
+  now `cyclesEnabled`; passing `--fields cycleEnabled` now fails with `INVALID_FIELD`.
+- Related entities are fetched once per id per command (a 50-issue list on one team reads the
+  team once), `<relation>.id` paths are answered without a fetch, and each relation read
+  retries on rate limits and network errors like the main query.
+
 ## 0.1.0 — 2026-06-24
 
 First public release on npm, renamed from `linear-agent` to **`linmux`**. Alpha,

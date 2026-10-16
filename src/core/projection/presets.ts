@@ -88,7 +88,7 @@ export const TEAM_PRESETS = {
     'color',
     'private',
     'createdAt',
-    'cycleEnabled',
+    'cyclesEnabled',
   ] as const,
   full: FULL_PRESET,
 } as const

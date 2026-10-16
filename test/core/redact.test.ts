@@ -43,6 +43,14 @@ describe('redact (structural walk)', () => {
     })
   })
 
+  it('serializes Date values as ISO strings instead of empty objects', () => {
+    const when = new Date('2026-10-16T17:00:00.000Z')
+    expect(redact({ updatedAt: when, nested: [when] })).toEqual({
+      updatedAt: '2026-10-16T17:00:00.000Z',
+      nested: ['2026-10-16T17:00:00.000Z'],
+    })
+  })
+
   it('does not mutate the input object', () => {
     const input = { token: 'lin_api_secret' }
     const before = JSON.stringify(input)

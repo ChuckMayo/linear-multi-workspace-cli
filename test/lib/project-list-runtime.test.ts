@@ -291,3 +291,31 @@ describe('ProjectList oclif command', () => {
     expect(typeof runProjectList).toBe('function')
   })
 })
+
+describe('projectListRuntime -- SDK-shaped nodes (relations on the prototype)', () => {
+  it('Test 5: hydrates lead when it is a prototype getter, as in @linear/sdk', async () => {
+    class SdkProject {
+      id = PROJECT_UUID_1
+      name = 'Roadmap Q1'
+      state = 'started'
+      progress = 0.5
+      updatedAt = new Date('2026-10-16T17:00:00.000Z')
+      get lead() {
+        return Promise.resolve({ email: 'lead@example.com' })
+      }
+    }
+    const handle = makeMockClient({
+      projects: async () => ({ nodes: [new SdkProject() as unknown as Record<string, unknown>] }),
+    })
+
+    const out = await projectListRuntime({
+      flags: { workspace: 'acme' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    const row = (out.data as Array<Record<string, unknown>>)[0] as Record<string, unknown>
+    expect(row.lead).toEqual({ email: 'lead@example.com' })
+  })
+})

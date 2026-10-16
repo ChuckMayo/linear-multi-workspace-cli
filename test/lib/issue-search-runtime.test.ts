@@ -570,3 +570,45 @@ describe('issueSearchRuntime — no-N+1 guarantee on --fields=ids (CR-01 regress
     expect(out.data).toEqual([{ id: 'u1', identifier: 'ENG-1' }])
   })
 })
+
+describe('issueSearchRuntime — SDK-shaped results (relations on the prototype)', () => {
+  it('Test 13: hydrates state/assignee/team when they are prototype getters, as in @linear/sdk', async () => {
+    class SdkIssueSearchResult {
+      id = 'u1'
+      identifier = 'ENG-1'
+      title = 'sdk shaped'
+      priority = 2
+      updatedAt = new Date('2026-10-16T17:00:00.000Z')
+      metadata = { snippet: 'match' }
+      get state() {
+        return Promise.resolve({ name: 'In Progress' })
+      }
+      get assignee() {
+        return Promise.resolve({ email: 'a@example.com' })
+      }
+      get team() {
+        return Promise.resolve({ key: 'ENG' })
+      }
+    }
+    const handle = makeMockClient({
+      searchIssues: async () => ({
+        totalCount: 1,
+        nodes: [new SdkIssueSearchResult() as unknown as SearchResultNode],
+        pageInfo: { hasNextPage: false, endCursor: null },
+      }),
+    })
+
+    const out = await issueSearchRuntime({
+      args: { query: 'q' },
+      flags: { workspace: 'acme' },
+      env: {},
+      loadConfigOverride: () => STUB_CONFIG,
+      clientFactoryOverride: () => handle.client,
+    })
+
+    const row = (out.data as Array<Record<string, unknown>>)[0] as Record<string, unknown>
+    expect(row.state).toEqual({ name: 'In Progress' })
+    expect(row.assignee).toEqual({ email: 'a@example.com' })
+    expect(row.team).toEqual({ key: 'ENG' })
+  })
+})

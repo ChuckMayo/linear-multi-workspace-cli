@@ -33,7 +33,7 @@ import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { parsePagination } from '@/core/pagination/index.js'
-import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
+import { hydrateRelations, parseFields, project } from '@/core/projection/index.js'
 import {
   getLastComplexity,
   type RetryOpts,
@@ -151,19 +151,13 @@ export async function issueSearchRuntime(input: IssueSearchInput): Promise<Issue
         // leak through `--fields=full` as a duplicate of the top-level
         // `snippet`.
         //
-        // Relation keys are preserved as property descriptors (still lazy)
-        // so `hydrateForProjection` can decide whether to read each one
-        // based on the projection spec.
+        // Relation keys are skipped here and read later from `result`
+        // itself, where the SDK keeps them as prototype getters, so
+        // `hydrateRelations` can decide whether to read each one based on
+        // the projection spec.
         const issue: Record<string, unknown> = {}
         for (const k of Object.keys(result)) {
-          if (k === 'metadata') continue
-          if (RELATION_KEYS.has(k)) {
-            const desc = Object.getOwnPropertyDescriptor(result, k)
-            if (desc) {
-              Object.defineProperty(issue, k, desc)
-            }
-            continue
-          }
+          if (k === 'metadata' || RELATION_KEYS.has(k)) continue
           issue[k] = (result as Record<string, unknown>)[k]
         }
         if (!noSnippet) {
@@ -175,7 +169,7 @@ export async function issueSearchRuntime(input: IssueSearchInput): Promise<Issue
             }
           }
         }
-        const hydrated = await hydrateForProjection(issue, fields)
+        const hydrated = await hydrateRelations(issue, RELATION_KEYS, fields, result)
         return project(hydrated, fields)
       }),
     )
@@ -204,50 +198,3 @@ export async function issueSearchRuntime(input: IssueSearchInput): Promise<Issue
 // -----------------------------------------------------------------------------
 
 const RELATION_KEYS = new Set(['state', 'assignee', 'team', 'project', 'cycle', 'parent'])
-
-async function hydrateForProjection(
-  issue: Record<string, unknown>,
-  spec: ProjectionSpec,
-): Promise<Record<string, unknown>> {
-  const needs = neededRelations(spec)
-  if (needs.size === 0) {
-    // No relations needed -- copy non-relation keys only so we don't
-    // accidentally trigger a relation getter via spread enumeration on
-    // `--fields=ids`.
-    const out: Record<string, unknown> = {}
-    for (const k of Object.keys(issue)) {
-      if (!RELATION_KEYS.has(k)) out[k] = issue[k]
-    }
-    return out
-  }
-  const hydrated: Record<string, unknown> = {}
-  for (const k of Object.keys(issue)) {
-    if (RELATION_KEYS.has(k)) {
-      if (needs.has(k)) {
-        const value = issue[k]
-        hydrated[k] = await resolveLazy(value)
-      }
-      // else: skip -- don't read the lazy getter at all
-    } else {
-      hydrated[k] = issue[k]
-    }
-  }
-  return hydrated
-}
-
-function neededRelations(spec: ProjectionSpec): Set<string> {
-  if (spec === FULL_PRESET) return new Set(RELATION_KEYS)
-  const out = new Set<string>()
-  for (const path of spec) {
-    const head = path.split('.')[0]
-    if (head && RELATION_KEYS.has(head)) out.add(head)
-  }
-  return out
-}
-
-async function resolveLazy(value: unknown): Promise<unknown> {
-  if (value && typeof (value as { then?: unknown }).then === 'function') {
-    return await (value as Promise<unknown>)
-  }
-  return value
-}

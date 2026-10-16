@@ -136,7 +136,7 @@ const TEAM_A: Record<string, unknown> = {
   color: '#000',
   private: false,
   createdAt: '2026-01-01T00:00:00Z',
-  cycleEnabled: true,
+  cyclesEnabled: true,
 }
 
 const TEAM_B: Record<string, unknown> = {
@@ -147,7 +147,7 @@ const TEAM_B: Record<string, unknown> = {
   color: '#fff',
   private: true,
   createdAt: '2026-01-02T00:00:00Z',
-  cycleEnabled: false,
+  cyclesEnabled: false,
 }
 
 describe('teamListRuntime -- default pagination', () => {
