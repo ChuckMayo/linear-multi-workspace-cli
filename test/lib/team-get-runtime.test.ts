@@ -142,7 +142,7 @@ const TEAM_FIXTURE: Record<string, unknown> = {
   color: '#000',
   private: false,
   createdAt: '2026-01-01T00:00:00Z',
-  cycleEnabled: true,
+  cyclesEnabled: true,
 }
 
 describe('teamGetRuntime -- UUID input', () => {

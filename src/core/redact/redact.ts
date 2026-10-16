@@ -41,6 +41,11 @@ function walk(value: unknown, seen: WeakSet<object>): unknown {
   if (value === null || typeof value !== 'object') {
     return value
   }
+  // The SDK hands back Date instances; rebuilding them via Object.entries
+  // would yield `{}`. Emit the same ISO string JSON.stringify would.
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString()
+  }
   if (seen.has(value as object)) {
     return CIRCULAR_SENTINEL
   }

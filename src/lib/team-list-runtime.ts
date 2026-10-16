@@ -5,7 +5,7 @@
  * Wraps the SDK call in `withRateLimitRetry` inside `withFetchInterception`.
  * Uses `parseFields(input, 'team')` for projection, with the 02-01 default
  * preset (8 fields including `key`, `name`, `description`, `color`, `private`,
- * `cycleEnabled`).
+ * `cyclesEnabled`).
  *
  * Pipeline:
  *   1. resolveWorkspace

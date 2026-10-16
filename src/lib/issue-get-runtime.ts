@@ -35,7 +35,12 @@ import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
-import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
+import {
+  hydrateRelations,
+  type ProjectionSpec,
+  parseFields,
+  project,
+} from '@/core/projection/index.js'
 import { redact } from '@/core/redact/index.js'
 import {
   getLastComplexity,
@@ -228,46 +233,7 @@ async function hydrateForProjection(
   issue: Record<string, unknown>,
   spec: ProjectionSpec,
 ): Promise<Record<string, unknown>> {
-  const needs = neededRelations(spec)
-  if (needs.size === 0) {
-    // No relations needed — copy non-relation keys only so we don't accidentally
-    // trigger a relation getter via spread enumeration on `--fields=ids`.
-    const out: Record<string, unknown> = {}
-    for (const k of Object.keys(issue)) {
-      if (!RELATION_KEYS.has(k)) out[k] = issue[k]
-    }
-    return out
-  }
-  const hydrated: Record<string, unknown> = {}
-  for (const k of Object.keys(issue)) {
-    if (RELATION_KEYS.has(k)) {
-      if (needs.has(k)) {
-        const value = issue[k]
-        hydrated[k] = await resolveLazy(value)
-      }
-      // else: skip — don't read the lazy getter at all
-    } else {
-      hydrated[k] = issue[k]
-    }
-  }
-  return hydrated
-}
-
-function neededRelations(spec: ProjectionSpec): Set<string> {
-  if (spec === FULL_PRESET) return new Set(RELATION_KEYS)
-  const out = new Set<string>()
-  for (const path of spec) {
-    const head = path.split('.')[0]
-    if (head && RELATION_KEYS.has(head)) out.add(head)
-  }
-  return out
-}
-
-async function resolveLazy(value: unknown): Promise<unknown> {
-  if (value && typeof (value as { then?: unknown }).then === 'function') {
-    return await (value as Promise<unknown>)
-  }
-  return value
+  return hydrateRelations(issue, RELATION_KEYS, spec)
 }
 
 // -----------------------------------------------------------------------------

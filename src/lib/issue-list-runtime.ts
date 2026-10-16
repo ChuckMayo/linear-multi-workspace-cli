@@ -43,7 +43,12 @@ import { type Config, loadConfig } from '@/core/config/index.js'
 import { LinearAgentError } from '@/core/errors/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { parsePagination } from '@/core/pagination/index.js'
-import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
+import {
+  hydrateRelations,
+  type ProjectionSpec,
+  parseFields,
+  project,
+} from '@/core/projection/index.js'
 import { redact } from '@/core/redact/index.js'
 import {
   getLastComplexity,
@@ -224,53 +229,10 @@ async function hydrateForProjection(
   issue: Record<string, unknown>,
   spec: ProjectionSpec,
 ): Promise<Record<string, unknown>> {
-  const needs = neededRelations(spec)
-  const hydrated: Record<string, unknown> = { ...issue }
-
-  if (needs.has('state') && hydrated.state !== undefined) {
-    hydrated.state = await resolveLazy(hydrated.state)
-  }
-  if (needs.has('assignee') && hydrated.assignee !== undefined) {
-    hydrated.assignee = await resolveLazy(hydrated.assignee)
-  }
-  if (needs.has('team') && hydrated.team !== undefined) {
-    hydrated.team = await resolveLazy(hydrated.team)
-  }
-  if (needs.has('project') && hydrated.project !== undefined) {
-    hydrated.project = await resolveLazy(hydrated.project)
-  }
-  if (needs.has('cycle') && hydrated.cycle !== undefined) {
-    hydrated.cycle = await resolveLazy(hydrated.cycle)
-  }
-  if (needs.has('parent') && hydrated.parent !== undefined) {
-    hydrated.parent = await resolveLazy(hydrated.parent)
-  }
-
-  return hydrated
+  return hydrateRelations(issue, RELATION_KEYS, spec)
 }
 
 const RELATION_KEYS = new Set(['state', 'assignee', 'team', 'project', 'cycle', 'parent'])
-
-function neededRelations(spec: ProjectionSpec): Set<string> {
-  // FULL_PRESET asks for every field — but related entities still need
-  // hydration; the SDK passthrough does NOT auto-resolve lazy promise
-  // properties. We don't have an authoritative list here, so for FULL we
-  // hydrate the conservative known-relations set.
-  if (spec === FULL_PRESET) return new Set(RELATION_KEYS)
-  const out = new Set<string>()
-  for (const path of spec) {
-    const head = path.split('.')[0]
-    if (head && RELATION_KEYS.has(head)) out.add(head)
-  }
-  return out
-}
-
-async function resolveLazy(value: unknown): Promise<unknown> {
-  if (value && typeof (value as { then?: unknown }).then === 'function') {
-    return await (value as Promise<unknown>)
-  }
-  return value
-}
 
 // -----------------------------------------------------------------------------
 // Phase 3: compose query for --include path (Approach A — single rawRequest)

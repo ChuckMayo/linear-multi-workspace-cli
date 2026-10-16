@@ -163,7 +163,7 @@ describe('Phase 2 entity presets — defaults shape', () => {
   it('Test 13: TEAM_PRESETS.defaults has 8 entries; ids includes [id, key]', () => {
     expect(TEAM_PRESETS.defaults).toHaveLength(8)
     expect(TEAM_PRESETS.ids).toEqual(['id', 'key'])
-    expect(TEAM_PRESETS.defaults).toContain('cycleEnabled')
+    expect(TEAM_PRESETS.defaults).toContain('cyclesEnabled')
   })
 
   it('Test 14: LABEL_PRESETS.defaults has 8 entries', () => {

@@ -31,7 +31,12 @@ import { createLinearClient } from '@/core/client/index.js'
 import { type Config, loadConfig } from '@/core/config/index.js'
 import type { Meta } from '@/core/output/index.js'
 import { parsePagination } from '@/core/pagination/index.js'
-import { FULL_PRESET, type ProjectionSpec, parseFields, project } from '@/core/projection/index.js'
+import {
+  hydrateRelations,
+  type ProjectionSpec,
+  parseFields,
+  project,
+} from '@/core/projection/index.js'
 import {
   getLastComplexity,
   type RetryOpts,
@@ -158,41 +163,5 @@ async function hydrateForProjection(
   state: Record<string, unknown>,
   spec: ProjectionSpec,
 ): Promise<Record<string, unknown>> {
-  const needs = neededRelations(spec)
-  if (needs.size === 0) {
-    const out: Record<string, unknown> = {}
-    for (const k of Object.keys(state)) {
-      if (!RELATION_KEYS.has(k)) out[k] = state[k]
-    }
-    return out
-  }
-  const hydrated: Record<string, unknown> = {}
-  for (const k of Object.keys(state)) {
-    if (RELATION_KEYS.has(k)) {
-      if (needs.has(k)) {
-        const value = state[k]
-        hydrated[k] = await resolveLazy(value)
-      }
-    } else {
-      hydrated[k] = state[k]
-    }
-  }
-  return hydrated
-}
-
-function neededRelations(spec: ProjectionSpec): Set<string> {
-  if (spec === FULL_PRESET) return new Set(RELATION_KEYS)
-  const out = new Set<string>()
-  for (const path of spec) {
-    const head = path.split('.')[0]
-    if (head && RELATION_KEYS.has(head)) out.add(head)
-  }
-  return out
-}
-
-async function resolveLazy(value: unknown): Promise<unknown> {
-  if (value && typeof (value as { then?: unknown }).then === 'function') {
-    return await (value as Promise<unknown>)
-  }
-  return value
+  return hydrateRelations(state, RELATION_KEYS, spec)
 }
